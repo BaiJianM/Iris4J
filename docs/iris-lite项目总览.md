@@ -33,6 +33,8 @@ Java 复刻 Redis 官方 **Redis Iris**（Context Engine），单体 8 业务模
 | Embedder | RemoteEmbedder（远程 llama-server，Qwen3-Embedding-0.6B，1024 维；2026-09-12 起 ONNX 本地推理全量移除）与 Bm25Embedder（本地 BM25 词法近似）按 `iris.embedder.type` 互斥，remote 缺省。Rerank 同为远程（RemoteCrossEncoderReranker，Qwen3-Reranker-0.6B，双向取 min） |
 | LLM | OpenAiCompatibleLlmClient（OpenAI 兼容协议，密钥经环境变量 `IRIS_LLM_API_KEY` 注入，不落仓库）。2026-09-11 起为百炼 DashScope `qwen3.8-max-0902`（base-url 必须含 `/compatible-mode/v1` 前缀；原 qwen3.7-flash 免费额度耗尽 403 后切换，各模型额度独立）；`iris.llm.max-tokens` 默认 8192 |
 
+**演示数据集**（2026-09-21 起）：仓库内置 FK 闭包抽样版 `deploy/mysql/init/sample-data/iris_demo_sample.sql`——135 表 / 约 11.8 万行 / 19 MB / **零孤儿**（246 条 FK 边全量验证），CRC32 取模种子确定性可复现，`scripts/sample-demo-dataset.py` 可再生任意规模（`ANCHORS`/`CLOSURE_CAP` 环境变量）。导入：`mysql -D iris_demo -uroot -p < deploy/mysql/init/sample-data/iris_demo_sample.sql`。完整 ecomm 数据集（135 表 367 万行 / 1.1 GB）**不随仓库分发**，容量账本（`docs/内存预算与容量推导.md`）以全量数据集为口径。
+
 **模块边界**（依赖严格单向 web→application→context；infrastructure 实现端口）：
 `shared`（错误码/key 策略/指标）· `context`（Schema/查询模型）· `memory` · `cache` · `cdc`（只消费不查询）· `infrastructure`（Redis/文件/远程模型客户端）· `application`（无 Redis 命令）· `web`（中间件 HTTP 面：REST + MCP 端点 + 安全 + boot 启动类，fat jar 只装配本链路不碰演示）。**`demo`（2026-09-13 拆分）**：Agent 演示 boot 模块——聊天循环/SSE/配方自进化/console 前端（React 19 + Vite + Tailwind v4，13 页真数据，无 mock 通路）独立部署体系，中间件 fat jar 不含演示（盘点见 `docs/演示与中间件边界盘点.md`）。
 
