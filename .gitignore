@@ -67,3 +67,4 @@ node_modules/
 
 ### Demo dataset (1.1 GB real business data, never distribute) ###
 deploy/mysql/init/test_data/
+__pycache__/
