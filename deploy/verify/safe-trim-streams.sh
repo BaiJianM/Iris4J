@@ -9,7 +9,8 @@
 #        target 默认 10000（排空后的稳态保留条数），margin 默认 1000
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-YML="<REPO_ROOT>/api/src/main/resources/application.yml"
+# 仓库根 = 本脚本 deploy/verify/ 的上两级；流上限参数读 web 模块 application.yml
+YML="${IRIS_YML:-$(cd "$HERE/../.." && pwd)/web/src/main/resources/application.yml}"
 RC=iris-redis
 TARGET="${1:-10000}"
 MARGIN="${2:-1000}"

@@ -16,7 +16,8 @@ Qwen3-Embedding-0.6B / Qwen3-Reranker-0.6B 阈值标定脚本。
      同一事实改写（正）vs 同域不同事实（负）。
 
 用法：python3 calibrate-qwen3-thresholds.py [embed-base-url] [rerank-base-url]
-默认 http://<MODEL_HOST>:8081/v1 与 :8082/v1。
+默认 http://127.0.0.1:8081/v1 与 :8082/v1（可用 IRIS_EMBEDDER_BASE_URL /
+IRIS_RERANK_BASE_URL 环境变量覆盖，或命令行参数显式传入）。
 
 标定结论（Qwen3-0.6B）：
   - Embedding：semantic-cache 0.88 可分（正 min 0.899 / 负 max 0.866）；记忆去重
@@ -27,11 +28,22 @@ Qwen3-Embedding-0.6B / Qwen3-Reranker-0.6B 阈值标定脚本。
     RemoteCrossEncoderReranker 类注释）。精判保留本地 bge-reranker-base。
 """
 import json
+import os
 import sys
 import urllib.request
 
-EMBED = (sys.argv[1] if len(sys.argv) > 1 else "http://<MODEL_HOST>:8081") + "/v1/embeddings"
-RERANK = (sys.argv[2] if len(sys.argv) > 2 else "http://<MODEL_HOST>:8082") + "/v1/rerank"
+
+def _no_v1(url: str) -> str:
+    """兼容带或不带 /v1 的 base-url 传入。"""
+    return url[:-3] if url.endswith("/v1") else url
+
+
+_embed_base = sys.argv[1] if len(sys.argv) > 1 else os.environ.get(
+    "IRIS_EMBEDDER_BASE_URL", "http://127.0.0.1:8081/v1")
+_rerank_base = sys.argv[2] if len(sys.argv) > 2 else os.environ.get(
+    "IRIS_RERANK_BASE_URL", "http://127.0.0.1:8082/v1")
+EMBED = _no_v1(_embed_base) + "/v1/embeddings"
+RERANK = _no_v1(_rerank_base) + "/v1/rerank"
 
 
 def post(url, payload):

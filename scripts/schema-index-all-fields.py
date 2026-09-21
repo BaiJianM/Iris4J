@@ -18,7 +18,7 @@ from pathlib import Path
 
 import yaml
 
-SCHEMA_DIR = Path("<REPO_ROOT>/deploy/schema")
+SCHEMA_DIR = Path(__file__).resolve().parents[1] / "deploy" / "schema"
 COLUMNS_TSV = Path("/tmp/iris_demo_columns.tsv")
 
 SKIP_DATA_TYPES = {"text", "tinytext", "mediumtext", "longtext",

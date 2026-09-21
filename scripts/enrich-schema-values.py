@@ -13,13 +13,16 @@ column_comment，解析「前缀：0待审 1通过 2驳回」形态的值域声�
 用法：enrich-schema-values.py [--apply]（默认 dry-run）
 """
 import glob
+import os
 import re
 import subprocess
 import sys
 
 import yaml
 
-SCHEMA_GLOB = "<REPO_ROOT>/deploy/schema/ecomm.*.yml"
+# 仓库根 = 本脚本所在 scripts/ 的上一级
+SCHEMA_GLOB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "deploy", "schema", "ecomm.*.yml")
 DOCKER_MYSQL = ["/usr/local/bin/docker", "exec", "iris-mysql", "mysql", "-uroot",
                 "-piris-root", "-D", "information_schema",
                 "--default-character-set=utf8mb4", "-N", "-e"]

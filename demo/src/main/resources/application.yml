@@ -1,6 +1,10 @@
 spring:
   application:
     name: iris-lite
+  config:
+    # 本机覆盖文件（.gitignore 已挡，不入库）：机器相关值——schema/graph 目录、
+    # embed/rerank 服务地址等写在这里，仓库内 yml 只留中性默认值
+    import: "optional:file:./application-local.yml,optional:file:../application-local.yml"
   task:
     scheduling:
       # 4 个 @Scheduled 任务（schema 轮询 5s / CDC reclaim 15s / key 热载 30s /
@@ -113,7 +117,8 @@ iris:
     # 命中意图的配方注入 system prompt（省 search→call 发现抖动）。与 schema 外部目录
     # 物理分离——schema 目录只认 {ns}.{entity}.yml，graph 文件混入会被当实体解析报错。
     # 空值 = 功能关闭（recipesBlock 恒空串，不影响主链路）。
-    graph-dir: <REPO_ROOT>/deploy/graph
+    # 本机路径经 application-local.yml 覆盖（不入库）
+    graph-dir: ${IRIS_AGENT_GRAPH_DIR:}
     # 两级 Schema 摘要阈值：实体数超过该值时，常驻摘要降为
     # 「表名+用途描述+关联」一级摘要（配合 yml 的顶层 description 字段），
     # 字段详情由 get_schema 按需取；不超过则保留全字段摘要。ecomm 125 表场景
@@ -130,8 +135,9 @@ iris:
     # 是否启用外部目录 Schema 热加载（false 时退化为纯 classpath 固定 Schema）
     hot-reload: true
     # 外部 Schema 目录：目录下 *.yml 会覆盖 classpath 同名实体（按 namespace/entity 覆盖）
-    # 注意：这是本机绝对路径，迁移到其他机器请改为实际路径
-    dir: <REPO_ROOT>/deploy/schema
+    # 缺省相对仓库根（从根目录起 jar 即生效）；IDEA Debug 等其他工作目录经
+    # application-local.yml 覆盖为绝对路径
+    dir: ${IRIS_SCHEMA_DIR:./deploy/schema}
     # 轮询文件变更间隔（毫秒）
     poll-interval-ms: 3000
   cache:
@@ -157,9 +163,10 @@ iris:
     #   b: 0.75          # 长度归一强度
     #   avgdl: 24        # 期望文档长度（词项数）
     remote:
-      # Mac mini llama-server（embedding，OpenAI 兼容 /v1/embeddings）
-      # 服务常驻见 Mac mini launchd：com.iris.llama.embedder / com.iris.llama.reranker
-      base-url: http://<MODEL_HOST>:8081/v1
+      # 远程 llama-server（embedding，OpenAI 兼容 /v1/embeddings），项目外部署；
+      # 服务常驻见 launchd：com.iris.llama.embedder / com.iris.llama.reranker。
+      # 实际机器地址经 application-local.yml 覆盖（不入库）
+      base-url: ${IRIS_EMBEDDER_BASE_URL:http://127.0.0.1:8081/v1}
       model: qwen3-embedding-0.6b
       # 单条短文本 LAN 延迟 ~42ms；超时给足余量。服务不可达时零向量降级
       # （语义层旁路、结果正确性不受影响，见 RemoteEmbedder 失败语义）
@@ -181,7 +188,7 @@ iris:
 #    api-key: ${DEEPSEEK_API_KEY:}
 #    model: deepseek-v4-pro
     # --- 备选 2：本地局域网 LM Studio（Mac mini M4，qwen3.5-9b Q4_K_M）---
-    # base-url: http://<MODEL_HOST>:1234/v1   # 客户端拼 /chat/completions，须带 /v1 前缀
+    # base-url: http://<模型机IP>:1234/v1   # 客户端拼 /chat/completions，须带 /v1 前缀
     # api-key: lm-studio                       # LM Studio 不校验密钥，填任意非空值
     # model: qwen3.5-9b
     temperature: 0.1
@@ -269,12 +276,13 @@ iris:
     rerank:
       # 关闭即回到纯余弦行为（threshold 0.90）
       enabled: true
-      # 远程 /v1/rerank（Mac mini llama-server Qwen3-Reranker-0.6B），项目外部署唯一形态。
+      # 远程 /v1/rerank（llama-server Qwen3-Reranker-0.6B），项目外部署唯一形态；
+      # 实际机器地址经 application-local.yml 覆盖（不入库）。
       # 关键前提：GGUF 内烘焙的 rerank 模板已把 <Instruct> 从默认 web search
       # 换成任务定制指令（「日期/数值/指标/方向完全一致才算相关」）——裸 GGUF 的
       # 焊死模板对同域句对全判 0.97+（判话题不判同题），patched 后正负完全可分，
       # 详见 scripts/qwen3-reranker-official-test.py
-      base-url: http://<MODEL_HOST>:8082/v1
+      base-url: ${IRIS_RERANK_BASE_URL:http://127.0.0.1:8082/v1}
       model: qwen3-reranker-0.6b
       # LAN 延迟 ~150ms/3 文档；超时给足。失败时调用方保守 MISS
       timeout-ms: 10000

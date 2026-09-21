@@ -6,12 +6,15 @@
 用法：enrich-schema-descriptions.py [--apply]（默认 dry-run）
 """
 import glob
+import os
 import re
 import sys
 
 import yaml
 
-SCHEMA_GLOB = "<REPO_ROOT>/deploy/schema/ecomm.*.yml"
+# 仓库根 = 本脚本所在 scripts/ 的上一级
+SCHEMA_GLOB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "deploy", "schema", "ecomm.*.yml")
 
 APPLY = "--apply" in sys.argv
 
