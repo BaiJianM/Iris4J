@@ -77,7 +77,7 @@ curl http://127.0.0.1:8080/actuator/health
 
 控制台：独立前端（React 19 + Vite，**开发需 Node 20+**），位于 `demo/console`，开发模式 `cd demo/console && npm run dev`（:5173，代理到 :8080），生产模式 `npm run build` 后自行托管静态产物。
 
-> **演示数据集**：完整 ecomm 数据集（135 表，约 3.67M 行，1.1 GB）不随仓库分发。仓库内置 FK 闭包抽样版 `deploy/mysql/init/sample-data/iris_demo_sample.sql`（约 19 MB，11 万行，零孤儿行、确定性可复现，由 `scripts/sample-demo-dataset.py` 从运行中的演示库生成），导入方式：`mysql -D iris_demo -uroot -p < deploy/mysql/init/sample-data/iris_demo_sample.sql`。也可使用自己的业务库或自备脱敏数据；Schema 声明样例见 `deploy/schema/`。
+> **演示数据集**：完整 ecomm 数据集（135 表，约 3.67M 行，1.1 GB）不随仓库分发。仓库内置 FK 闭包抽样版 `deploy/mysql/init/sample-data/iris_demo_sample.sql`（约 19 MB，11 万行，零孤儿行、确定性可复现），导入方式：`mysql -D iris_demo -uroot -p < deploy/mysql/init/sample-data/iris_demo_sample.sql`。也可使用自己的业务库或自备脱敏数据；Schema 声明样例见 `deploy/schema/`。
 
 ### 关键配置
 
@@ -96,7 +96,7 @@ curl http://127.0.0.1:8080/actuator/health
 | `iris.mcp.dynamic-tools.mode` | `on-demand`（默认，2 个发现工具）/ `all`（全量注册） |
 | `iris.schema.dir` | 外部 Schema 目录（覆盖 classpath 基线，mtime 热载） |
 
-> **提示**：全量导入（百万级行）期间建议 `iris.cdc.cache-invalidation-enabled=false`，追平后再开启并手动清一次 `iris:{ns}:cache:*`——逐条失效在大 keyspace 下是 O(全库键数) 的 SCAN，性能红线详见 `docs/iris-lite项目总览.md`。
+> **提示**：全量导入（百万级行）期间建议 `iris.cdc.cache-invalidation-enabled=false`，追平后再开启并手动清一次 `iris:{ns}:cache:*`——逐条失效在大 keyspace 下是 O(全库键数) 的 SCAN，属性能红线。
 
 ## Schema 声明
 
@@ -133,9 +133,8 @@ http://127.0.0.1:8080/mcp   (Streamable-HTTP, 需 X-API-Key 时透传)
 
 `on-demand` 模式下 `tools/list` 恒 25 个（23 静态 + `search_entity_tools` / `call_entity_tool` 两跳发现），Schema 热载后自动广播 `tools/list_changed`——数百实体不会撑爆 Agent 上下文。
 
-## 文档
+## 相关资源
 
-- [docs/iris-lite项目总览.md](docs/iris-lite项目总览.md) — 对标范围、架构、安全红线、踩坑清单、端点速查（必读）
 - [llama-server 部署指引](https://github.com/ggml-org/llama.cpp) — 远程模型（Qwen3-Embedding / Qwen3-Reranker）服务化
 - [deploy/schema/](deploy/schema/) — 135 个电商演示实体 Schema
 

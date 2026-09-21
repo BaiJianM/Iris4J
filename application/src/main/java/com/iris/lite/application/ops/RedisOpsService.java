@@ -7,9 +7,8 @@ package com.iris.lite.application.ops;
  * RPO/RTO 指标留生产化阶段。
  *
  * <p><b>为什么不做文件级备份</b>：应用进程不碰文件系统——
- * dump.rdb 与 appendonlydir 的 tar/还原由 {@code scripts/redis-backup.sh}
- * 与 {@code scripts/redis-restore.sh} 在宿主机完成（tar 整个 /data 卷，
- * 含 dump.rdb + AOF + 消费组位点）。进程内做文件搬运会引入
+ * dump.rdb 与 appendonlydir 的 tar/还原由项目外运维脚本在宿主机完成
+ * （tar 整个 /data 卷，含 dump.rdb + AOF + 消费组位点）。进程内做文件搬运会引入
  * 容器路径挂载与权限问题，且备份失败难以感知。
  */
 public interface RedisOpsService {

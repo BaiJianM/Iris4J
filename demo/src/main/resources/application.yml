@@ -233,7 +233,7 @@ iris:
   semantic-cache:
     # 语义缓存开关：关闭时整体旁路（退化为纯精确缓存）
     enabled: true
-    # 余弦相似度阈值：Qwen3-Embedding-0.6B 标定（scripts/calibrate-qwen3-thresholds.py）。
+    # 余弦相似度阈值：Qwen3-Embedding-0.6B 标定。
     # 值级等价对 min=0.899（南宁市/广西南宁市），同域不等价值对 max=0.866（已发货/待发货），
     # 0.88 取分界带 [0.866, 0.899] 中点偏保守侧。注意 Qwen3 偏话题语义，状态值反义对
     # （已发货/待发货）余弦高达 0.87，比 bge-small 更挤——假命中的代价是错数据，
@@ -280,8 +280,7 @@ iris:
       # 实际机器地址经 application-local.yml 覆盖（不入库）。
       # 关键前提：GGUF 内烘焙的 rerank 模板已把 <Instruct> 从默认 web search
       # 换成任务定制指令（「日期/数值/指标/方向完全一致才算相关」）——裸 GGUF 的
-      # 固定写死模板对同域句对全判 0.97+（判话题不判同题），patched 后正负完全可分，
-      # 详见 scripts/qwen3-reranker-official-test.py
+      # 固定写死模板对同域句对全判 0.97+（判话题不判同题），patched 后正负完全可分
       base-url: ${IRIS_RERANK_BASE_URL:http://127.0.0.1:8082/v1}
       model: qwen3-reranker-0.6b
       # LAN 延迟 ~150ms/3 文档；超时给足。失败时调用方保守 MISS

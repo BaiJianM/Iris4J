@@ -14,8 +14,7 @@ import java.util.Map;
 /**
  * Redis 运维入口（高可用/备份/演练）。
  *
- * <p>文件级备份/恢复由 {@code scripts/redis-backup.sh}、
- * {@code scripts/redis-restore.sh} 完成，本入口只提供状态可观测与 BGSAVE 触发。
+ * <p>文件级备份/恢复由项目外运维脚本完成，本入口只提供状态可观测与 BGSAVE 触发。
  */
 @RestController
 @RequestMapping("/api/v1/redis")
