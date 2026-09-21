@@ -1,0 +1,61 @@
+namespace: ecomm
+entity: stk_transfer_order
+description: 仓库调拨单主表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: transfer_no
+    type: STRING
+    index: tag
+    description: 调拨单号
+  - name: from_warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: to_warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: total_qty
+    type: INT
+    index: numeric
+    description: 合计数量
+  - name: total_amount
+    type: DOUBLE
+    index: numeric
+    description: 合计金额（元）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待出库; 1=在途; 2=已入库; 3=已取消
+  - name: out_at
+    type: LONG
+    index: numeric
+    description: 出库时间（毫秒时间戳）
+  - name: in_at
+    type: LONG
+    index: numeric
+    description: 时间（毫秒时间戳）
+  - name: operator_id
+    type: LONG
+    index: numeric
+    description: 操作人ID
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

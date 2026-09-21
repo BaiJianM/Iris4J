@@ -1,0 +1,36 @@
+namespace: ecomm
+entity: mkt_sign_in_record
+description: 会员每日签到记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: sign_date
+    type: LONG
+    index: numeric
+    description: 签订日期
+  - name: reward_coupon_id
+    type: LONG
+    index: numeric
+    relatedEntity: mkt_coupon
+    description: 外键关联 mkt_coupon
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: continuous_days
+    type: INT
+    index: numeric
+    description: 连续天数
+  - name: reward_point
+    type: INT
+    index: numeric
+    description: 奖励积分

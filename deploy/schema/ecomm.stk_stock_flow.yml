@@ -1,0 +1,65 @@
+namespace: ecomm
+entity: stk_stock_flow
+description: 库存流水（每笔进出库记录）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: biz_type
+    type: INT
+    index: numeric
+    description: 业务类型
+    values: 1=采购入库; 2=下单冻结; 3=支付扣减; 4=取消释放; 5=退款回补; 6=调拨出库; 7=调拨入库; 8=盘点损益; 9=人工调整; 10=残次转出
+  - name: biz_no
+    type: STRING
+    index: tag
+    description: 业务单号
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: total_delta
+    type: INT
+    index: numeric
+    description: 合计变动量
+  - name: available_delta
+    type: INT
+    index: numeric
+    description: 可用变动量
+  - name: frozen_delta
+    type: INT
+    index: numeric
+    description: 冻结变动量
+  - name: sold_delta
+    type: INT
+    index: numeric
+    description: 已售变动量
+  - name: before_available
+    type: INT
+    index: numeric
+    description: 变动前可用数量
+  - name: after_available
+    type: INT
+    index: numeric
+    description: 变动后可用数量
+  - name: operator_id
+    type: LONG
+    index: numeric
+    description: 操作人ID
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注

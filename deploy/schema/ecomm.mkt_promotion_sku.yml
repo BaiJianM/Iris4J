@@ -1,0 +1,44 @@
+namespace: ecomm
+entity: mkt_promotion_sku
+description: 促销活动适用 SKU
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: promotion_id
+    type: LONG
+    index: numeric
+    relatedEntity: mkt_promotion
+    description: 外键关联 mkt_promotion
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: product_id
+    type: LONG
+    index: numeric
+    description: 商品ID
+  - name: promotion_price
+    type: DOUBLE
+    index: numeric
+    description: 促销价格（元）
+  - name: original_price
+    type: DOUBLE
+    index: numeric
+    description: 原价价格（元）
+  - name: limit_quantity
+    type: INT
+    index: numeric
+    description: 限制数量
+  - name: sold_quantity
+    type: INT
+    index: numeric
+    description: 已售数量

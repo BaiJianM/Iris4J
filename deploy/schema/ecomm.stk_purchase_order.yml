@@ -1,0 +1,64 @@
+namespace: ecomm
+entity: stk_purchase_order
+description: 采购入库单主表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: purchase_no
+    type: STRING
+    index: tag
+    description: 采购单号
+  - name: warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=草稿; 1=待审; 2=已审; 3=部分入库; 4=全部入库; 5=已取消
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: supplier_name
+    type: STRING
+    index: text
+    description: 供应商名称
+  - name: supplier_contact
+    type: STRING
+    index: tag
+    description: 供应商联系人
+  - name: total_qty
+    type: INT
+    index: numeric
+    description: 合计数量
+  - name: total_amount
+    type: DOUBLE
+    index: numeric
+    description: 合计金额（元）
+  - name: expect_at
+    type: LONG
+    index: numeric
+    description: 预期时间（毫秒时间戳）
+  - name: arrive_at
+    type: LONG
+    index: numeric
+    description: 到达时间（毫秒时间戳）
+  - name: operator_id
+    type: LONG
+    index: numeric
+    description: 操作人ID
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

@@ -1,0 +1,57 @@
+namespace: ecomm
+entity: mch_qualification
+description: 商家资质证照
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: merchant_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_merchant
+    description: 外键关联 mch_merchant
+  - name: valid_to
+    type: LONG
+    index: numeric
+    description: 有效
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: qual_type
+    type: INT
+    index: numeric
+    description: 资质类型
+    values: 1=营业执照; 2=开户许可; 3=税务登记; 4=品牌授权; 5=行业许可
+  - name: qual_name
+    type: STRING
+    index: text
+    description: 资质名称
+  - name: qual_no
+    type: STRING
+    index: tag
+    description: 资质单号
+  - name: image_url
+    type: STRING
+    index: tag
+    description: 图片地址
+  - name: valid_from
+    type: INT
+    index: numeric
+    description: 有效来自
+  - name: audit_status
+    type: INT
+    index: numeric
+    description: 审核状态
+    values: 0=待审; 1=通过; 2=驳回; 3=过期
+  - name: audit_remark
+    type: STRING
+    index: text
+    description: 审核备注
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

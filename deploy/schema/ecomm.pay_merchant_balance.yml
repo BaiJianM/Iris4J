@@ -1,0 +1,52 @@
+namespace: ecomm
+entity: pay_merchant_balance
+description: 商家余额账户
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: merchant_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_merchant
+    description: 外键关联 mch_merchant
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: available_amount
+    type: DOUBLE
+    index: numeric
+    description: 可用金额（元）
+  - name: pending_amount
+    type: DOUBLE
+    index: numeric
+    description: 待处理金额（元）
+  - name: frozen_amount
+    type: DOUBLE
+    index: numeric
+    description: 冻结金额（元）
+  - name: total_income
+    type: DOUBLE
+    index: numeric
+    description: 合计收入
+  - name: total_withdraw
+    type: DOUBLE
+    index: numeric
+    description: 合计提现
+  - name: version
+    type: INT
+    index: numeric
+    description: 版本
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

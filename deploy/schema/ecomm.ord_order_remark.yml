@@ -1,0 +1,36 @@
+namespace: ecomm
+entity: ord_order_remark
+description: 订单备注（买家/客服备注）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: remark_type
+    type: INT
+    index: numeric
+    description: 备注类型
+    values: 1=客服备注; 2=仓储备注; 3=财务备注
+  - name: content
+    type: STRING
+    index: text
+    description: 内容
+  - name: operator_id
+    type: LONG
+    index: numeric
+    description: 操作人ID
+  - name: operator_name
+    type: STRING
+    index: text
+    description: 操作人名称

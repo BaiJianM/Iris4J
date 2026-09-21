@@ -1,0 +1,61 @@
+namespace: ecomm
+entity: stk_stocktake
+description: 库存盘点单主表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: stocktake_no
+    type: STRING
+    index: tag
+    description: 盘点单号
+  - name: warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: stocktake_type
+    type: INT
+    index: numeric
+    description: 盘点类型
+    values: 1=全盘; 2=抽盘; 3=循环盘点
+  - name: sku_count
+    type: INT
+    index: numeric
+    description: SKU次数
+  - name: profit_qty
+    type: INT
+    index: numeric
+    description: 利润数量
+  - name: loss_qty
+    type: INT
+    index: numeric
+    description: 亏损数量
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=盘点中; 1=待审核; 2=已完成; 3=已作废
+  - name: operator_id
+    type: LONG
+    index: numeric
+    description: 操作人ID
+  - name: finish_at
+    type: LONG
+    index: numeric
+    description: 完成时间（毫秒时间戳）
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

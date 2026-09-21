@@ -1,0 +1,50 @@
+namespace: ecomm
+entity: afc_after_sale_item
+description: 售后单商品明细，按行记录退换数量与金额
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: after_sale_id
+    type: LONG
+    index: numeric
+    relatedEntity: afc_after_sale
+    description: 外键关联 afc_after_sale
+  - name: order_item_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order_item
+    description: 外键关联 ord_order_item
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: sku_name
+    type: STRING
+    index: text
+    description: SKU 名称
+  - name: quantity
+    type: INT
+    index: numeric
+    description: 数量
+  - name: pay_amount
+    type: DOUBLE
+    index: numeric
+    description: 支付金额（元）
+  - name: refund_amount
+    type: DOUBLE
+    index: numeric
+    description: 退款金额（元）

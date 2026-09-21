@@ -1,0 +1,43 @@
+namespace: ecomm
+entity: base_dict
+description: 数据字典码表（平台枚举值）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: dict_code
+    type: STRING
+    index: tag
+    description: 字典编码
+  - name: item_value
+    type: STRING
+    index: tag
+    description: 条目值
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: dict_name
+    type: STRING
+    index: text
+    description: 字典名称
+  - name: item_label
+    type: STRING
+    index: text
+    description: 条目标签
+  - name: sort
+    type: INT
+    index: numeric
+    description: 排序值（小在前）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

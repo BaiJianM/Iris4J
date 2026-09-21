@@ -1,0 +1,110 @@
+name: iris-lite
+
+# iris-lite 部署编排
+# 三件套：redis(standalone) + mysql(单数据源) + debezium-server(独立运行)
+# iris-lite 应用本身用 IDE 或 java -jar 本地启动，不进本编排。
+
+services:
+  redis:
+    image: redis:8.10.1
+    container_name: iris-redis
+    # --save ""：关闭周期 RDB 快照（镜像默认 save 3600 1 / 300 100 / 60 10000）。
+    # save 周期持久化在批量写入时会因 fork copy-on-write 使内存瞬时翻倍，
+    # 容器内存受限时会被 OOMKilled(ExitCode=137)。持久化已由 AOF(appendonly=everysec)
+    # 承担，RDB 是冗余的，故关闭周期 RDB 以消除最频繁的 fork 源。
+    # 另一半风险是 AOF 重写（同样 fork）：批量导入前建议再执行
+    #   CONFIG SET auto-aof-rewrite-percentage 0
+    # 导入结束、内存回落到安全水位后改回 100。
+    # 判据：Redis RSS ≤ 5G（VM 11.67G）时 rewrite COW 余量充足；重新全量导入前再置 0。
+    command: ["redis-server", "--appendonly", "yes", "--save", ""]
+    # 查询引擎聚合 TIMEOUT 默认 500ms，对大基数 GROUPBY+SORTBY 贴线超时，
+    # 服务端应调到 2000ms：redis-server 命令行不支持该模块参数，容器重启后
+    # 会回落 500，启动后需补一句：
+    #   docker exec iris-redis redis-cli FT.CONFIG SET TIMEOUT 2000
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mysql:
+    image: mysql:8.4
+    container_name: iris-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: iris-root
+      MYSQL_DATABASE: iris_demo
+    command:
+      - --server-id=1
+      - --log-bin=mysql-bin
+      - --binlog_format=ROW
+      - --binlog_row_image=FULL
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./deploy/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-piris-root"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  postgres:
+    image: postgres:16
+    container_name: iris-postgres
+    environment:
+      POSTGRES_USER: iris
+      POSTGRES_PASSWORD: iris-pg
+      POSTGRES_DB: iris_demo
+    command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=4", "-c", "max_wal_senders=4"]
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./deploy/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iris -d iris_demo"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  debezium-server:
+    image: quay.io/debezium/server:3.6.2.Final
+    container_name: iris-debezium
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./deploy/debezium/application.properties:/debezium/config/application.properties:ro
+      - debezium-data:/debezium/data
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+  debezium-pg-server:
+    image: quay.io/debezium/server:3.6.2.Final
+    container_name: iris-debezium-pg
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./deploy/debezium-pg/application.properties:/debezium/config/application.properties:ro
+      - debezium-pg-data:/debezium/data
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  mysql-data:
+  debezium-data:
+  postgres-data:
+  debezium-pg-data:

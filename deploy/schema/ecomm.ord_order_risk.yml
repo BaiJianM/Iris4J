@@ -1,0 +1,55 @@
+namespace: ecomm
+entity: ord_order_risk
+description: 订单风控审核记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: risk_level
+    type: INT
+    index: numeric
+    description: 风险等级
+    values: 1=低; 2=中; 3=高
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: order_no
+    type: STRING
+    index: tag
+    description: 订单号
+  - name: risk_type
+    type: INT
+    index: numeric
+    description: 风险类型
+    values: 1=频繁下单; 2=异常金额; 3=地址异常; 4=设备异常; 5=黄牛嫌疑; 6=黑名单
+  - name: risk_score
+    type: INT
+    index: numeric
+    description: 风险评分
+  - name: hit_rule
+    type: STRING
+    index: tag
+    description: 命中规则
+  - name: handle_result
+    type: INT
+    index: numeric
+    description: 处理结果
+    values: 0=放行; 1=人工审核; 2=拦截
+  - name: handle_remark
+    type: STRING
+    index: text
+    description: 处理备注

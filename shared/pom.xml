@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.iris</groupId>
+        <artifactId>iris-lite</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>iris-lite-shared</artifactId>
+    <name>iris-lite-shared</name>
+    <description>公共模型、异常、分页、namespace 与指标门面</description>
+
+    <dependencies>
+        <!-- IrisMetrics 指标门面：micrometer-core 版本由 Boot BOM 管理；
+             MeterRegistry 实例由 api 模块启动时 install，业务模块零 Spring 依赖 -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+    </dependencies>
+</project>

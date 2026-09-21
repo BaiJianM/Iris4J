@@ -1,0 +1,99 @@
+namespace: ecomm
+entity: mch_shop
+description: 店铺主档（隶属商家）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: shop_no
+    type: STRING
+    index: tag
+    description: 店铺单号
+  - name: shop_name
+    type: STRING
+    index: tag
+    description: 店铺名称
+  - name: merchant_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_merchant
+    description: 外键关联 mch_merchant
+  - name: province_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: city_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=关闭; 1=营业; 2=休息; 3=冻结
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: shop_type
+    type: INT
+    index: numeric
+    description: 店铺类型
+    values: 1=旗舰店; 2=专营店; 3=专卖店; 4=自营
+  - name: logo_url
+    type: STRING
+    index: tag
+    description: 标识地址
+  - name: banner_url
+    type: STRING
+    index: tag
+    description: 横幅地址
+  - name: shop_desc
+    type: STRING
+    index: text
+    description: 店铺描述
+  - name: contact_mobile
+    type: STRING
+    index: tag
+    description: 联系手机号
+  - name: service_qq
+    type: STRING
+    index: tag
+    description: 服务QQ 号
+  - name: score_desc
+    type: DOUBLE
+    index: numeric
+    description: 描述评分
+  - name: score_service
+    type: DOUBLE
+    index: numeric
+    description: 服务评分
+  - name: score_logistics
+    type: DOUBLE
+    index: numeric
+    description: 物流评分
+  - name: collect_count
+    type: INT
+    index: numeric
+    description: 收藏次数
+  - name: product_count
+    type: INT
+    index: numeric
+    description: 商品次数
+  - name: sale_amount
+    type: DOUBLE
+    index: numeric
+    description: 销售金额（元）
+  - name: open_at
+    type: LONG
+    index: numeric
+    description: 开放时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

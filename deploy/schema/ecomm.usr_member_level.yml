@@ -1,0 +1,61 @@
+namespace: ecomm
+entity: usr_member_level
+description: 会员等级定义
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: level_code
+    type: STRING
+    index: tag
+    description: 等级编码
+  - name: min_growth
+    type: INT
+    index: numeric
+    description: 最低增长
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: level_name
+    type: STRING
+    index: text
+    description: 等级名称
+  - name: max_growth
+    type: INT
+    index: numeric
+    description: 最高增长
+  - name: discount_rate
+    type: DOUBLE
+    index: numeric
+    description: 折扣比率
+  - name: point_rate
+    type: DOUBLE
+    index: numeric
+    description: 积分比率
+  - name: free_shipping
+    type: INT
+    index: numeric
+    description: 免费运费
+    values: 0=否; 1=是
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

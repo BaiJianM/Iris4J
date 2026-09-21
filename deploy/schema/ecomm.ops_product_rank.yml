@@ -1,0 +1,51 @@
+namespace: ecomm
+entity: ops_product_rank
+description: 商品排行榜快照
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: rank_type
+    type: INT
+    index: numeric
+    description: 排名类型
+    values: 1=销量; 2=销售额; 3=收藏; 4=好评; 5=复购
+  - name: rank_period
+    type: INT
+    index: numeric
+    description: 排名周期
+    values: 1=日; 2=周; 3=月
+  - name: category_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_category
+    description: 外键关联 prd_category
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: stat_date
+    type: LONG
+    index: numeric
+    description: 统计日期（YYYYMMDD）
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: rank_no
+    type: INT
+    index: numeric
+    description: 排名单号
+  - name: rank_value
+    type: DOUBLE
+    index: numeric
+    description: 排名值

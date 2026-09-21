@@ -1,0 +1,17 @@
+# CDC 排除表名单：高频日志/流水表，不进 CDC 链路
+# 同步位置：
+#   1. deploy/debezium/application.properties 的 table.exclude.list（Debezium 侧生效）
+#   2. api/src/main/resources/application.yml 的 iris.cdc.sources（消费端无对应 source 块）
+#   3. deploy/schema/ 无对应 schema yml
+# verify-cdc-completeness.sh 会读本文件跳过对账。
+# 注意：log_* 前缀是物流(logistics)不是日志，未列入；如需排除追加一张一行即可。
+ord_order_status_log
+afc_after_sale_log
+base_admin_login_log
+ops_job_log
+pay_merchant_balance_log
+prd_price_change_log
+usr_member_balance_log
+usr_member_level_log
+usr_member_login_log
+usr_member_point_log

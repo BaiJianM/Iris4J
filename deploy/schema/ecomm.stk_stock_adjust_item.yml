@@ -1,0 +1,48 @@
+namespace: ecomm
+entity: stk_stock_adjust_item
+description: 库存调整单明细
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: adjust_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_stock_adjust
+    description: 外键关联 stk_stock_adjust
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: before_qty
+    type: INT
+    index: numeric
+    description: 变动前数量
+  - name: adjust_qty
+    type: INT
+    index: numeric
+    description: 调整数量
+  - name: after_qty
+    type: INT
+    index: numeric
+    description: 变动后数量
+  - name: cost_price
+    type: DOUBLE
+    index: numeric
+    description: 成本价格（元）
+  - name: amount
+    type: DOUBLE
+    index: numeric
+    description: 金额（元）
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注

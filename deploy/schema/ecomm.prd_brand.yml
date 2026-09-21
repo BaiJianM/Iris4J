@@ -1,0 +1,56 @@
+namespace: ecomm
+entity: prd_brand
+description: 商品品牌
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: brand_name
+    type: STRING
+    index: tag
+    description: 品牌名称
+  - name: first_letter
+    type: STRING
+    index: tag
+    description: 首次字母
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: brand_name_en
+    type: STRING
+    index: text
+    description: 品牌名称
+  - name: logo_url
+    type: STRING
+    index: tag
+    description: 标识地址
+  - name: brand_story
+    type: STRING
+    index: tag
+    description: 品牌故事
+  - name: official_site
+    type: STRING
+    index: tag
+    description: 官方网站
+  - name: sort
+    type: INT
+    index: numeric
+    description: 排序值（小在前）
+  - name: is_recommend
+    type: INT
+    index: numeric
+    description: 是否推荐
+    values: 0=否; 1=是
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

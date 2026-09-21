@@ -1,0 +1,24 @@
+namespace: ecomm
+entity: mch_shop_staff_role
+description: 店铺员工与角色关联表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: staff_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop_staff
+    description: 外键关联 mch_shop_staff
+  - name: role_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop_role
+    description: 外键关联 mch_shop_role
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳

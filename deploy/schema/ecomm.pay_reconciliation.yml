@@ -1,0 +1,64 @@
+namespace: ecomm
+entity: pay_reconciliation
+description: 支付对账单主表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: recon_no
+    type: STRING
+    index: tag
+    description: 对账单号
+  - name: recon_date
+    type: LONG
+    index: numeric
+    description: 对账日期
+  - name: channel_id
+    type: LONG
+    index: numeric
+    relatedEntity: pay_channel
+    description: 外键关联 pay_channel
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: bill_amount
+    type: DOUBLE
+    index: numeric
+    description: 账单金额（元）
+  - name: bill_count
+    type: INT
+    index: numeric
+    description: 账单次数
+  - name: local_amount
+    type: DOUBLE
+    index: numeric
+    description: 本地金额（元）
+  - name: local_count
+    type: INT
+    index: numeric
+    description: 本地次数
+  - name: diff_amount
+    type: DOUBLE
+    index: numeric
+    description: 差异金额（元）
+  - name: diff_count
+    type: INT
+    index: numeric
+    description: 差异次数
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待对账; 1=对账中; 2=已平账; 3=存在差异; 4=已处理
+  - name: operator_id
+    type: LONG
+    index: numeric
+    description: 操作人ID
+  - name: finish_at
+    type: LONG
+    index: numeric
+    description: 完成时间（毫秒时间戳）

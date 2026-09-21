@@ -1,0 +1,105 @@
+namespace: ecomm
+entity: afc_after_sale
+description: 售后单主表，退换货退款申请的顶层单据
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: after_sale_no
+    type: STRING
+    index: tag
+    description: 售后单号
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待审核; 1=商家同意; 2=商家拒绝; 3=待买家退货; 4=待商家收货; 5=待平台介入; 6=已完成; 7=已关闭; 8=已取消
+  - name: apply_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: order_no
+    type: STRING
+    index: tag
+    description: 订单号
+  - name: type
+    type: INT
+    index: numeric
+    description: 类型码
+    values: 1=仅退款; 2=退货退款; 3=换货; 4=维修
+  - name: reason_type
+    type: INT
+    index: numeric
+    description: 原因类型
+    values: 1=质量问题; 2=商品破损; 3=描述不符; 4=少件错发; 5=七天无理由; 6=发票问题; 7=其他
+  - name: reason_desc
+    type: STRING
+    index: text
+    description: 原因描述
+  - name: images
+    type: STRING
+    index: tag
+    description: 图片列表
+  - name: apply_amount
+    type: DOUBLE
+    index: numeric
+    description: 申请金额（元）
+  - name: actual_amount
+    type: DOUBLE
+    index: numeric
+    description: 实付金额（元）
+  - name: freight_refund
+    type: DOUBLE
+    index: numeric
+    description: 运费退款
+  - name: quantity
+    type: INT
+    index: numeric
+    description: 数量
+  - name: refund_status
+    type: INT
+    index: numeric
+    description: 退款状态
+    values: 0=未退; 1=退款中; 2=已退款; 3=退款失败
+  - name: audit_remark
+    type: STRING
+    index: text
+    description: 审核备注
+  - name: auditor_id
+    type: LONG
+    index: numeric
+    description: 审核人ID
+  - name: audit_at
+    type: LONG
+    index: numeric
+    description: 审核时间（毫秒时间戳）
+  - name: finish_at
+    type: LONG
+    index: numeric
+    description: 完成时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

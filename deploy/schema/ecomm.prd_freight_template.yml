@@ -1,0 +1,58 @@
+namespace: ecomm
+entity: prd_freight_template
+description: 运费模板
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: template_name
+    type: STRING
+    index: text
+    description: 模板名称
+  - name: charge_type
+    type: INT
+    index: numeric
+    description: 收费类型
+    values: 1=按件; 2=按重量; 3=按体积
+  - name: is_free
+    type: INT
+    index: numeric
+    description: 是否免费
+    values: 0=否; 1=是
+  - name: default_fee
+    type: DOUBLE
+    index: numeric
+    description: 默认费用（元）
+  - name: default_qty
+    type: INT
+    index: numeric
+    description: 默认数量
+  - name: add_fee
+    type: DOUBLE
+    index: numeric
+    description: 新增费用（元）
+  - name: add_qty
+    type: INT
+    index: numeric
+    description: 新增数量
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

@@ -1,0 +1,46 @@
+namespace: ecomm
+entity: usr_member_auth
+description: 会员第三方登录授权绑定
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: identity_type
+    type: INT
+    index: numeric
+    description: 身份类型
+    values: 1=手机; 2=邮箱; 3=微信; 4=支付宝; 5=用户名
+  - name: identifier
+    type: STRING
+    index: tag
+    description: 标识
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: credential
+    type: STRING
+    index: tag
+    description: 凭证
+  - name: verified
+    type: INT
+    index: numeric
+    description: 已认证
+    values: 0=否; 1=是
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=失效; 1=有效
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

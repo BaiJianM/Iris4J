@@ -1,0 +1,117 @@
+namespace: ecomm
+entity: usr_member
+description: 会员主表（平台用户）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: member_no
+    type: STRING
+    index: tag
+    description: 会员单号
+  - name: username
+    type: STRING
+    index: tag
+    description: 登录用户名
+  - name: mobile
+    type: STRING
+    index: tag
+    description: 手机号
+  - name: level_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member_level
+    description: 外键关联 usr_member_level
+  - name: consume_amount
+    type: DOUBLE
+    index: numeric
+    description: 消耗金额（元）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=禁用; 1=正常; 2=风控冻结
+  - name: register_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: nickname
+    type: STRING
+    index: text
+    description: 昵称
+  - name: avatar
+    type: STRING
+    index: tag
+    description: 头像地址
+  - name: email
+    type: STRING
+    index: tag
+    description: 邮箱
+  - name: gender
+    type: INT
+    index: numeric
+    description: 性别
+    values: 0=未知; 1=男; 2=女
+  - name: birthday
+    type: INT
+    index: numeric
+    description: 生日
+  - name: point_balance
+    type: INT
+    index: numeric
+    description: 积分余额
+  - name: point_total
+    type: INT
+    index: numeric
+    description: 积分合计
+  - name: balance_amount
+    type: DOUBLE
+    index: numeric
+    description: 余额金额（元）
+  - name: growth_value
+    type: INT
+    index: numeric
+    description: 增长值
+  - name: order_count
+    type: INT
+    index: numeric
+    description: 订单次数
+  - name: member_type
+    type: INT
+    index: numeric
+    description: 会员类型
+    values: 1=个人; 2=企业
+  - name: register_channel
+    type: INT
+    index: numeric
+    description: 注册渠道
+    values: 1=APP; 2=小程序; 3=H5; 4=PC; 5=第三方
+  - name: register_ip
+    type: STRING
+    index: tag
+    description: 注册IP 地址
+  - name: real_name_flag
+    type: INT
+    index: numeric
+    description: 实名名称标记
+    values: 0=否; 1=是
+  - name: last_login_at
+    type: LONG
+    index: numeric
+    description: 最近登录时间（毫秒时间戳）
+  - name: is_deleted
+    type: INT
+    index: numeric
+    description: 软删除标记（0/1）
+    values: 0=否; 1=是
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

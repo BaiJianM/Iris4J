@@ -1,0 +1,104 @@
+namespace: ecomm
+entity: mch_merchant
+description: 商家主档
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: merchant_no
+    type: STRING
+    index: tag
+    description: 商户单号
+  - name: merchant_name
+    type: STRING
+    index: tag
+    description: 商户名称
+  - name: license_no
+    type: STRING
+    index: tag
+    description: 证照单号
+  - name: province_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: city_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用; 2=清退
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: short_name
+    type: STRING
+    index: text
+    description: 简称
+  - name: merchant_type
+    type: INT
+    index: numeric
+    description: 商户类型
+    values: 1=个体工商户; 2=有限责任公司; 3=股份有限公司; 4=外资; 5=个人
+  - name: legal_person
+    type: STRING
+    index: tag
+    description: 法定代表人人
+  - name: legal_id_card
+    type: STRING
+    index: tag
+    description: 法定代表人身份证号
+  - name: contact_name
+    type: STRING
+    index: text
+    description: 联系人姓名
+  - name: contact_mobile
+    type: STRING
+    index: tag
+    description: 联系手机号
+  - name: contact_email
+    type: STRING
+    index: tag
+    description: 联系人邮箱
+  - name: address
+    type: STRING
+    index: text
+    description: 详细地址
+  - name: settle_type
+    type: INT
+    index: numeric
+    description: 结算类型
+    values: 1=月结; 2=半月结; 3=周结; 4=实时
+  - name: settle_cycle
+    type: INT
+    index: numeric
+    description: 结算周期
+  - name: commission_rate
+    type: DOUBLE
+    index: numeric
+    description: 佣金比率
+  - name: deposit_amount
+    type: DOUBLE
+    index: numeric
+    description: 保证金金额（元）
+  - name: audit_status
+    type: INT
+    index: numeric
+    description: 审核状态
+    values: 0=待审; 1=通过; 2=驳回; 3=冻结
+  - name: enter_at
+    type: LONG
+    index: numeric
+    description: 录入时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

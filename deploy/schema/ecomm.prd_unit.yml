@@ -1,0 +1,35 @@
+namespace: ecomm
+entity: prd_unit
+description: 计量单位字典
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: category_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_category
+    description: 外键关联 prd_category
+  - name: unit_code
+    type: STRING
+    index: tag
+    description: 单位编码
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: unit_name
+    type: STRING
+    index: text
+    description: 单位名称
+  - name: base_ratio
+    type: DOUBLE
+    index: numeric
+    description: 基础比率
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注

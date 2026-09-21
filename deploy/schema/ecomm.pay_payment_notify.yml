@@ -1,0 +1,61 @@
+namespace: ecomm
+entity: pay_payment_notify
+description: 支付异步回调通知记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: payment_no
+    type: STRING
+    index: tag
+    description: 支付单号
+  - name: channel_id
+    type: LONG
+    index: numeric
+    relatedEntity: pay_channel
+    description: 外键关联 pay_channel
+  - name: notify_no
+    type: STRING
+    index: tag
+    description: 通知单号
+  - name: process_status
+    type: INT
+    index: numeric
+    description: 流程状态
+    values: 0=待处理; 1=成功; 2=失败; 3=重复忽略
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: payment_id
+    type: LONG
+    index: numeric
+    description: 支付ID
+  - name: notify_type
+    type: INT
+    index: numeric
+    description: 通知类型
+    values: 1=支付; 2=退款
+  - name: notify_data
+    type: STRING
+    index: tag
+    description: 通知数据
+  - name: sign
+    type: STRING
+    index: tag
+    description: 签订
+  - name: process_count
+    type: INT
+    index: numeric
+    description: 流程次数
+  - name: process_msg
+    type: STRING
+    index: tag
+    description: 流程消息
+  - name: notify_at
+    type: LONG
+    index: numeric
+    description: 通知时间（毫秒时间戳）

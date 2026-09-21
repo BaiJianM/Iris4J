@@ -1,0 +1,58 @@
+namespace: ecomm
+entity: mkt_seckill_sku
+description: 秒杀活动 SKU 与秒杀价
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: activity_id
+    type: LONG
+    index: numeric
+    relatedEntity: mkt_seckill_activity
+    description: 外键关联 mkt_seckill_activity
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: seckill_price
+    type: DOUBLE
+    index: numeric
+    description: 秒杀价格（元）
+  - name: original_price
+    type: DOUBLE
+    index: numeric
+    description: 原价价格（元）
+  - name: seckill_stock
+    type: INT
+    index: numeric
+    description: 秒杀库存
+  - name: locked_stock
+    type: INT
+    index: numeric
+    description: 锁定库存
+  - name: sold_stock
+    type: INT
+    index: numeric
+    description: 已售库存
+  - name: sort
+    type: INT
+    index: numeric
+    description: 排序值（小在前）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用

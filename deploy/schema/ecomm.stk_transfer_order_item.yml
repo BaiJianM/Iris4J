@@ -1,0 +1,40 @@
+namespace: ecomm
+entity: stk_transfer_order_item
+description: 调拨单明细
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: transfer_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_transfer_order
+    description: 外键关联 stk_transfer_order
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: quantity
+    type: INT
+    index: numeric
+    description: 数量
+  - name: received_qty
+    type: INT
+    index: numeric
+    description: 已收数量
+  - name: cost_price
+    type: DOUBLE
+    index: numeric
+    description: 成本价格（元）
+  - name: amount
+    type: DOUBLE
+    index: numeric
+    description: 金额（元）

@@ -1,0 +1,41 @@
+namespace: ecomm
+entity: afc_refund_item
+description: 退款单商品明细，按行记录退款金额
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: refund_id
+    type: LONG
+    index: numeric
+    relatedEntity: afc_refund
+    description: 外键关联 afc_refund
+  - name: order_item_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order_item
+    description: 外键关联 ord_order_item
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: quantity
+    type: INT
+    index: numeric
+    description: 数量
+  - name: pay_amount
+    type: DOUBLE
+    index: numeric
+    description: 支付金额（元）
+  - name: refund_amount
+    type: DOUBLE
+    index: numeric
+    description: 退款金额（元）

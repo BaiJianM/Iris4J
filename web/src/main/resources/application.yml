@@ -1,0 +1,1126 @@
+spring:
+  application:
+    name: iris-lite
+  task:
+    scheduling:
+      # 4 个 @Scheduled 任务（schema 轮询 5s / CDC reclaim 15s / key 热载 30s /
+      # MCP 工具对账 3s）共用 Boot 默认单线程调度器时，reclaim sweep 长任务
+      # （单轮可达数分钟）会饿死其他任务 → 池化隔离
+      pool:
+        size: 4
+      thread-name-prefix: iris-sched-
+  ai:
+    mcp:
+      server:
+        # Streamable-HTTP 传输，HTTP 端点 /mcp（默认不鉴权，仅本地开发使用）
+        protocol: STREAMABLE
+        name: iris-lite-mcp
+        version: 0.1.0
+
+server:
+  port: 8080
+
+# ---- 日志 ----
+# 调试期把业务包开到 DEBUG，输出各流程节点（CDC 消费/投影、查询缓存命中、
+# Schema 热加载、MCP 工具注册、Redis 命令）的关键信息。
+# 上生产改回 info：logging.level.com.iris.lite=info（或用环境变量覆盖）。
+logging:
+  level:
+    root: info
+    # 业务代码全开 debug，便于追踪完整链路
+    com.iris.lite: debug
+    # Spring Web / MCP 传输层保持 info，避免把 debug 噪音灌进业务日志
+    org.springframework.web: info
+    org.springframework.ai.mcp: info
+    io.modelcontextprotocol: info
+    # Lettuce 自带 debug 会逐条打印命令，量太大，保持 info
+    io.lettuce.core: info
+  pattern:
+    # 线程名必留：CDC 是多源多线程模型，靠线程名（iris-cdc-customer）区分数据源
+    console: "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # prometheus：GET /actuator/prometheus 输出全部指标（Timer/Counter/Gauge）
+        # ⚠️ /actuator/** 豁免 X-API-Key 鉴权（见 iris.security 注释）：生产部署必须
+        # 经网关限制 /actuator 来源（仅内网/管理网段可达），或改用独立 management 端口
+        # 配防火墙——否则 health/metrics/prometheus 对外泄露内部拓扑与流量画像
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    distribution:
+      # iris.query 直方图（SLO 桶）供控制台延迟分位展示与前端采样曲线
+      # 注意：指标名含点，map key 必须用 [""] 方括号语法，否则被解析为嵌套属性绑定不上
+      slo:
+        "[iris.query]": 1ms,5ms,10ms,25ms,50ms,100ms,250ms,500ms,1s
+      # client 端分位数：actuator /metrics JSON 会带 PERCENTILE_95 测量值
+      percentiles:
+        "[iris.query]": 0.5,0.95,0.99
+      percentiles-histogram:
+        "[iris.query]": true
+
+iris:
+  # 默认 namespace，CDC 与查询共用的命名空间（demo 命名空间已退役，全库即演示数据）
+  namespace: ecomm
+  # group_by 维度路径 "fk->维表.维度" 的归并预算参数。
+  # 默认值按内存预算推导（每组中间态 ~200B），接入方按自身硬件调整
+  aggregate:
+    dimension:
+      # 归并前分组数上限：超过直接拒绝（建议加 filters 缩围），防大基数拖垮堆内存
+      max-input-groups: 20000
+      # 维表映射 pipeline 批大小
+      fetch-batch: 500
+      # 映射缺失（fk 指向不存在的维表行）策略：keep=归 UNKNOWN 组（默认）| discard=丢弃 | error=报错
+      unknown-group: keep
+  # API-Key 鉴权：空 = 关闭（本地开发默认）；设置环境变量 IRIS_API_KEY 即启用。
+  # REST(/api/**) 与 MCP(/mcp) 共用校验入口（X-API-Key 请求头），/actuator/** 豁免
+  security:
+    api-key: ${IRIS_API_KEY:}
+    # 动态 agent key：yml agents[] 为静态基线；运行时可经
+    # /api/v1/admin/agent-keys 增删改（存 Redis 指纹，免重启热载）。
+    # refresh-ms = 动态条目周期对账间隔（管理写操作后即时刷新，此值只是兜底）
+    agent-keys:
+      refresh-ms: 30000
+  # 动态 MCP 工具：按生效 Schema 为每个实体生成 query_{entity} 工具，
+  # Schema 热加载后自动增删并广播 tools/list_changed。
+  # mode=all=全量注册进 tools/list（实体多时目录会撑爆 Agent 上下文）；
+  # mode=on-demand=按需发现（默认）：只注册 search_entity_tools/call_entity_tool，
+  # 动态工具进内存索引（不截断），Agent 先搜后调
+  mcp:
+    dynamic-tools:
+      enabled: true
+      mode: on-demand
+      poll-interval-ms: 3000
+  # Agent 演示：控制台内置 Agent 对话（SSE 流式 + 工具调用循环）
+  agent:
+    # false 时 AgentController 不装配（/api/v1/agent/** 404）
+    enabled: true
+    # 工具调用循环轮数上限（防失控护栏）
+    max-iterations: 6
+    # 单轮 LLM 流式调用超时（秒）；多轮工具 + 推理模型，远长于普通补全
+    timeout-seconds: 120
+    # 多轮上下文：注入 prompt 的会话历史条数（读自工作记忆留痕，按时间取最近 N 条）
+    # 0 = 关闭（每问独立，follow-up 如「执行」将失去指代）；单条截断 1200 字符
+    history-entries: 6
+    # 查询路径规划：意图→推荐路径配方目录，*.yml 按 mtime 惰性热加载，
+    # 命中意图的配方注入 system prompt（省 search→call 发现抖动）。与 schema 外部目录
+    # 物理分离——schema 目录只认 {ns}.{entity}.yml，graph 文件混入会被当实体解析报错。
+    # 空值 = 功能关闭（recipesBlock 恒空串，不影响主链路）。
+    graph-dir: <REPO_ROOT>/deploy/graph
+    # 两级 Schema 摘要阈值：实体数超过该值时，常驻摘要降为
+    # 「表名+用途描述+关联」一级摘要（配合 yml 的顶层 description 字段），
+    # 字段详情由 get_schema 按需取；不超过则保留全字段摘要。ecomm 125 表场景
+    # 常驻上下文从 ≈14k 字符降到 ≈4k；小库（个位数实体）一步到位更省一跳。
+    schema-digest-full-max: 12
+    # 配方自进化草稿池：顺畅成功会话（轮数≤smooth-max-rounds）
+    # 与失败会话的「问题+工具序列」沉淀到 iris:{ns}:recipe-drafts 审核队列，
+    # 人工审核后合入 graph 配方热载（不做 LLM 自动生成配方——会编造工具名）。
+    # 审核视图：GET /api/v1/agent/recipe-drafts?namespace=&limit=
+    recipe-drafts-enabled: true
+    recipe-draft-smooth-max-rounds: 4
+    recipe-drafts-max-entries: 200
+  schema:
+    # 是否启用外部目录 Schema 热加载（false 时退化为纯 classpath 固定 Schema）
+    hot-reload: true
+    # 外部 Schema 目录：目录下 *.yml 会覆盖 classpath 同名实体（按 namespace/entity 覆盖）
+    # 注意：这是本机绝对路径，迁移到其他机器请改为实际路径
+    dir: <REPO_ROOT>/deploy/schema
+    # 轮询文件变更间隔（毫秒）
+    poll-interval-ms: 3000
+  cache:
+    # 精确缓存/语义缓存条目 TTL（秒），TTL 兜底失效 + CDC 主动失效
+    ttl-seconds: 60
+    freshness-bypass:
+      # 时效词旁路：用户问题含「最新/现在/今天」类指示词时，
+      # LLM 缓存查找强制 miss（reason=fresh-keyword），Agent 发起的数据查询
+      # 带 fresh 标记穿透语义/精确两层查询缓存，直达 Query Engine 强制现算。
+      # 检测是零成本确定性关键词匹配，缺省开启
+      enabled: true
+      # 自定义词表（逗号分隔，覆盖默认词表）：最新,现在,目前,当前,实时,此刻,今天,今日,刚刚,刚才
+      # keywords: ""
+  # Embedder：remote = 远程 HTTP（OpenAI 兼容 /v1/embeddings），**唯一正式形态**——
+  # 向量模型必须部署在项目外（如 Mac mini llama-server），Java 侧零模型推理。
+  # bm25 = 本地 BM25 词法近似（非语义，仅供无模型环境的冒烟/开发，条件装配互斥）
+  embedder:
+    type: remote
+    # bm25 兜底参数（type=bm25 时生效；缺省即经典值）
+    # bm25:
+    #   dimension: 256   # 特征哈希维度
+    #   k1: 1.2          # tf 饱和强度
+    #   b: 0.75          # 长度归一强度
+    #   avgdl: 24        # 期望文档长度（词项数）
+    remote:
+      # Mac mini llama-server（embedding，OpenAI 兼容 /v1/embeddings）
+      # 服务常驻见 Mac mini launchd：com.iris.llama.embedder / com.iris.llama.reranker
+      base-url: http://<MODEL_HOST>:8081/v1
+      model: qwen3-embedding-0.6b
+      # 单条短文本 LAN 延迟 ~42ms；超时给足余量。服务不可达时零向量降级
+      # （语义层旁路、结果正确性不受影响，见 RemoteEmbedder 失败语义）
+      timeout-ms: 5000
+  # LLM 接入（记忆抽取等）：OpenAI 兼容协议，换供应商（OpenAI/通义/Kimi/Ollama 等）
+  # 只需改 base-url/model/api-key 三项，代码零改动
+  llm:
+    # 总开关：关闭时不创建 LLM 客户端 bean（同时应关闭 memory.extractor）
+    enabled: true
+    # 阿里云百炼（当前生效）：OpenAI 兼容端点，注意须带 /compatible-mode/v1 前缀
+    base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    # 密钥不落仓库：启动前 export IRIS_LLM_API_KEY=sk-xxx
+    api-key: ${IRIS_LLM_API_KEY:}
+    # 推理模型：reasoning 阶段消耗输出预算，max-tokens 红线同下
+    model: deepseek-v4.1-flash
+    # --- 备选 1：DeepSeek 云端 ---
+#    base-url: https://api.deepseek.com
+
+#    api-key: ${DEEPSEEK_API_KEY:}
+#    model: deepseek-v4-pro
+    # --- 备选 2：本地局域网 LM Studio（Mac mini M4，qwen3.5-9b Q4_K_M）---
+    # base-url: http://<MODEL_HOST>:1234/v1   # 客户端拼 /chat/completions，须带 /v1 前缀
+    # api-key: lm-studio                       # LM Studio 不校验密钥，填任意非空值
+    # model: qwen3.5-9b
+    temperature: 0.1
+    # 推理模型 reasoning 阶段消耗输出预算：预算过低会导致 reasoning 没跑完
+    # 就被截断、content 为空。reasoning+正文共享预算，复杂问题 4096 不够
+    # （烧光预算 finish_reason=length），故取 8192
+    max-tokens: 8192
+    timeout-seconds: 60
+  memory:
+    # 工作记忆会话 TTL：追加/读取刷新（活跃会话自动续期），
+    # 到期自动清理僵尸会话；长期记忆不受影响。<=0 = 永不过期（不推荐）
+    working-ttl-seconds: 86400
+    extractor:
+      # 自动记忆晋升开关：开启后工作记忆达到阈值异步调 LLM 抽取长期记忆
+      enabled: true
+      # 工作记忆每累计 N 条自动触发一次异步抽取（整段会话一起抽，上下文更全）
+      trigger-every: 6
+      # 去重阈值：候选记忆与已有长期记忆的向量余弦 >= 该值时跳过写入
+      # Qwen3-Embedding 分布：同事实改写对 0.813~0.935，不同事实对
+      # 最高 0.826（花生过敏/海鲜过敏——分数分布有重叠，无法完全可分）。
+      # 取 0.85 偏「宁可重复写入、不可丢事实」：假跳过 = 丢数据（不可逆），
+      # 假写入 = 重复条目（可清理）。0.80 是 bge-small 分布（0.71/0.845 可分）
+      # 的对应阈值，换 Qwen3 后沿用会误删海鲜过敏这类不同事实
+      dedup-threshold: 0.85
+      # 全局缺省抽取策略：discrete/summary/preferences/custom
+      # 会话级策略（POST /working 的 strategy 字段）优先于全局缺省
+      strategy: discrete
+      # 抽取 worker 线程数（单体应用取进程内池）
+      threads: 1
+    summarization:
+      # 会话渐进摘要：内容超阈值时旧消息 LLM 滚动摘要
+      # 进 context 字段并裁剪旧条目（保留最近 keep-percent%）
+      enabled: true
+      # 触发阈值：会话条目总字符量（无 tiktoken，中文场景字符≈token 量级）
+      threshold-chars: 8000
+      # 摘要后保留最近条目的字符占比（保留最近 40%）
+      keep-percent: 40
+    wm-index:
+      # 工作记忆语义索引：条目向量随写入伴生，
+      # 支持 GET /working/search 与 MCP search_working_memory 会话内语义检索
+      enabled: true
+  semantic-cache:
+    # 语义缓存开关：关闭时整体旁路（退化为纯精确缓存）
+    enabled: true
+    # 余弦相似度阈值：Qwen3-Embedding-0.6B 标定（scripts/calibrate-qwen3-thresholds.py）。
+    # 值级等价对 min=0.899（南宁市/广西南宁市），同域不等价值对 max=0.866（已发货/待发货），
+    # 0.88 取分界带 [0.866, 0.899] 中点偏保守侧。注意 Qwen3 偏话题语义，状态值反义对
+    # （已发货/待发货）余弦高达 0.87，比 bge-small 更挤——假命中的代价是错数据，
+    # 漏命中的代价只是回源，故取 0.88 而非 0.85
+    threshold: 0.88
+    # Qwen3-Embedding-0.6B 向量维度
+    dimension: 1024
+    # Embedder 模型标识（与维度共同构成向量空间指纹，指纹变化触发索引切换与重嵌入迁移）
+    model-id: qwen3-embedding-0.6b
+    # 容量上限：按 (namespace, entity) 限制语义条目数，超限淘汰剩余 TTL 最短者
+    # （≈最早写入，LRU 近似）；<=0 表示不限制
+    max-entries: 1000
+    # 淘汰检查抽样频率：每 N 次 STORE 检查一次（检查需 SCAN+逐条 PTTL，~190ms/千条，
+    # 不逐次执行；代价是上限为软上限，两次检查间最多超额 N 条）
+    evict-check-every: 50
+  llm-cache:
+    # LLM 响应语义缓存（类 LangCache）：缓存 prompt→LLM response 对，
+    # 相似 prompt 毫秒级返回缓存响应、跳过真实 LLM 调用（降本 = 输出 token × 命中率）。
+    # 与上面的 semantic-cache（缓存查询结果）互补：本层面向 LLM 应用调用方
+    enabled: true
+    # 相似度阈值：LLM 响应错服务的代价高（返回错误答案），比查询语义缓存（0.85）更保守
+    threshold: 0.90
+    # 默认 TTL：LLM 响应的有效期一般长于查询缓存（会话级应用建议调用方按需覆盖）
+    ttl-seconds: 3600
+    # 容量上限（软上限）：超限淘汰剩余 TTL 最短条目（含向量）
+    max-entries: 1000
+    # KNN 候选数：多取几个再按余弦阈值筛，防 HNSW 近似排序漏掉真命中
+    knn-candidates: 5
+    # 精判门：双塔余弦对微改写句对区分度不足——日期槽位在 512 维里被稀释，
+    # 「9月6号有人下单吗」vs「那2025年的9月6号有人下单吗」cos 0.916 即可误命中。
+    # 链路：KNN 召回放宽（宁滥勿缺）→ 槽位一致性校验（数字序列不同即拒；
+    # 交叉编码器对槽位差异同样失明，rerank 0.9998）→ rerank 精判 → 过门限才放行。
+    # 精判失效时保守 MISS（放行等于回到误命中状态）。
+    # Qwen3-Embedding 标定：正对 cos min=0.8283，召回线必须低于它；
+    # 0.80 宁滥勿缺（精度由槽位门 + rerank 门兜底），无数字槽位的反义对
+    # （女性/男性复购率 cos 0.928）由 rerank 门拦截——Qwen3-Reranker-0.6B
+    # 配任务定制指令后正负对完全可分（双向取 min：正 min 0.9929 / 负 max 0.6812，
+    # 见 RemoteCrossEncoderReranker 类注释）
+    recall-threshold: 0.80
+    rerank:
+      # 关闭即回到纯余弦行为（threshold 0.90）
+      enabled: true
+      # 远程 /v1/rerank（Mac mini llama-server Qwen3-Reranker-0.6B），项目外部署唯一形态。
+      # 关键前提：GGUF 内烘焙的 rerank 模板已把 <Instruct> 从默认 web search
+      # 换成任务定制指令（「日期/数值/指标/方向完全一致才算相关」）——裸 GGUF 的
+      # 焊死模板对同域句对全判 0.97+（判话题不判同题），patched 后正负完全可分，
+      # 详见 scripts/qwen3-reranker-official-test.py
+      base-url: http://<MODEL_HOST>:8082/v1
+      model: qwen3-reranker-0.6b
+      # LAN 延迟 ~150ms/3 文档；超时给足。失败时调用方保守 MISS
+      timeout-ms: 10000
+      # 双向取 min（缺省 true）：Qwen3-Reranker 分数有方向性（订单量→销售额 0.9005
+      # vs 反向 0.6812），双向 min 后与正对 min 0.9929 完全可分，对入库先后顺序免疫；
+      # 代价是精判候选 ×2 次调用。false = 单方向（省一半延迟，阈值需 ≥0.95 贴边）
+      two-sided: true
+      # 放行门限（0-1）。Qwen3-Reranker-0.6B 标定（patched 模板）：
+      # 过槽位门后进精判的句对——正对 min=0.9950，负对 max=0.6812（销售额/订单量），
+      # 0.90 取分界带中点；带数字槽位的负对（2025年改写 0.9985 等）由槽位门在前段拦截
+      threshold: 0.90
+  # RAG 混合检索：多路召回 → RRF 融合 → rerank 精判。
+  # 生效面：长期记忆检索（HYBRID 模式）与 LLM 缓存语义查找。
+  # 三通道：稠密（embedding KNN）+ 词法（BM25，FT TEXT 索引 + lex 派生字段）
+  # + LLM 多查询改写（MultiQueryExpander，按 mode 触发）。
+  rag:
+    lexical:
+      # BM25 词法通道开关：关闭则 save 不伴生写 lex 字段、检索跳过词法通道。
+      # 首次开启时存量条目经词法索引回填自动补 lex（不需要手工迁移）
+      enabled: true
+    # RRF（Reciprocal Rank Fusion）常数：业界缺省 60，压平头部排名差异，
+    # 让「多通道同时命中」稳定胜过「单通道第一」
+    rrf-k: 60
+    # 融合候选池上限（进精判的量）：配合 rerank 批量调用（1+N 次往返）控制延迟
+    candidates: 12
+    multi-query:
+      # LLM 改写触发模式（可配置项，默认 off 不开启）：always=每次检索都改写 |
+      # on-miss=miss 时升级改写抢救一次（记忆=融合池为空触发，缓存=未命中触发，
+      # 命中路径零 LLM 延迟；缓存路径 always 等效 on-miss——命中前不做 LLM 调用
+      # 是硬边界）| off=关闭通道。
+      # 默认关闭的原因：推理型模型（deepseek-v4-pro 等）改写耗时可达数秒且烧
+      # token，两通道（稠密+词法）已覆盖绝大多数召回面；需要更宽召回面时
+      # 显式开 on-miss/always，或给 iris.llm 换低延迟模型
+      mode: off
+      # 每次改写生成的变体数（1-5，缺省 2）
+      variants: 2
+  # 源库一致性校验：JdbcSourceTableReader 条件装配，未配置 jdbc-url 时
+  # 校验端点报 IRIS-9999 提示。配置后 POST /api/v1/admin/consistency/check|repair 可用
+  consistency:
+    # 源库 JDBC 连接（管理面低频短连接，每次校验开一条、用完即关）
+    jdbc-url: ${IRIS_CONSISTENCY_JDBC_URL:jdbc:mysql://127.0.0.1:3306/iris_demo}
+    jdbc-username: ${IRIS_CONSISTENCY_JDBC_USER:root}
+    # 密码不落仓库：演示 compose 的 MySQL 默认密码为 iris-root，直接 export IRIS_CONSISTENCY_JDBC_PASS=iris-root
+    jdbc-password: ${IRIS_CONSISTENCY_JDBC_PASS:}
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+    database: 0
+    # 客户端命令超时。必须留足余量：服务端 FT.CONFIG TIMEOUT 2000（聚合引擎护栏）
+    # 之上还有排队/冷页载入开销（宿主机内存紧张时冷查询可达 2s+），
+    # 客户端 2s 会抢先超时让重试退避失去意义。真正的查询护栏在服务端，这里只管传输。
+    timeout-ms: 8000
+  cdc:
+    # 多源 CDC：一个 source 对应一个数据源（MySQL/PostgreSQL），各自消费独立 stream
+    # 电商数据集（ecdb 135 表迁入 iris_demo）：Debezium 侧 iris_demo.* 全量捕获，
+    # namespace=ecomm 按表配置消费组（demo 命名空间已退役，全库即演示数据）
+    # 可靠性参数：max-deliveries/claim-idle-ms 控制毒消息重试与转 DLQ，
+    # stream-maxlen 是 stream 的**保留上限**（XTRIM 近似裁剪，0 = 关闭）。
+    #
+    # 它只是"内存目标"，不是"数据保留硬约束"：XTRIM MAXLEN 不区分是否已消费，
+    # 实际生效上限由 CdcConsumer.trimStream 取 max(stream-maxlen, lag + pending + 1000)，
+    # 积压超过本值时自动抬高，绝不会为了省内存裁掉未投递事件。
+    #
+    # 内存预算：本值必须与部署 VM 内存匹配。每条 entry 含全量行 JSON，
+    # 若按 100000 保留，135 条流的"保留窗口"即 1350 万条 ≈ 9.5 GB，在
+    # 11.67 GiB 级别的 Docker VM 上，配合周期 RDB 的 fork copy-on-write
+    # 内存瞬时翻倍，会被 OOMKilled(137)。
+    # 1000×135 流 ≈ 87MB；消费追平后流只服务短窗重放/审计，
+    # 一致性修复以源库为准，不依赖长流。
+    stream-maxlen: 1000
+    # 缓存失效开关（默认 true，生产必须 true）：
+    # true  = 每条事件投影后失效该实体全部查询缓存，保证查询不返回脏数据；
+    # false = 跳过失效，仅在全量导入/Redis 重建回填期临时使用。
+    #
+    # 失效必须索引驱动而非 SCAN：`SCAN MATCH iris:{ns}:cache:{entity}:*` 是整库
+    # 游标遍历（MATCH 只在服务端做过滤、不减少遍历量），代价 O(全 keyspace 键数)
+    # ——16 万键下单条 2.8 秒，135 路消费者全被拖死，吞吐掉到 0 条/秒；
+    # 且该代价与"是否真有缓存"无关（无查询流量时遍历整库删的是空集）。
+    #
+    # 索引驱动：写入缓存时把条目登记进 iris:{ns}:cacheidx:{entity}（SET），
+    # 失效时 SMEMBERS + 逐个 DEL，代价降为 O(该实体缓存条目数)；索引为空直接返回。
+    # 逐条失效不再有性能风险，全量导入期也不必再关本开关（关了只省一次 SMEMBERS）。
+    cache-invalidation-enabled: true
+    # 批量投影 pipeline：整批事件一次 pipeline 提交，
+    # 往返从「每事件 5+N 次」压到「整批 2 次」——全量导入吞吐的治本优化。
+    # false = 回落逐条路径（排障用，语义完全一致）。DLQ 重放恒走逐条路径。
+    batch-pipeline-enabled: true
+    sources:
+      # MySQL 电商核心表（stream = iris.iris_demo.{table}）
+      - namespace: ecomm
+        stream: iris.iris_demo.afc_after_sale
+        entity: afc_after_sale
+        group: iris-lite-ecomm-afc_after_sale
+        consumer: cdc-ecomm-afc_after_sale
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.afc_after_sale_item
+        entity: afc_after_sale_item
+        group: iris-lite-ecomm-afc_after_sale_item
+        consumer: cdc-ecomm-afc_after_sale_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.afc_dispute
+        entity: afc_dispute
+        group: iris-lite-ecomm-afc_dispute
+        consumer: cdc-ecomm-afc_dispute
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.afc_exchange
+        entity: afc_exchange
+        group: iris-lite-ecomm-afc_exchange
+        consumer: cdc-ecomm-afc_exchange
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.afc_refund
+        entity: afc_refund
+        group: iris-lite-ecomm-afc_refund
+        consumer: cdc-ecomm-afc_refund
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.afc_refund_item
+        entity: afc_refund_item
+        group: iris-lite-ecomm-afc_refund_item
+        consumer: cdc-ecomm-afc_refund_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.afc_return_goods
+        entity: afc_return_goods
+        group: iris-lite-ecomm-afc_return_goods
+        consumer: cdc-ecomm-afc_return_goods
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.afc_return_goods_track
+        entity: afc_return_goods_track
+        group: iris-lite-ecomm-afc_return_goods_track
+        consumer: cdc-ecomm-afc_return_goods_track
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.base_admin_permission
+        entity: base_admin_permission
+        group: iris-lite-ecomm-base_admin_permission
+        consumer: cdc-ecomm-base_admin_permission
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.base_admin_role
+        entity: base_admin_role
+        group: iris-lite-ecomm-base_admin_role
+        consumer: cdc-ecomm-base_admin_role
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.base_admin_role_permission
+        entity: base_admin_role_permission
+        group: iris-lite-ecomm-base_admin_role_permission
+        consumer: cdc-ecomm-base_admin_role_permission
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.base_admin_user
+        entity: base_admin_user
+        group: iris-lite-ecomm-base_admin_user
+        consumer: cdc-ecomm-base_admin_user
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.base_admin_user_role
+        entity: base_admin_user_role
+        group: iris-lite-ecomm-base_admin_user_role
+        consumer: cdc-ecomm-base_admin_user_role
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.base_dict
+        entity: base_dict
+        group: iris-lite-ecomm-base_dict
+        consumer: cdc-ecomm-base_dict
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.base_region
+        entity: base_region
+        group: iris-lite-ecomm-base_region
+        consumer: cdc-ecomm-base_region
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.cart_cart
+        entity: cart_cart
+        group: iris-lite-ecomm-cart_cart
+        consumer: cdc-ecomm-cart_cart
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.cart_cart_item
+        entity: cart_cart_item
+        group: iris-lite-ecomm-cart_cart_item
+        consumer: cdc-ecomm-cart_cart_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.cart_cart_stat
+        entity: cart_cart_stat
+        group: iris-lite-ecomm-cart_cart_stat
+        consumer: cdc-ecomm-cart_cart_stat
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.cart_checkout_snapshot
+        entity: cart_checkout_snapshot
+        group: iris-lite-ecomm-cart_checkout_snapshot
+        consumer: cdc-ecomm-cart_checkout_snapshot
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.log_company
+        entity: log_company
+        group: iris-lite-ecomm-log_company
+        consumer: cdc-ecomm-log_company
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.log_freight_bill
+        entity: log_freight_bill
+        group: iris-lite-ecomm-log_freight_bill
+        consumer: cdc-ecomm-log_freight_bill
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.log_logistics
+        entity: log_logistics
+        group: iris-lite-ecomm-log_logistics
+        consumer: cdc-ecomm-log_logistics
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.log_logistics_exception
+        entity: log_logistics_exception
+        group: iris-lite-ecomm-log_logistics_exception
+        consumer: cdc-ecomm-log_logistics_exception
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.log_logistics_package
+        entity: log_logistics_package
+        group: iris-lite-ecomm-log_logistics_package
+        consumer: cdc-ecomm-log_logistics_package
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.log_logistics_track
+        entity: log_logistics_track
+        group: iris-lite-ecomm-log_logistics_track
+        consumer: cdc-ecomm-log_logistics_track
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.log_pickup_point
+        entity: log_pickup_point
+        group: iris-lite-ecomm-log_pickup_point
+        consumer: cdc-ecomm-log_pickup_point
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_contract
+        entity: mch_contract
+        group: iris-lite-ecomm-mch_contract
+        consumer: cdc-ecomm-mch_contract
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_merchant
+        entity: mch_merchant
+        group: iris-lite-ecomm-mch_merchant
+        consumer: cdc-ecomm-mch_merchant
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_qualification
+        entity: mch_qualification
+        group: iris-lite-ecomm-mch_qualification
+        consumer: cdc-ecomm-mch_qualification
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_settlement_account
+        entity: mch_settlement_account
+        group: iris-lite-ecomm-mch_settlement_account
+        consumer: cdc-ecomm-mch_settlement_account
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_shop
+        entity: mch_shop
+        group: iris-lite-ecomm-mch_shop
+        consumer: cdc-ecomm-mch_shop
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_shop_category
+        entity: mch_shop_category
+        group: iris-lite-ecomm-mch_shop_category
+        consumer: cdc-ecomm-mch_shop_category
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_shop_role
+        entity: mch_shop_role
+        group: iris-lite-ecomm-mch_shop_role
+        consumer: cdc-ecomm-mch_shop_role
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_shop_score
+        entity: mch_shop_score
+        group: iris-lite-ecomm-mch_shop_score
+        consumer: cdc-ecomm-mch_shop_score
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_shop_staff
+        entity: mch_shop_staff
+        group: iris-lite-ecomm-mch_shop_staff
+        consumer: cdc-ecomm-mch_shop_staff
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mch_shop_staff_role
+        entity: mch_shop_staff_role
+        group: iris-lite-ecomm-mch_shop_staff_role
+        consumer: cdc-ecomm-mch_shop_staff_role
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_coupon
+        entity: mkt_coupon
+        group: iris-lite-ecomm-mkt_coupon
+        consumer: cdc-ecomm-mkt_coupon
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_coupon_sku
+        entity: mkt_coupon_sku
+        group: iris-lite-ecomm-mkt_coupon_sku
+        consumer: cdc-ecomm-mkt_coupon_sku
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_coupon_template
+        entity: mkt_coupon_template
+        group: iris-lite-ecomm-mkt_coupon_template
+        consumer: cdc-ecomm-mkt_coupon_template
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_coupon_use
+        entity: mkt_coupon_use
+        group: iris-lite-ecomm-mkt_coupon_use
+        consumer: cdc-ecomm-mkt_coupon_use
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_discount
+        entity: mkt_discount
+        group: iris-lite-ecomm-mkt_discount
+        consumer: cdc-ecomm-mkt_discount
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_discount_sku
+        entity: mkt_discount_sku
+        group: iris-lite-ecomm-mkt_discount_sku
+        consumer: cdc-ecomm-mkt_discount_sku
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_groupbuy_activity
+        entity: mkt_groupbuy_activity
+        group: iris-lite-ecomm-mkt_groupbuy_activity
+        consumer: cdc-ecomm-mkt_groupbuy_activity
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_groupbuy_member
+        entity: mkt_groupbuy_member
+        group: iris-lite-ecomm-mkt_groupbuy_member
+        consumer: cdc-ecomm-mkt_groupbuy_member
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_groupbuy_team
+        entity: mkt_groupbuy_team
+        group: iris-lite-ecomm-mkt_groupbuy_team
+        consumer: cdc-ecomm-mkt_groupbuy_team
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_promotion
+        entity: mkt_promotion
+        group: iris-lite-ecomm-mkt_promotion
+        consumer: cdc-ecomm-mkt_promotion
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_promotion_sku
+        entity: mkt_promotion_sku
+        group: iris-lite-ecomm-mkt_promotion_sku
+        consumer: cdc-ecomm-mkt_promotion_sku
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_seckill_activity
+        entity: mkt_seckill_activity
+        group: iris-lite-ecomm-mkt_seckill_activity
+        consumer: cdc-ecomm-mkt_seckill_activity
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_seckill_sku
+        entity: mkt_seckill_sku
+        group: iris-lite-ecomm-mkt_seckill_sku
+        consumer: cdc-ecomm-mkt_seckill_sku
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_sign_in_record
+        entity: mkt_sign_in_record
+        group: iris-lite-ecomm-mkt_sign_in_record
+        consumer: cdc-ecomm-mkt_sign_in_record
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.mkt_user_promotion_record
+        entity: mkt_user_promotion_record
+        group: iris-lite-ecomm-mkt_user_promotion_record
+        consumer: cdc-ecomm-mkt_user_promotion_record
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ops_daily_sales_stat
+        entity: ops_daily_sales_stat
+        group: iris-lite-ecomm-ops_daily_sales_stat
+        consumer: cdc-ecomm-ops_daily_sales_stat
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ops_message
+        entity: ops_message
+        group: iris-lite-ecomm-ops_message
+        consumer: cdc-ecomm-ops_message
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ops_message_user
+        entity: ops_message_user
+        group: iris-lite-ecomm-ops_message_user
+        consumer: cdc-ecomm-ops_message_user
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ops_notice
+        entity: ops_notice
+        group: iris-lite-ecomm-ops_notice
+        consumer: cdc-ecomm-ops_notice
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ops_product_rank
+        entity: ops_product_rank
+        group: iris-lite-ecomm-ops_product_rank
+        consumer: cdc-ecomm-ops_product_rank
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ops_search_keyword
+        entity: ops_search_keyword
+        group: iris-lite-ecomm-ops_search_keyword
+        consumer: cdc-ecomm-ops_search_keyword
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ops_shop_daily_stat
+        entity: ops_shop_daily_stat
+        group: iris-lite-ecomm-ops_shop_daily_stat
+        consumer: cdc-ecomm-ops_shop_daily_stat
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order
+        entity: ord_order
+        group: iris-lite-ecomm-ord_order
+        consumer: cdc-ecomm-ord_order
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_address
+        entity: ord_order_address
+        group: iris-lite-ecomm-ord_order_address
+        consumer: cdc-ecomm-ord_order_address
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_cancel
+        entity: ord_order_cancel
+        group: iris-lite-ecomm-ord_order_cancel
+        consumer: cdc-ecomm-ord_order_cancel
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_commission
+        entity: ord_order_commission
+        group: iris-lite-ecomm-ord_order_commission
+        consumer: cdc-ecomm-ord_order_commission
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_confirm
+        entity: ord_order_confirm
+        group: iris-lite-ecomm-ord_order_confirm
+        consumer: cdc-ecomm-ord_order_confirm
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_delivery
+        entity: ord_order_delivery
+        group: iris-lite-ecomm-ord_order_delivery
+        consumer: cdc-ecomm-ord_order_delivery
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_delivery_item
+        entity: ord_order_delivery_item
+        group: iris-lite-ecomm-ord_order_delivery_item
+        consumer: cdc-ecomm-ord_order_delivery_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_discount
+        entity: ord_order_discount
+        group: iris-lite-ecomm-ord_order_discount
+        consumer: cdc-ecomm-ord_order_discount
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_invoice
+        entity: ord_order_invoice
+        group: iris-lite-ecomm-ord_order_invoice
+        consumer: cdc-ecomm-ord_order_invoice
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_item
+        entity: ord_order_item
+        group: iris-lite-ecomm-ord_order_item
+        consumer: cdc-ecomm-ord_order_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_remark
+        entity: ord_order_remark
+        group: iris-lite-ecomm-ord_order_remark
+        consumer: cdc-ecomm-ord_order_remark
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_risk
+        entity: ord_order_risk
+        group: iris-lite-ecomm-ord_order_risk
+        consumer: cdc-ecomm-ord_order_risk
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.ord_order_settlement
+        entity: ord_order_settlement
+        group: iris-lite-ecomm-ord_order_settlement
+        consumer: cdc-ecomm-ord_order_settlement
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_channel
+        entity: pay_channel
+        group: iris-lite-ecomm-pay_channel
+        consumer: cdc-ecomm-pay_channel
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_merchant_balance
+        entity: pay_merchant_balance
+        group: iris-lite-ecomm-pay_merchant_balance
+        consumer: cdc-ecomm-pay_merchant_balance
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_payment
+        entity: pay_payment
+        group: iris-lite-ecomm-pay_payment
+        consumer: cdc-ecomm-pay_payment
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_payment_notify
+        entity: pay_payment_notify
+        group: iris-lite-ecomm-pay_payment_notify
+        consumer: cdc-ecomm-pay_payment_notify
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_payment_record
+        entity: pay_payment_record
+        group: iris-lite-ecomm-pay_payment_record
+        consumer: cdc-ecomm-pay_payment_record
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_reconciliation
+        entity: pay_reconciliation
+        group: iris-lite-ecomm-pay_reconciliation
+        consumer: cdc-ecomm-pay_reconciliation
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_reconciliation_diff
+        entity: pay_reconciliation_diff
+        group: iris-lite-ecomm-pay_reconciliation_diff
+        consumer: cdc-ecomm-pay_reconciliation_diff
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_settlement_batch
+        entity: pay_settlement_batch
+        group: iris-lite-ecomm-pay_settlement_batch
+        consumer: cdc-ecomm-pay_settlement_batch
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_settlement_item
+        entity: pay_settlement_item
+        group: iris-lite-ecomm-pay_settlement_item
+        consumer: cdc-ecomm-pay_settlement_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.pay_withdraw
+        entity: pay_withdraw
+        group: iris-lite-ecomm-pay_withdraw
+        consumer: cdc-ecomm-pay_withdraw
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_attribute
+        entity: prd_attribute
+        group: iris-lite-ecomm-prd_attribute
+        consumer: cdc-ecomm-prd_attribute
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_attribute_value
+        entity: prd_attribute_value
+        group: iris-lite-ecomm-prd_attribute_value
+        consumer: cdc-ecomm-prd_attribute_value
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_brand
+        entity: prd_brand
+        group: iris-lite-ecomm-prd_brand
+        consumer: cdc-ecomm-prd_brand
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_category
+        entity: prd_category
+        group: iris-lite-ecomm-prd_category
+        consumer: cdc-ecomm-prd_category
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_freight_rule
+        entity: prd_freight_rule
+        group: iris-lite-ecomm-prd_freight_rule
+        consumer: cdc-ecomm-prd_freight_rule
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_freight_template
+        entity: prd_freight_template
+        group: iris-lite-ecomm-prd_freight_template
+        consumer: cdc-ecomm-prd_freight_template
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_product
+        entity: prd_product
+        group: iris-lite-ecomm-prd_product
+        consumer: cdc-ecomm-prd_product
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_product_attribute
+        entity: prd_product_attribute
+        group: iris-lite-ecomm-prd_product_attribute
+        consumer: cdc-ecomm-prd_product_attribute
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_product_category
+        entity: prd_product_category
+        group: iris-lite-ecomm-prd_product_category
+        consumer: cdc-ecomm-prd_product_category
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_product_detail
+        entity: prd_product_detail
+        group: iris-lite-ecomm-prd_product_detail
+        consumer: cdc-ecomm-prd_product_detail
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_product_image
+        entity: prd_product_image
+        group: iris-lite-ecomm-prd_product_image
+        consumer: cdc-ecomm-prd_product_image
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_product_stat
+        entity: prd_product_stat
+        group: iris-lite-ecomm-prd_product_stat
+        consumer: cdc-ecomm-prd_product_stat
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_sku
+        entity: prd_sku
+        group: iris-lite-ecomm-prd_sku
+        consumer: cdc-ecomm-prd_sku
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_sku_attribute
+        entity: prd_sku_attribute
+        group: iris-lite-ecomm-prd_sku_attribute
+        consumer: cdc-ecomm-prd_sku_attribute
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_sku_sale_stat
+        entity: prd_sku_sale_stat
+        group: iris-lite-ecomm-prd_sku_sale_stat
+        consumer: cdc-ecomm-prd_sku_sale_stat
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.prd_unit
+        entity: prd_unit
+        group: iris-lite-ecomm-prd_unit
+        consumer: cdc-ecomm-prd_unit
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.rvw_consult
+        entity: rvw_consult
+        group: iris-lite-ecomm-rvw_consult
+        consumer: cdc-ecomm-rvw_consult
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.rvw_product_review_stat
+        entity: rvw_product_review_stat
+        group: iris-lite-ecomm-rvw_product_review_stat
+        consumer: cdc-ecomm-rvw_product_review_stat
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.rvw_review
+        entity: rvw_review
+        group: iris-lite-ecomm-rvw_review
+        consumer: cdc-ecomm-rvw_review
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.rvw_review_image
+        entity: rvw_review_image
+        group: iris-lite-ecomm-rvw_review_image
+        consumer: cdc-ecomm-rvw_review_image
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.rvw_review_like
+        entity: rvw_review_like
+        group: iris-lite-ecomm-rvw_review_like
+        consumer: cdc-ecomm-rvw_review_like
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.rvw_review_reply
+        entity: rvw_review_reply
+        group: iris-lite-ecomm-rvw_review_reply
+        consumer: cdc-ecomm-rvw_review_reply
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_purchase_order
+        entity: stk_purchase_order
+        group: iris-lite-ecomm-stk_purchase_order
+        consumer: cdc-ecomm-stk_purchase_order
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_purchase_order_item
+        entity: stk_purchase_order_item
+        group: iris-lite-ecomm-stk_purchase_order_item
+        consumer: cdc-ecomm-stk_purchase_order_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_stock
+        entity: stk_stock
+        group: iris-lite-ecomm-stk_stock
+        consumer: cdc-ecomm-stk_stock
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_stock_adjust
+        entity: stk_stock_adjust
+        group: iris-lite-ecomm-stk_stock_adjust
+        consumer: cdc-ecomm-stk_stock_adjust
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_stock_adjust_item
+        entity: stk_stock_adjust_item
+        group: iris-lite-ecomm-stk_stock_adjust_item
+        consumer: cdc-ecomm-stk_stock_adjust_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_stock_flow
+        entity: stk_stock_flow
+        group: iris-lite-ecomm-stk_stock_flow
+        consumer: cdc-ecomm-stk_stock_flow
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_stock_lock
+        entity: stk_stock_lock
+        group: iris-lite-ecomm-stk_stock_lock
+        consumer: cdc-ecomm-stk_stock_lock
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_stock_warning
+        entity: stk_stock_warning
+        group: iris-lite-ecomm-stk_stock_warning
+        consumer: cdc-ecomm-stk_stock_warning
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_stocktake
+        entity: stk_stocktake
+        group: iris-lite-ecomm-stk_stocktake
+        consumer: cdc-ecomm-stk_stocktake
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_stocktake_item
+        entity: stk_stocktake_item
+        group: iris-lite-ecomm-stk_stocktake_item
+        consumer: cdc-ecomm-stk_stocktake_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_transfer_order
+        entity: stk_transfer_order
+        group: iris-lite-ecomm-stk_transfer_order
+        consumer: cdc-ecomm-stk_transfer_order
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_transfer_order_item
+        entity: stk_transfer_order_item
+        group: iris-lite-ecomm-stk_transfer_order_item
+        consumer: cdc-ecomm-stk_transfer_order_item
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.stk_warehouse
+        entity: stk_warehouse
+        group: iris-lite-ecomm-stk_warehouse
+        consumer: cdc-ecomm-stk_warehouse
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.usr_member
+        entity: usr_member
+        group: iris-lite-ecomm-usr_member
+        consumer: cdc-ecomm-usr_member
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.usr_member_address
+        entity: usr_member_address
+        group: iris-lite-ecomm-usr_member_address
+        consumer: cdc-ecomm-usr_member_address
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.usr_member_auth
+        entity: usr_member_auth
+        group: iris-lite-ecomm-usr_member_auth
+        consumer: cdc-ecomm-usr_member_auth
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.usr_member_browse_history
+        entity: usr_member_browse_history
+        group: iris-lite-ecomm-usr_member_browse_history
+        consumer: cdc-ecomm-usr_member_browse_history
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.usr_member_favorite
+        entity: usr_member_favorite
+        group: iris-lite-ecomm-usr_member_favorite
+        consumer: cdc-ecomm-usr_member_favorite
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.usr_member_level
+        entity: usr_member_level
+        group: iris-lite-ecomm-usr_member_level
+        consumer: cdc-ecomm-usr_member_level
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.usr_member_profile
+        entity: usr_member_profile
+        group: iris-lite-ecomm-usr_member_profile
+        consumer: cdc-ecomm-usr_member_profile
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.usr_member_search_history
+        entity: usr_member_search_history
+        group: iris-lite-ecomm-usr_member_search_history
+        consumer: cdc-ecomm-usr_member_search_history
+        block-ms: 1000
+      - namespace: ecomm
+        stream: iris.iris_demo.usr_member_shop_favorite
+        entity: usr_member_shop_favorite
+        group: iris-lite-ecomm-usr_member_shop_favorite
+        consumer: cdc-ecomm-usr_member_shop_favorite
+        block-ms: 1000
+      # 多源 CDC 扩展点：需要时在 ecomm 命名空间为其他数据源（如 PG 库）
+      # 另配 source 即可恢复多源验证路径。
+    # 可靠性（毒消息防护）：处理失败的消息留在 PEL；每 reclaim-interval-ms 扫描一次，
+    # 空闲超 claim-idle-ms 的消息重试，投递次数达到 max-deliveries 转 DLQ（{stream}:dlq）。
+    max-deliveries: 3
+    # 本值必须显著大于"最坏一批的处理耗时"。若单批处理耗时超过它（如全量导入
+    # 310 万积压时每批 >>3 秒），reclaim 任务会把**本实例正在处理**的消息当
+    # "过期未确认"抢走再处理一遍：算力浪费一半（排空速率掉到约 1000 条/秒，
+    # 单实例能力约 2500 条/秒），且第二次处理撞上 2 秒命令超时后按
+    # max-deliveries 被判毒消息入 DLQ（error 多为 RedisCommandTimeoutException）。
+    claim-idle-ms: 30000
+    reclaim-interval-ms: 15000

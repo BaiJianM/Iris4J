@@ -1,0 +1,57 @@
+namespace: ecomm
+entity: ops_notice
+description: 平台公告
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: notice_type
+    type: INT
+    index: numeric
+    description: 公告类型
+    values: 1=系统公告; 2=活动公告; 3=商家公告; 4=紧急通知
+  - name: publish_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=草稿; 1=已发布; 2=已下线
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: title
+    type: STRING
+    index: text
+    description: 标题
+  - name: target_type
+    type: INT
+    index: numeric
+    description: 目标类型
+    values: 1=全体会员; 2=全体商家; 3=指定会员; 4=指定商家
+  - name: offline_at
+    type: LONG
+    index: numeric
+    description: 线下时间（毫秒时间戳）
+  - name: read_count
+    type: INT
+    index: numeric
+    description: 阅读次数
+  - name: sort
+    type: INT
+    index: numeric
+    description: 排序值（小在前）
+  - name: publisher_id
+    type: LONG
+    index: numeric
+    description: 发布者ID
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

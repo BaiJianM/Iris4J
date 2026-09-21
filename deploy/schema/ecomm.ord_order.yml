@@ -1,0 +1,139 @@
+namespace: ecomm
+entity: ord_order
+description: 订单主表（交易核心单据）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: order_no
+    type: STRING
+    index: tag
+    description: 订单号
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: pay_status
+    type: INT
+    index: numeric
+    description: 支付状态（营收/实付金额类统计只算 1，订单笔数类统计含全部状态）
+    values: 0=未付; 1=已付; 2=已退款; 3=部分退款
+  - name: order_status
+    type: INT
+    index: numeric
+    description: 订单状态
+    values: 0=待付款; 1=待发货; 2=待收货; 3=已完成; 4=已取消; 5=售后中; 6=已关闭
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: parent_order_no
+    type: STRING
+    index: tag
+    description: 父级订单单号
+  - name: order_type
+    type: INT
+    index: numeric
+    description: 订单类型
+    values: 1=普通; 2=秒杀; 3=拼团; 4=预售; 5=礼品卡
+  - name: order_source
+    type: INT
+    index: numeric
+    description: 订单来源
+    values: 1=APP; 2=小程序; 3=H5; 4=PC; 5=第三方
+  - name: goods_amount
+    type: DOUBLE
+    index: numeric
+    description: 商品金额（元）
+  - name: discount_amount
+    type: DOUBLE
+    index: numeric
+    description: 折扣金额（元）
+  - name: freight_amount
+    type: DOUBLE
+    index: numeric
+    description: 运费金额（元）
+  - name: point_amount
+    type: DOUBLE
+    index: numeric
+    description: 积分金额（元）
+  - name: pay_amount
+    type: DOUBLE
+    index: numeric
+    description: 支付金额（元）
+  - name: total_quantity
+    type: INT
+    index: numeric
+    description: 合计数量
+  - name: coupon_id
+    type: LONG
+    index: numeric
+    description: 优惠券ID
+  - name: promotion_id
+    type: LONG
+    index: numeric
+    description: 促销ID
+  - name: point_used
+    type: INT
+    index: numeric
+    description: 积分已用
+  - name: pay_type
+    type: INT
+    index: numeric
+    description: 支付类型
+    values: 1=微信; 2=支付宝; 3=银行卡; 4=余额; 5=货到付款
+  - name: delivery_type
+    type: INT
+    index: numeric
+    description: 配送类型
+    values: 1=快递; 2=自提; 3=同城配送
+  - name: buyer_remark
+    type: STRING
+    index: text
+    description: 买家备注
+  - name: seller_remark
+    type: STRING
+    index: text
+    description: 卖家备注
+  - name: invoice_flag
+    type: INT
+    index: numeric
+    description: 发票标记
+    values: 0=否; 1=是
+  - name: auto_confirm_at
+    type: LONG
+    index: numeric
+    description: 自动确认时间（毫秒时间戳）
+  - name: pay_at
+    type: LONG
+    index: numeric
+    description: 支付时间（毫秒时间戳）
+  - name: ship_at
+    type: LONG
+    index: numeric
+    description: 发货时间（毫秒时间戳）
+  - name: receive_at
+    type: LONG
+    index: numeric
+    description: 收货时间（毫秒时间戳）
+  - name: finish_at
+    type: LONG
+    index: numeric
+    description: 完成时间（毫秒时间戳）
+  - name: cancel_at
+    type: LONG
+    index: numeric
+    description: 取消时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

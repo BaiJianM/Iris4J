@@ -1,0 +1,51 @@
+namespace: ecomm
+entity: log_logistics_track
+description: 物流轨迹明细（揽收转运派送节点）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: logistics_id
+    type: LONG
+    index: numeric
+    relatedEntity: log_logistics
+    description: 外键关联 log_logistics
+  - name: logistics_no
+    type: STRING
+    index: tag
+    description: 物流单号
+  - name: track_time
+    type: LONG
+    index: numeric
+    description: 轨迹时间（毫秒时间戳）
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: node_code
+    type: STRING
+    index: tag
+    description: 节点编码
+  - name: track_desc
+    type: STRING
+    index: text
+    description: 轨迹描述
+  - name: track_area
+    type: STRING
+    index: tag
+    description: 轨迹区域
+  - name: operator
+    type: STRING
+    index: tag
+    description: 操作人
+  - name: operator_phone
+    type: STRING
+    index: tag
+    description: 操作人电话
+  - name: sort
+    type: INT
+    index: numeric
+    description: 排序值（小在前）

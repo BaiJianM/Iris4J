@@ -1,0 +1,36 @@
+namespace: ecomm
+entity: rvw_review_reply
+description: 评价回复（商家/客服）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: review_id
+    type: LONG
+    index: numeric
+    relatedEntity: rvw_review
+    description: 外键关联 rvw_review
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: operator_id
+    type: LONG
+    index: numeric
+    description: 操作人ID
+  - name: operator_name
+    type: STRING
+    index: text
+    description: 操作人名称
+  - name: content
+    type: STRING
+    index: text
+    description: 内容

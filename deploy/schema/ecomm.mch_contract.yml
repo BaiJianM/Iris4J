@@ -1,0 +1,60 @@
+namespace: ecomm
+entity: mch_contract
+description: 商家入驻合同
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: contract_no
+    type: STRING
+    index: tag
+    description: 合同单号
+  - name: merchant_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_merchant
+    description: 外键关联 mch_merchant
+  - name: end_date
+    type: LONG
+    index: numeric
+    description: 结束日期
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: contract_name
+    type: STRING
+    index: text
+    description: 合同名称
+  - name: sign_date
+    type: INT
+    index: numeric
+    description: 签订日期
+  - name: start_date
+    type: INT
+    index: numeric
+    description: 开始日期
+  - name: amount
+    type: DOUBLE
+    index: numeric
+    description: 金额（元）
+  - name: attachment
+    type: STRING
+    index: tag
+    description: 附件
+  - name: sign_person
+    type: STRING
+    index: tag
+    description: 签订人
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=草稿; 1=生效; 2=到期; 3=终止
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

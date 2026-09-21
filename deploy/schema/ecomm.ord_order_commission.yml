@@ -1,0 +1,54 @@
+namespace: ecomm
+entity: ord_order_commission
+description: 订单佣金分账记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: order_item_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order_item
+    description: 外键关联 ord_order_item
+  - name: beneficiary_id
+    type: LONG
+    index: numeric
+    description: 受益人ID
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: commission_type
+    type: INT
+    index: numeric
+    description: 佣金类型
+    values: 1=推广佣金; 2=分销佣金; 3=达人带货
+  - name: base_amount
+    type: DOUBLE
+    index: numeric
+    description: 基础金额（元）
+  - name: commission_rate
+    type: DOUBLE
+    index: numeric
+    description: 佣金比率
+  - name: commission_amount
+    type: DOUBLE
+    index: numeric
+    description: 佣金金额（元）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待结算; 1=已结算; 2=已失效; 3=已退回
+  - name: settle_at
+    type: LONG
+    index: numeric
+    description: 结算时间（毫秒时间戳）

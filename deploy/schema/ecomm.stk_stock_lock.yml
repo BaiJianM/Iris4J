@@ -1,0 +1,58 @@
+namespace: ecomm
+entity: stk_stock_lock
+description: 订单占用的库存锁定记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: lock_no
+    type: STRING
+    index: tag
+    description: 锁定单号
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: lock_status
+    type: INT
+    index: numeric
+    description: 锁定状态
+    values: 1=占用中; 2=已扣减; 3=已释放; 4=已作废
+  - name: expire_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: order_no
+    type: STRING
+    index: tag
+    description: 订单号
+  - name: quantity
+    type: INT
+    index: numeric
+    description: 数量
+  - name: release_at
+    type: LONG
+    index: numeric
+    description: 发布时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

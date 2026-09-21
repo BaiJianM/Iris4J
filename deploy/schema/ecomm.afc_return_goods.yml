@@ -1,0 +1,83 @@
+namespace: ecomm
+entity: afc_return_goods
+description: 退货单，记录退货商品与回寄信息
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: return_no
+    type: STRING
+    index: tag
+    description: 退货单号
+  - name: after_sale_id
+    type: LONG
+    index: numeric
+    relatedEntity: afc_after_sale
+    description: 外键关联 afc_after_sale
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: return_address
+    type: STRING
+    index: text
+    description: 退货地址
+  - name: receiver
+    type: STRING
+    index: tag
+    description: 收货人
+  - name: receiver_mobile
+    type: STRING
+    index: tag
+    description: 收货人手机号
+  - name: logistics_company
+    type: STRING
+    index: tag
+    description: 物流公司
+  - name: logistics_no
+    type: STRING
+    index: tag
+    description: 物流单号
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待寄回; 1=已寄回; 2=商家已收货; 3=验货通过; 4=验货不通过; 5=已关闭
+  - name: check_remark
+    type: STRING
+    index: text
+    description: 核查备注
+  - name: ship_at
+    type: LONG
+    index: numeric
+    description: 发货时间（毫秒时间戳）
+  - name: receive_at
+    type: LONG
+    index: numeric
+    description: 收货时间（毫秒时间戳）
+  - name: check_at
+    type: LONG
+    index: numeric
+    description: 核查时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

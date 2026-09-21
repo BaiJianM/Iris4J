@@ -1,0 +1,84 @@
+namespace: ecomm
+entity: mkt_coupon
+description: 会员持有的优惠券实例
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: coupon_no
+    type: STRING
+    index: tag
+    description: 优惠券单号
+  - name: template_id
+    type: LONG
+    index: numeric
+    relatedEntity: mkt_coupon_template
+    description: 外键关联 mkt_coupon_template
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=未使用; 1=已使用; 2=已过期; 3=已作废
+  - name: end_time
+    type: LONG
+    index: numeric
+    description: 结束时间（毫秒时间戳）
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: coupon_type
+    type: INT
+    index: numeric
+    description: 优惠券类型
+  - name: face_value
+    type: DOUBLE
+    index: numeric
+    description: 面值（元）
+  - name: discount_rate
+    type: DOUBLE
+    index: numeric
+    description: 折扣比率
+  - name: min_amount
+    type: DOUBLE
+    index: numeric
+    description: 最低金额（元）
+  - name: obtain_type
+    type: INT
+    index: numeric
+    description: 获得类型
+    values: 1=主动领取; 2=系统赠送; 3=活动奖励; 4=兑换码
+  - name: start_time
+    type: LONG
+    index: numeric
+    description: 开始时间（毫秒时间戳）
+  - name: used_time
+    type: LONG
+    index: numeric
+    description: 已用时间（毫秒时间戳）
+  - name: order_no
+    type: STRING
+    index: tag
+    description: 订单号
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

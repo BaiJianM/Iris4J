@@ -1,0 +1,53 @@
+namespace: ecomm
+entity: log_logistics_exception
+description: 物流异常事件记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: logistics_id
+    type: LONG
+    index: numeric
+    relatedEntity: log_logistics
+    description: 外键关联 log_logistics
+  - name: handle_status
+    type: INT
+    index: numeric
+    description: 处理状态码
+    values: 0=待处理; 1=处理中; 2=已解决; 3=已退回
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: logistics_no
+    type: STRING
+    index: tag
+    description: 物流单号
+  - name: exception_type
+    type: INT
+    index: numeric
+    description: 异常类型
+    values: 1=地址不详; 2=拒收; 3=破损; 4=丢失; 5=超时未达; 6=联系不上收件人
+  - name: description
+    type: STRING
+    index: text
+    description: 描述
+  - name: handle_result
+    type: STRING
+    index: tag
+    description: 处理结果
+  - name: compensation
+    type: DOUBLE
+    index: numeric
+    description: 赔偿金额（元）
+  - name: handler_id
+    type: LONG
+    index: numeric
+    description: 处理人ID
+  - name: handle_at
+    type: LONG
+    index: numeric
+    description: 处理时间（毫秒时间戳）

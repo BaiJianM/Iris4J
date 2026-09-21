@@ -1,0 +1,49 @@
+namespace: ecomm
+entity: ops_message
+description: 站内信系统消息主表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: msg_code
+    type: STRING
+    index: tag
+    description: 消息编码
+  - name: msg_type
+    type: INT
+    index: numeric
+    description: 消息类型
+    values: 1=订单; 2=物流; 3=活动; 4=账户; 5=系统
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: title
+    type: STRING
+    index: text
+    description: 标题
+  - name: content
+    type: STRING
+    index: text
+    description: 内容
+  - name: send_way
+    type: INT
+    index: numeric
+    description: 发送方式
+    values: 1=站内信; 2=短信; 3=推送; 4=邮件
+  - name: total_count
+    type: INT
+    index: numeric
+    description: 合计次数
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待发送; 1=发送中; 2=已发送; 3=已取消
+  - name: send_at
+    type: LONG
+    index: numeric
+    description: 发送时间（毫秒时间戳）

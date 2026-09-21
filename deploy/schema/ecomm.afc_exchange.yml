@@ -1,0 +1,63 @@
+namespace: ecomm
+entity: afc_exchange
+description: 换货单，记录换货商品与新旧对照
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: exchange_no
+    type: STRING
+    index: tag
+    description: 换货单号
+  - name: after_sale_id
+    type: LONG
+    index: numeric
+    relatedEntity: afc_after_sale
+    description: 外键关联 afc_after_sale
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: old_sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: new_sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: quantity
+    type: INT
+    index: numeric
+    description: 数量
+  - name: diff_amount
+    type: DOUBLE
+    index: numeric
+    description: 差异金额（元）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待换出; 1=已换出; 2=已收货; 3=已完成; 4=已关闭
+  - name: new_order_no
+    type: STRING
+    index: tag
+    description: 新增订单单号
+  - name: finish_at
+    type: LONG
+    index: numeric
+    description: 完成时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

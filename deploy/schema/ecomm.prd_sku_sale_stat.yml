@@ -1,0 +1,40 @@
+namespace: ecomm
+entity: prd_sku_sale_stat
+description: SKU 销售统计；演示数据与交易单据不同源，营收/销量等对账口径以明细单据为准，此表仅作运营报表展示参考
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: stat_date
+    type: LONG
+    index: numeric
+    description: 统计日期（YYYYMMDD）
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: sale_qty
+    type: INT
+    index: numeric
+    description: 销售数量
+  - name: sale_amount
+    type: DOUBLE
+    index: numeric
+    description: 销售金额（元）
+  - name: refund_qty
+    type: INT
+    index: numeric
+    description: 退款数量

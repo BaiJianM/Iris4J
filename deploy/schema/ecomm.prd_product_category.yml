@@ -1,0 +1,29 @@
+namespace: ecomm
+entity: prd_product_category
+description: 商品与类目关联表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: category_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_category
+    description: 外键关联 prd_category
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: is_primary
+    type: INT
+    index: numeric
+    description: 是否主
+    values: 0=否; 1=是

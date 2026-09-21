@@ -1,0 +1,53 @@
+namespace: ecomm
+entity: stk_stocktake_item
+description: 盘点单明细
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: stocktake_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_stocktake
+    description: 外键关联 stk_stocktake
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: book_qty
+    type: INT
+    index: numeric
+    description: 预约数量
+  - name: actual_qty
+    type: INT
+    index: numeric
+    description: 实付数量
+  - name: diff_qty
+    type: INT
+    index: numeric
+    description: 差异数量
+  - name: cost_price
+    type: DOUBLE
+    index: numeric
+    description: 成本价格（元）
+  - name: diff_amount
+    type: DOUBLE
+    index: numeric
+    description: 差异金额（元）
+  - name: handle_status
+    type: INT
+    index: numeric
+    description: 处理状态码
+    values: 0=未处理; 1=已调整; 2=已忽略
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注

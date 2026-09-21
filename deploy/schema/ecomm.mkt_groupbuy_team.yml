@@ -1,0 +1,53 @@
+namespace: ecomm
+entity: mkt_groupbuy_team
+description: 拼团场次（团）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: team_no
+    type: STRING
+    index: tag
+    description: 团队单号
+  - name: activity_id
+    type: LONG
+    index: numeric
+    relatedEntity: mkt_groupbuy_activity
+    description: 外键关联 mkt_groupbuy_activity
+  - name: leader_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=拼团中; 1=已成团; 2=已失败; 3=已取消
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: need_count
+    type: INT
+    index: numeric
+    description: 需求次数
+  - name: join_count
+    type: INT
+    index: numeric
+    description: 加入次数
+  - name: expire_at
+    type: LONG
+    index: numeric
+    description: 过期时间（毫秒时间戳）
+  - name: success_at
+    type: LONG
+    index: numeric
+    description: 成功时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

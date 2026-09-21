@@ -1,0 +1,47 @@
+namespace: ecomm
+entity: prd_freight_rule
+description: 运费模板计费规则明细
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: template_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_freight_template
+    description: 外键关联 prd_freight_template
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: region_ids
+    type: STRING
+    index: tag
+    description: 地区ID 列表
+  - name: region_names
+    type: STRING
+    index: text
+    description: 地区名称
+  - name: first_qty
+    type: INT
+    index: numeric
+    description: 首次数量
+  - name: first_fee
+    type: DOUBLE
+    index: numeric
+    description: 首次费用（元）
+  - name: add_qty
+    type: INT
+    index: numeric
+    description: 新增数量
+  - name: add_fee
+    type: DOUBLE
+    index: numeric
+    description: 新增费用（元）
+  - name: free_amount
+    type: DOUBLE
+    index: numeric
+    description: 免费金额（元）

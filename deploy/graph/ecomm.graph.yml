@@ -1,0 +1,73 @@
+# ecomm 查询路径配方
+# 用途：QueryPathAdvisor 加载后注入 Agent system prompt——模型命中意图时按既定路径
+# 直接执行，省掉 search→call 发现抖动（无配方时「手机号查订单」MCP 模式需 6 轮 6 工具）。
+# 红线：这里的字段名/实体名必须与 deploy/schema/*.yml 一致（fail-closed 世界写错=白跑）；
+# 本文件只注入提示词，不参与鉴权，执行仍走完整治理链。
+# 更新：改完即生效（advisor 按文件 mtime 热加载），无需重启应用。
+namespace: ecomm
+recipes:
+  - intent: 查某会员/客户的订单清单与下单数量（典型问法：手机号 178xxx 下过多少单、列清单）
+    match: [手机号, 会员, 客户, 下单, 订单, 清单]
+    anchor: usr_member WHERE mobile=? 或 id=?（手机号用 mobile，会员号用 member_no，直接用 id 等值查）
+    path:
+      - "第一步：query_entity(entity=usr_member, filters={mobile:值}) 取 id（member_no 查询则 filters={member_no:值}）"
+      - "第二步：query_entity(entity=ord_order, filters={member_id:上一步id})——返回 total 即下单总数，清单按 page/page_size 分页取（≤3 页）"
+    tools: query_entity
+    hint: 单数就是第二步返回的 total，禁止为计数再逐页拉取；订单状态看 order_status、支付看 pay_status
+  - intent: 查某订单的商品明细（典型问法：订单 xxx 买了什么、明细）
+    match: [订单明细, 买了, 明细, 商品清单]
+    anchor: ord_order WHERE order_no=? 或 id=?
+    path:
+      - "第一步：query_entity(entity=ord_order, filters={order_no:值}) 取 id（纯数字可直查 id）"
+      - "第二步：query_entity(entity=ord_order_item, filters={order_id:上一步id})——total 即明细行数"
+    tools: query_entity
+    hint: 也可以用 get_related_entities(entity=ord_order, id=订单id) 一次性看全部关联（反向含 ord_order_item）
+  - intent: 查某会员的售后单（典型问法：客户 xxx 的退换货/售后）
+    match: [售后, 退货, 换货, 退款, 退单]
+    anchor: usr_member WHERE mobile=? 或 id=?（或已有订单 id 时从订单出发）
+    path:
+      - "已知会员 id：query_entity(entity=afc_after_sale, filters={member_id:会员id})"
+      - "已知订单 id：query_entity(entity=afc_after_sale, filters={order_id:订单id})"
+    tools: query_entity
+    hint: total 即售后单数；售后状态字段按 get_schema 返回为准
+  - intent: 查商品（典型问法：商品 xxx 的信息/价格、某类商品列表）
+    match: [商品, 产品, 价格, 库存, sku]
+    anchor: prd_product WHERE 名称全文匹配或分类/品牌过滤
+    path:
+      - "按名称：query_entity(entity=prd_product, textFilters={name:关键词})（name 为 text 索引字段时）"
+      - "按分类/品牌：先查 prd_category / prd_brand 拿 id，再 query_entity(entity=prd_product, filters={category_id:...})"
+      - "规格价格：get_related_entities(entity=prd_product, id=商品id) 反向含 prd_sku"
+    tools: query_entity, get_related_entities
+    hint: 商品模糊名一律走 textFilters，不要用 filters 拼模糊值
+  - intent: 统计/聚合类（典型问法：多少、平均、最大、最小、各渠道各多少）
+    match: [多少, 统计, 平均, 最大, 最小, 总额, 排行, 各渠道]
+    anchor: 直接 aggregate_entity，不走逐页查询
+    path:
+      - "queryEntity 无聚合能力——统计类必须 aggregate_entity(entity, group_by, metrics=[{op:count|sum|avg|min|max, field}], filters)"
+      - "需要先定位子集时：先按锚点路径拿 id/范围，再把过滤条件写进 aggregate_entity 的 filters"
+    tools: aggregate_entity
+    hint: 分页拉取计数被 RepeatGuard 拦截；聚合结果 ≤100 组
+  - intent: TopN 排名类（典型问法：谁/哪个/哪家 最多、最爱、最活跃、排名前 N）
+    match: [最多, 最爱, 最活跃, 最热门, 排名, 前几, top, TOP]
+    anchor: 谁最 X = 按 X 的主体字段 GROUPBY + COUNT + 按计数倒序取前 N（一次 aggregate_entity 完成）
+    path:
+      - "aggregate_entity(entity=目标实体, group_by=[主体字段], metrics=[{op:count, alias:n}], sort_by=n, sort_desc=true, limit=5)"
+      - "示例：最爱评价的会员 → aggregate_entity(entity=rvw_review, group_by=[member_id], metrics=[{op:count, alias:review_count}], sort_by=review_count, sort_desc=true, limit=5)"
+    tools: aggregate_entity
+    hint: 必须带 sort_by=<计数别名>+sort_desc=true+limit，禁止全量分组翻页；sort_by 只能用分组字段名或固定指标别名（count / sum_<字段> / avg_<字段>），metrics 无 alias 参数；返回 totalGroups 是组总数（基数可能数万），TopN 只看 rows 前 N 行；若返回「聚合引擎超时」（IRIS-1003）不要原样重试（会被重复护栏拦截），直接换低基数维度分组或加过滤条件缩小范围
+  - intent: 按类型/大类汇总（典型问法：各支付方式/各状态/各等级 分别多少，X 类占比）
+    match: [各支付方式, 支付方式, 类型分布, 大类, 占比, 分别多少种, 各类型]
+    anchor: 主体字段只存外键、类型维度在关联表上 → 用维度路径一次归并（不要按外键分组后再翻页映射）
+    path:
+      - "aggregate_entity(entity=事实实体, group_by=[\"外键字段->维表实体.维度字段\"], metrics=[{op:count}], sort_by=count, sort_desc=true, limit=10)"
+      - "示例：各支付方式笔数 → aggregate_entity(entity=pay_payment, group_by=[\"channel_id->pay_channel.channel_code\"], metrics=[{op:count}], sort_by=count, sort_desc=true, limit=10)——返回行含 inputGroups（归并前实例数）与 totalGroups（归并后类别数）"
+    tools: aggregate_entity
+    hint: 维度路径写法=外键字段->维表实体.维度字段（必须与 Schema 声明的 relatedEntity 一致）；返回按归并后组数排序，先结论后口径（inputGroups 是归并前实例数，声明口径用）
+  - intent: 时间范围统计（典型问法：今天/昨天/本周/某日 有多少笔 X、X 近期总量）
+    match: [今天, 昨天, 本周, 当日, 今日, 近期, 这几天]
+    anchor: 直接 aggregate_entity + range_filters，一步出数；不确定时间字段名时先 get_schema 确认（通常为 created_at）
+    path:
+      - "aggregate_entity(entity=X, metrics=[{op:count}], range_filters={created_at:{min:<起始日界毫秒>, max:<截止日界毫秒>}})"
+      - "日界毫秒一律取 system prompt 末尾 nowAnchor 注入的近 32 天逐日 UTC 日界表：今天=[当日 00:00:00.000, 当日 23:59:59.999]；昨天/本周=相应起止日界"
+    tools: aggregate_entity, get_schema
+    hint: 禁止自算 epoch 毫秒（极易差一天）；数据毫秒基准恒为 UTC 字面不可配置，声明统计口径时说明按 UTC 日界

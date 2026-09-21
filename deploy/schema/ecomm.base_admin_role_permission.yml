@@ -1,0 +1,24 @@
+namespace: ecomm
+entity: base_admin_role_permission
+description: 后台角色与权限点关联表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: role_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_admin_role
+    description: 外键关联 base_admin_role
+  - name: permission_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_admin_permission
+    description: 外键关联 base_admin_permission
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳

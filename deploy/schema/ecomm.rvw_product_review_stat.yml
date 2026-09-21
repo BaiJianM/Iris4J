@@ -1,0 +1,55 @@
+namespace: ecomm
+entity: rvw_product_review_stat
+description: 商品评价汇总统计；演示数据与交易单据不同源，营收/销量等对账口径以明细单据为准，此表仅作运营报表展示参考
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: stat_date
+    type: LONG
+    index: numeric
+    description: 统计日期（YYYYMMDD）
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: total_count
+    type: INT
+    index: numeric
+    description: 合计次数
+  - name: good_count
+    type: INT
+    index: numeric
+    description: 好评次数
+  - name: mid_count
+    type: INT
+    index: numeric
+    description: 中期次数
+  - name: bad_count
+    type: INT
+    index: numeric
+    description: 差评次数
+  - name: image_count
+    type: INT
+    index: numeric
+    description: 图片次数
+  - name: avg_score
+    type: DOUBLE
+    index: numeric
+    description: 平均评分
+  - name: good_rate
+    type: DOUBLE
+    index: numeric
+    description: 好评比率
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

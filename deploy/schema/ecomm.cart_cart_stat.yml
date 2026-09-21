@@ -1,0 +1,47 @@
+namespace: ecomm
+entity: cart_cart_stat
+description: 购物车每日统计（运营侧报表）；演示数据与交易单据不同源，营收/销量等对账口径以明细单据为准，此表仅作运营报表展示参考
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: stat_date
+    type: LONG
+    index: numeric
+    description: 统计日期（YYYYMMDD）
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: add_count
+    type: INT
+    index: numeric
+    description: 新增次数
+  - name: add_user_count
+    type: INT
+    index: numeric
+    description: 新增用户次数
+  - name: add_amount
+    type: DOUBLE
+    index: numeric
+    description: 新增金额（元）
+  - name: submit_count
+    type: INT
+    index: numeric
+    description: 提交次数
+  - name: abandon_count
+    type: INT
+    index: numeric
+    description: 弃单次数
+  - name: convert_rate
+    type: DOUBLE
+    index: numeric
+    description: 转化率

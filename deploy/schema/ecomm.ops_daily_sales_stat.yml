@@ -1,0 +1,67 @@
+namespace: ecomm
+entity: ops_daily_sales_stat
+description: 平台每日销售统计（运营报表）；演示数据与交易单据不同源，营收/销量等对账口径以明细单据为准，此表仅作运营报表展示参考
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: stat_date
+    type: LONG
+    index: numeric
+    description: 统计日期（YYYYMMDD）
+  - name: category_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_category
+    description: 外键关联 prd_category
+  - name: pay_amount
+    type: DOUBLE
+    index: numeric
+    description: 支付金额（元）
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: order_count
+    type: INT
+    index: numeric
+    description: 订单次数
+  - name: pay_order_count
+    type: INT
+    index: numeric
+    description: 支付订单次数
+  - name: pay_member_count
+    type: INT
+    index: numeric
+    description: 支付会员次数
+  - name: goods_amount
+    type: DOUBLE
+    index: numeric
+    description: 商品金额（元）
+  - name: discount_amount
+    type: DOUBLE
+    index: numeric
+    description: 折扣金额（元）
+  - name: freight_amount
+    type: DOUBLE
+    index: numeric
+    description: 运费金额（元）
+  - name: refund_amount
+    type: DOUBLE
+    index: numeric
+    description: 退款金额（元）
+  - name: net_amount
+    type: DOUBLE
+    index: numeric
+    description: 净金额（元）
+  - name: avg_order_amount
+    type: DOUBLE
+    index: numeric
+    description: 平均订单金额（元）
+  - name: new_member_count
+    type: INT
+    index: numeric
+    description: 新增会员次数

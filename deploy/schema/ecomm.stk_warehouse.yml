@@ -1,0 +1,66 @@
+namespace: ecomm
+entity: stk_warehouse
+description: 仓库档案
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: warehouse_code
+    type: STRING
+    index: tag
+    description: 仓库编码
+  - name: province_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: city_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: warehouse_name
+    type: STRING
+    index: text
+    description: 仓库名称
+  - name: warehouse_type
+    type: INT
+    index: numeric
+    description: 仓库类型
+    values: 1=中心仓; 2=区域仓; 3=前置仓; 4=门店仓; 5=供应商仓
+  - name: address
+    type: STRING
+    index: text
+    description: 详细地址
+  - name: contact_name
+    type: STRING
+    index: text
+    description: 联系人姓名
+  - name: contact_phone
+    type: STRING
+    index: tag
+    description: 联系电话
+  - name: capacity
+    type: INT
+    index: numeric
+    description: 库容
+  - name: priority
+    type: INT
+    index: numeric
+    description: 优先级
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

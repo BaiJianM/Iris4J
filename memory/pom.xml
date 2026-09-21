@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.iris</groupId>
+        <artifactId>iris-lite</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>iris-lite-memory</artifactId>
+    <name>iris-lite-memory</name>
+    <description>工作记忆和长期记忆：领域模型与仓储端口</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.iris</groupId>
+            <artifactId>iris-lite-shared</artifactId>
+        </dependency>
+        <!-- @JsonIgnoreProperties（LongTermMemory 忽略存储侧派生字段 lex）。
+             仅引 annotations 最小包，不把 databind 拖进领域模块 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+    </dependencies>
+</project>

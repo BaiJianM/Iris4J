@@ -1,0 +1,61 @@
+namespace: ecomm
+entity: stk_stock_adjust
+description: 库存调整单主表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: adjust_no
+    type: STRING
+    index: tag
+    description: 调整单号
+  - name: warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待审; 1=已审; 2=驳回; 3=已作废
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: adjust_type
+    type: INT
+    index: numeric
+    description: 调整类型
+    values: 1=盘盈; 2=盘亏; 3=报损; 4=残次转出; 5=人工纠错
+  - name: total_qty
+    type: INT
+    index: numeric
+    description: 合计数量
+  - name: total_amount
+    type: DOUBLE
+    index: numeric
+    description: 合计金额（元）
+  - name: reason
+    type: STRING
+    index: tag
+    description: 原因
+  - name: applicant_id
+    type: LONG
+    index: numeric
+    description: 申请人ID
+  - name: auditor_id
+    type: LONG
+    index: numeric
+    description: 审核人ID
+  - name: audit_at
+    type: LONG
+    index: numeric
+    description: 审核时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

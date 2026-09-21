@@ -1,0 +1,44 @@
+namespace: ecomm
+entity: mkt_coupon_use
+description: 优惠券核销记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: coupon_id
+    type: LONG
+    index: numeric
+    relatedEntity: mkt_coupon
+    description: 外键关联 mkt_coupon
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: used_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: coupon_no
+    type: STRING
+    index: tag
+    description: 优惠券单号
+  - name: member_id
+    type: LONG
+    index: numeric
+    description: 会员ID
+  - name: order_no
+    type: STRING
+    index: tag
+    description: 订单号
+  - name: order_amount
+    type: DOUBLE
+    index: numeric
+    description: 订单金额（元）
+  - name: discount_amount
+    type: DOUBLE
+    index: numeric
+    description: 折扣金额（元）

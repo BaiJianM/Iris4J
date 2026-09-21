@@ -1,0 +1,70 @@
+namespace: ecomm
+entity: pay_channel
+description: 支付渠道配置表（微信支付宝等渠道）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: merchant_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_merchant
+    description: 外键关联 mch_merchant
+  - name: channel_code
+    type: STRING
+    index: tag
+    description: 渠道编码
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: sub_merchant_no
+    type: STRING
+    index: tag
+    description: 子级商户单号
+  - name: channel_name
+    type: STRING
+    index: text
+    description: 渠道名称
+  - name: pay_type
+    type: INT
+    index: numeric
+    description: 支付类型
+    values: 1=微信; 2=支付宝; 3=银联; 4=余额; 5=货到付款
+  - name: fee_rate
+    type: DOUBLE
+    index: numeric
+    description: 费用比率
+  - name: min_amount
+    type: DOUBLE
+    index: numeric
+    description: 最低金额（元）
+  - name: max_amount
+    type: DOUBLE
+    index: numeric
+    description: 最高金额（元）
+  - name: settle_cycle
+    type: INT
+    index: numeric
+    description: 结算周期
+  - name: support_refund
+    type: INT
+    index: numeric
+    description: 支持退款
+    values: 0=否; 1=是
+  - name: sort
+    type: INT
+    index: numeric
+    description: 排序值（小在前）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

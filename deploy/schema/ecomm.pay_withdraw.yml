@@ -1,0 +1,78 @@
+namespace: ecomm
+entity: pay_withdraw
+description: 商家提现单
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: withdraw_no
+    type: STRING
+    index: tag
+    description: 提现单号
+  - name: merchant_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_merchant
+    description: 外键关联 mch_merchant
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: account_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_settlement_account
+    description: 外键关联 mch_settlement_account
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待审; 1=审核通过; 2=打款中; 3=已到账; 4=驳回; 5=失败
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: amount
+    type: DOUBLE
+    index: numeric
+    description: 金额（元）
+  - name: fee_amount
+    type: DOUBLE
+    index: numeric
+    description: 费用金额（元）
+  - name: actual_amount
+    type: DOUBLE
+    index: numeric
+    description: 实付金额（元）
+  - name: audit_remark
+    type: STRING
+    index: text
+    description: 审核备注
+  - name: auditor_id
+    type: LONG
+    index: numeric
+    description: 审核人ID
+  - name: trade_no
+    type: STRING
+    index: tag
+    description: 交易单号
+  - name: apply_at
+    type: LONG
+    index: numeric
+    description: 申请时间（毫秒时间戳）
+  - name: audit_at
+    type: LONG
+    index: numeric
+    description: 审核时间（毫秒时间戳）
+  - name: finish_at
+    type: LONG
+    index: numeric
+    description: 完成时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

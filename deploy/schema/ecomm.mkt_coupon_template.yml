@@ -1,0 +1,101 @@
+namespace: ecomm
+entity: mkt_coupon_template
+description: 优惠券模板（券规则定义）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: start_time
+    type: LONG
+    index: numeric
+    description: 开始时间（毫秒时间戳）
+  - name: end_time
+    type: LONG
+    index: numeric
+    description: 结束时间（毫秒时间戳）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用; 2=已结束
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: template_name
+    type: STRING
+    index: text
+    description: 模板名称
+  - name: coupon_type
+    type: INT
+    index: numeric
+    description: 优惠券类型
+    values: 1=满减券; 2=折扣券; 3=无门槛券; 4=包邮券
+  - name: discount_type
+    type: INT
+    index: numeric
+    description: 折扣类型
+    values: 1=固定金额; 2=折扣率
+  - name: face_value
+    type: DOUBLE
+    index: numeric
+    description: 面值（元）
+  - name: discount_rate
+    type: DOUBLE
+    index: numeric
+    description: 折扣比率
+  - name: min_amount
+    type: DOUBLE
+    index: numeric
+    description: 最低金额（元）
+  - name: max_discount
+    type: DOUBLE
+    index: numeric
+    description: 最高折扣
+  - name: scope_type
+    type: INT
+    index: numeric
+    description: 范围类型
+    values: 1=全场; 2=指定类目; 3=指定商品; 4=指定店铺
+  - name: total_count
+    type: INT
+    index: numeric
+    description: 合计次数
+  - name: issued_count
+    type: INT
+    index: numeric
+    description: 签发次数
+  - name: used_count
+    type: INT
+    index: numeric
+    description: 已用次数
+  - name: limit_per_user
+    type: INT
+    index: numeric
+    description: 每人限领数量
+  - name: valid_type
+    type: INT
+    index: numeric
+    description: 有效类型
+    values: 1=固定区间; 2=领取后N天
+  - name: valid_days
+    type: INT
+    index: numeric
+    description: 有效天数
+  - name: stackable
+    type: INT
+    index: numeric
+    description: 可叠加
+    values: 0=否; 1=是
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

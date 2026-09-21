@@ -1,0 +1,147 @@
+namespace: ecomm
+entity: prd_product
+description: 商品 SPU 主表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: product_no
+    type: STRING
+    index: tag
+    description: 商品单号
+  - name: product_name
+    type: STRING
+    index: text
+    description: 商品名称（维度归并 product_id->prd_product.product_name 与模糊搜索依赖此声明）
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: category_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_category
+    description: 外键关联 prd_category
+  - name: brand_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_brand
+    description: 外键关联 prd_brand
+  - name: unit_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_unit
+    description: 外键关联 prd_unit
+  - name: min_price
+    type: DOUBLE
+    index: numeric
+    description: 最低价格（元）
+  - name: sale_count
+    type: INT
+    index: numeric
+    description: 销售次数
+  - name: audit_status
+    type: INT
+    index: numeric
+    description: 审核状态
+    values: 0=待审; 1=驳回; 2=通过; 3=违规下架
+  - name: shelf_status
+    type: INT
+    index: numeric
+    description: 上架状态
+    values: 0=仓库中; 1=上架; 2=定时上架
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: sub_title
+    type: STRING
+    index: text
+    description: 子级标题
+  - name: product_type
+    type: INT
+    index: numeric
+    description: 商品类型
+    values: 1=实物; 2=虚拟; 3=服务
+  - name: sale_mode
+    type: INT
+    index: numeric
+    description: 销售模式
+    values: 1=现货; 2=预售
+  - name: max_price
+    type: DOUBLE
+    index: numeric
+    description: 最高价格（元）
+  - name: market_price
+    type: DOUBLE
+    index: numeric
+    description: 市场价格（元）
+  - name: weight
+    type: DOUBLE
+    index: numeric
+    description: 重量（kg）
+  - name: volume
+    type: DOUBLE
+    index: numeric
+    description: 销量
+  - name: main_image
+    type: STRING
+    index: tag
+    description: 主营图片
+  - name: keywords
+    type: STRING
+    index: tag
+    description: 关键词
+  - name: freight_template_id
+    type: LONG
+    index: numeric
+    description: 运费模板ID
+  - name: service_flag
+    type: STRING
+    index: tag
+    description: 服务标记
+  - name: after_sale_days
+    type: INT
+    index: numeric
+    description: 售后天数
+  - name: limit_buy
+    type: INT
+    index: numeric
+    description: 限制购买
+  - name: comment_count
+    type: INT
+    index: numeric
+    description: 评论次数
+  - name: view_count
+    type: INT
+    index: numeric
+    description: 浏览量次数
+  - name: collect_count
+    type: INT
+    index: numeric
+    description: 收藏次数
+  - name: avg_score
+    type: DOUBLE
+    index: numeric
+    description: 平均评分
+  - name: audit_remark
+    type: STRING
+    index: text
+    description: 审核备注
+  - name: shelf_at
+    type: LONG
+    index: numeric
+    description: 上架时间（毫秒时间戳）
+  - name: is_deleted
+    type: INT
+    index: numeric
+    description: 软删除标记（0/1）
+    values: 0=否; 1=是
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

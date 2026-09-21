@@ -1,0 +1,73 @@
+namespace: ecomm
+entity: cart_cart_item
+description: 购物车商品行明细
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: cart_id
+    type: LONG
+    index: numeric
+    relatedEntity: cart_cart
+    description: 外键关联 cart_cart
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: sku_name
+    type: STRING
+    index: text
+    description: SKU 名称
+  - name: quantity
+    type: INT
+    index: numeric
+    description: 数量
+  - name: add_price
+    type: DOUBLE
+    index: numeric
+    description: 新增价格（元）
+  - name: current_price
+    type: DOUBLE
+    index: numeric
+    description: 当前价格（元）
+  - name: checked
+    type: INT
+    index: numeric
+    description: 已核对
+    values: 0=否; 1=是
+  - name: invalid_flag
+    type: INT
+    index: numeric
+    description: 失效标记
+    values: 0=正常; 1=已下架; 2=已售罄; 3=已删除
+  - name: add_at
+    type: LONG
+    index: numeric
+    description: 新增时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

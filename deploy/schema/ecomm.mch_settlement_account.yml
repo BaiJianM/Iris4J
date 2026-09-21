@@ -1,0 +1,58 @@
+namespace: ecomm
+entity: mch_settlement_account
+description: 商家结算银行账户
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: merchant_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_merchant
+    description: 外键关联 mch_merchant
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: account_type
+    type: INT
+    index: numeric
+    description: 账户类型
+    values: 1=对公银行; 2=对私银行; 3=支付宝; 4=微信
+  - name: account_name
+    type: STRING
+    index: text
+    description: 账户名称
+  - name: account_no
+    type: STRING
+    index: tag
+    description: 账号
+  - name: bank_name
+    type: STRING
+    index: text
+    description: 开户银行
+  - name: bank_branch
+    type: STRING
+    index: tag
+    description: 开户支行
+  - name: bank_code
+    type: STRING
+    index: tag
+    description: 银行编码
+  - name: is_default
+    type: INT
+    index: numeric
+    description: 默认标记（0/1）
+    values: 0=否; 1=是
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

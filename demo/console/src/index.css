@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--ring);
+  --color-hit: var(--hit);
+  --color-miss: var(--miss);
+  --color-error: var(--error);
+  --color-warn: var(--warn);
+  --color-need: var(--need);
+  --color-readonly: var(--readonly);
+  --color-accent: var(--accent);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
+/* Dark first */
+:root {
+  --bg: #0b0e14;
+  --bg-elevated: #10141c;
+  --card: #12161f;
+  --card-hover: #171c26;
+  --fg: #e6edf3;
+  --fg-muted: #9aa5b1;
+  --fg-subtle: #6a7280;
+  --border: #232a35;
+  --border-strong: #313a48;
+  --ring: #3b82f6;
+  --hit: #3fb950;
+  --miss: #6e7681;
+  --error: #f85149;
+  --warn: #d6a123;
+  --need: #a371f7;
+  --readonly: #6ca0c9;
+  --accent: #58a6ff;
+}
+
+.theme-light {
+  --bg: #f4f6f8;
+  --bg-elevated: #ffffff;
+  --card: #ffffff;
+  --card-hover: #f6f8fa;
+  --fg: #1c2128;
+  --fg-muted: #57606a;
+  --fg-subtle: #8c959f;
+  --border: #d8dee4;
+  --border-strong: #c2cad3;
+  --ring: #2563eb;
+  --hit: #1a7f37;
+  --miss: #8c959f;
+  --error: #cf222e;
+  --warn: #9a6700;
+  --need: #8250df;
+  --readonly: #487ea6;
+  --accent: #0969da;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'tnum' 1, 'cv05' 1;
+}
+
+.font-mono,
+code,
+pre {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' 1;
+}
+
+/* tabular numerals for data */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbars hidden until scroll */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
+  scrollbar-color: var(--border-strong) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*:hover::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  background-clip: content-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.75; }
+  100% { opacity: 0.4; }
+}
+.skeleton {
+  background: var(--card-hover);
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@keyframes drawer-in {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.drawer-in { animation: drawer-in 0.18s ease-out; }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fade-in 0.16s ease-out; }
+
+/* 从左到右渐进式字体颜色流动（渐变扫过，循环播放）。
+   两层实现：底层文字用正常颜色恒可见，::after 叠加同文字的渐变层
+   （accent 高亮带扫过），即使裁剪失效也只是没有动画，文字不会消失。
+   用法：<span class="text-sweep" data-text="文案">文案</span>（data-text 须与内容一致） */
+@keyframes text-sweep {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.text-sweep {
+  position: relative;
+  color: var(--fg-muted);
+}
+.text-sweep::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 30%,
+    var(--accent) 50%,
+    transparent 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: text-sweep 2.4s linear infinite;
+}

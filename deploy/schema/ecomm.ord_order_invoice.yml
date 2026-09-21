@@ -1,0 +1,74 @@
+namespace: ecomm
+entity: ord_order_invoice
+description: 订单发票记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待开票; 1=已开票; 2=已作废; 3=已红冲
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: invoice_no
+    type: STRING
+    index: tag
+    description: 发票单号
+  - name: invoice_type
+    type: INT
+    index: numeric
+    description: 发票类型
+    values: 1=增值税普通发票; 2=增值税专用发票; 3=电子发票
+  - name: title_type
+    type: INT
+    index: numeric
+    description: 标题类型
+    values: 1=个人; 2=单位
+  - name: title
+    type: STRING
+    index: text
+    description: 标题
+  - name: tax_no
+    type: STRING
+    index: tag
+    description: 税费单号
+  - name: bank_name
+    type: STRING
+    index: text
+    description: 开户银行
+  - name: bank_account
+    type: STRING
+    index: tag
+    description: 银行账号
+  - name: company_address
+    type: STRING
+    index: text
+    description: 公司地址
+  - name: company_phone
+    type: STRING
+    index: tag
+    description: 公司电话
+  - name: amount
+    type: DOUBLE
+    index: numeric
+    description: 金额（元）
+  - name: email
+    type: STRING
+    index: tag
+    description: 邮箱
+  - name: invoice_at
+    type: LONG
+    index: numeric
+    description: 发票时间（毫秒时间戳）

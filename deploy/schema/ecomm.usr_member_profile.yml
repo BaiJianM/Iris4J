@@ -1,0 +1,76 @@
+namespace: ecomm
+entity: usr_member_profile
+description: 会员扩展资料
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: province_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: city_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: district_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: real_name
+    type: STRING
+    index: text
+    description: 真实姓名
+  - name: id_card_no
+    type: STRING
+    index: tag
+    description: 身份证号
+  - name: address
+    type: STRING
+    index: text
+    description: 详细地址
+  - name: occupation
+    type: STRING
+    index: tag
+    description: 职业
+  - name: income_range
+    type: STRING
+    index: tag
+    description: 收入区间
+  - name: interest_tag
+    type: STRING
+    index: tag
+    description: 利息标签
+  - name: marriage
+    type: INT
+    index: numeric
+    description: 婚姻状况
+    values: 0=未知; 1=未婚; 2=已婚
+  - name: education
+    type: INT
+    index: numeric
+    description: 学历
+    values: 0=未知; 1=高中; 2=大专; 3=本科; 4=硕士; 5=博士
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

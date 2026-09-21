@@ -1,0 +1,67 @@
+namespace: ecomm
+entity: log_company
+description: 物流公司档案
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: parent_id
+    type: LONG
+    index: numeric
+    relatedEntity: log_company
+    description: 外键关联 log_company
+  - name: company_code
+    type: STRING
+    index: tag
+    description: 公司编码
+  - name: city_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: company_name
+    type: STRING
+    index: text
+    description: 公司名称
+  - name: org_level
+    type: INT
+    index: numeric
+    description: 组织等级
+    values: 1=总部; 2=分拨中心; 3=网点
+  - name: contact_phone
+    type: STRING
+    index: tag
+    description: 联系电话
+  - name: official_site
+    type: STRING
+    index: tag
+    description: 官方网站
+  - name: query_url
+    type: STRING
+    index: tag
+    description: 查询地址
+  - name: sort
+    type: INT
+    index: numeric
+    description: 排序值（小在前）
+  - name: is_default
+    type: INT
+    index: numeric
+    description: 默认标记（0/1）
+    values: 0=否; 1=是
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

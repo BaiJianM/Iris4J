@@ -1,0 +1,114 @@
+namespace: ecomm
+entity: log_logistics
+description: 物流单主表，订单发货后的履约单
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: logistics_no
+    type: STRING
+    index: tag
+    description: 物流单号
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: company_id
+    type: LONG
+    index: numeric
+    relatedEntity: log_company
+    description: 外键关联 log_company
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: province_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: city_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: district_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: logistics_status
+    type: INT
+    index: numeric
+    description: 物流状态
+    values: 0=已下单; 1=已揽收; 2=运输中; 3=派送中; 4=已签收; 5=异常; 6=已退回
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: order_no
+    type: STRING
+    index: tag
+    description: 订单号
+  - name: delivery_id
+    type: LONG
+    index: numeric
+    description: 配送ID
+  - name: company_name
+    type: STRING
+    index: text
+    description: 公司名称
+  - name: receiver
+    type: STRING
+    index: tag
+    description: 收货人
+  - name: receiver_mobile
+    type: STRING
+    index: tag
+    description: 收货人手机号
+  - name: address
+    type: STRING
+    index: text
+    description: 详细地址
+  - name: total_weight
+    type: DOUBLE
+    index: numeric
+    description: 总重量（kg）
+  - name: package_count
+    type: INT
+    index: numeric
+    description: 包裹次数
+  - name: freight_amount
+    type: DOUBLE
+    index: numeric
+    description: 运费金额（元）
+  - name: ship_at
+    type: LONG
+    index: numeric
+    description: 发货时间（毫秒时间戳）
+  - name: sign_at
+    type: LONG
+    index: numeric
+    description: 签订时间（毫秒时间戳）
+  - name: sign_by
+    type: STRING
+    index: tag
+    description: 签订
+  - name: expect_days
+    type: INT
+    index: numeric
+    description: 预期天数
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

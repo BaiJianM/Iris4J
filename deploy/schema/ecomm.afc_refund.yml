@@ -1,0 +1,96 @@
+namespace: ecomm
+entity: afc_refund
+description: 退款单主表，记录退款申请与审批状态
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: refund_no
+    type: STRING
+    index: tag
+    description: 退款单号
+  - name: payment_id
+    type: LONG
+    index: numeric
+    relatedEntity: pay_payment
+    description: 外键关联 pay_payment
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: channel_id
+    type: LONG
+    index: numeric
+    relatedEntity: pay_channel
+    description: 外键关联 pay_channel
+  - name: refund_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: after_sale_id
+    type: LONG
+    index: numeric
+    description: 售后单 ID
+  - name: payment_no
+    type: STRING
+    index: tag
+    description: 支付单号
+  - name: order_no
+    type: STRING
+    index: tag
+    description: 订单号
+  - name: refund_amount
+    type: DOUBLE
+    index: numeric
+    description: 退款金额（元）
+  - name: balance_amount
+    type: DOUBLE
+    index: numeric
+    description: 余额金额（元）
+  - name: cash_amount
+    type: DOUBLE
+    index: numeric
+    description: 现金金额（元）
+  - name: point_refund
+    type: INT
+    index: numeric
+    description: 积分退款
+  - name: refund_way
+    type: INT
+    index: numeric
+    description: 退款方式
+    values: 1=原路退回; 2=退到余额; 3=人工打款
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待退款; 1=退款中; 2=成功; 3=失败; 4=已关闭
+  - name: channel_refund_no
+    type: STRING
+    index: tag
+    description: 渠道退款单号
+  - name: fail_reason
+    type: STRING
+    index: tag
+    description: 失败原因
+  - name: apply_at
+    type: LONG
+    index: numeric
+    description: 申请时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

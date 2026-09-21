@@ -1,0 +1,52 @@
+namespace: ecomm
+entity: mch_shop_staff
+description: 店铺员工账号
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: staff_no
+    type: STRING
+    index: tag
+    description: 员工单号
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: real_name
+    type: STRING
+    index: text
+    description: 真实姓名
+  - name: mobile
+    type: STRING
+    index: tag
+    description: 手机号
+  - name: email
+    type: STRING
+    index: tag
+    description: 邮箱
+  - name: position
+    type: STRING
+    index: tag
+    description: 职位
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=离职; 1=在职; 2=停用
+  - name: last_login_at
+    type: LONG
+    index: numeric
+    description: 最近登录时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

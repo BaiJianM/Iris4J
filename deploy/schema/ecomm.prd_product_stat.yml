@@ -1,0 +1,60 @@
+namespace: ecomm
+entity: prd_product_stat
+description: 商品统计冗余表（销量浏览量）；演示数据与交易单据不同源，营收/销量等对账口径以明细单据为准，此表仅作运营报表展示参考
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: stat_date
+    type: LONG
+    index: numeric
+    description: 统计日期（YYYYMMDD）
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: view_count
+    type: INT
+    index: numeric
+    description: 浏览量次数
+  - name: visitor_count
+    type: INT
+    index: numeric
+    description: 访客次数
+  - name: cart_count
+    type: INT
+    index: numeric
+    description: 购物车次数
+  - name: order_count
+    type: INT
+    index: numeric
+    description: 订单次数
+  - name: pay_count
+    type: INT
+    index: numeric
+    description: 支付次数
+  - name: pay_amount
+    type: DOUBLE
+    index: numeric
+    description: 支付金额（元）
+  - name: refund_count
+    type: INT
+    index: numeric
+    description: 退款次数
+  - name: convert_rate
+    type: DOUBLE
+    index: numeric
+    description: 转化率

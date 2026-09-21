@@ -1,0 +1,40 @@
+namespace: ecomm
+entity: base_admin_role
+description: 后台角色定义
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: role_code
+    type: STRING
+    index: tag
+    description: 角色编码
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: role_name
+    type: STRING
+    index: text
+    description: 角色名称
+  - name: remark
+    type: STRING
+    index: text
+    description: 备注
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

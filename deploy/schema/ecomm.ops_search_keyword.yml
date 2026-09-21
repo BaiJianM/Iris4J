@@ -1,0 +1,42 @@
+namespace: ecomm
+entity: ops_search_keyword
+description: 站内搜索关键词统计
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: keyword
+    type: STRING
+    index: tag
+    description: 关键词
+  - name: search_count
+    type: INT
+    index: numeric
+    description: 搜索次数
+  - name: stat_date
+    type: LONG
+    index: numeric
+    description: 统计日期（YYYYMMDD）
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: category_id
+    type: LONG
+    index: numeric
+    description: 类目ID
+  - name: user_count
+    type: INT
+    index: numeric
+    description: 用户次数
+  - name: order_count
+    type: INT
+    index: numeric
+    description: 订单次数
+  - name: click_rate
+    type: DOUBLE
+    index: numeric
+    description: 点击比率

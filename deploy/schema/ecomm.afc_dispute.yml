@@ -1,0 +1,79 @@
+namespace: ecomm
+entity: afc_dispute
+description: 交易纠纷争议处理单
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: dispute_no
+    type: STRING
+    index: tag
+    description: 争议单号
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待受理; 1=处理中; 2=已判决; 3=已撤销
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: after_sale_id
+    type: LONG
+    index: numeric
+    description: 售后单 ID
+  - name: dispute_type
+    type: INT
+    index: numeric
+    description: 争议类型
+    values: 1=退款纠纷; 2=商品质量; 3=物流问题; 4=服务态度; 5=虚假宣传
+  - name: content
+    type: STRING
+    index: text
+    description: 内容
+  - name: images
+    type: STRING
+    index: tag
+    description: 图片列表
+  - name: expect_amount
+    type: DOUBLE
+    index: numeric
+    description: 预期金额（元）
+  - name: result
+    type: STRING
+    index: tag
+    description: 结果
+  - name: compensation
+    type: DOUBLE
+    index: numeric
+    description: 赔偿金额（元）
+  - name: handler_id
+    type: LONG
+    index: numeric
+    description: 处理人ID
+  - name: handle_at
+    type: LONG
+    index: numeric
+    description: 处理时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

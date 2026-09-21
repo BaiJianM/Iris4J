@@ -1,0 +1,33 @@
+namespace: ecomm
+entity: mch_shop_category
+description: 店铺经营类目授权
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: category_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_category
+    description: 外键关联 prd_category
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: commission_rate
+    type: DOUBLE
+    index: numeric
+    description: 佣金比率
+  - name: qual_status
+    type: INT
+    index: numeric
+    description: 资质状态
+    values: 0=待审; 1=通过; 2=驳回

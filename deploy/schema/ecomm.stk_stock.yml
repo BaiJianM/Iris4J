@@ -1,0 +1,60 @@
+namespace: ecomm
+entity: stk_stock
+description: 仓库库存（按 SKU 与仓库维度）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: available_stock
+    type: INT
+    index: numeric
+    description: 可用库存
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: total_stock
+    type: INT
+    index: numeric
+    description: 合计库存
+  - name: frozen_stock
+    type: INT
+    index: numeric
+    description: 冻结库存
+  - name: sold_stock
+    type: INT
+    index: numeric
+    description: 已售库存
+  - name: damaged_stock
+    type: INT
+    index: numeric
+    description: 破损库存
+  - name: in_transit_stock
+    type: INT
+    index: numeric
+    description: 运输中库存
+  - name: safety_stock
+    type: INT
+    index: numeric
+    description: 保障库存
+  - name: version
+    type: INT
+    index: numeric
+    description: 版本
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

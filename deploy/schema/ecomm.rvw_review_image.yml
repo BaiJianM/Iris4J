@@ -1,0 +1,32 @@
+namespace: ecomm
+entity: rvw_review_image
+description: 评价晒图
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: review_id
+    type: LONG
+    index: numeric
+    relatedEntity: rvw_review
+    description: 外键关联 rvw_review
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: image_url
+    type: STRING
+    index: tag
+    description: 图片地址
+  - name: sort
+    type: INT
+    index: numeric
+    description: 排序值（小在前）
+  - name: type
+    type: INT
+    index: numeric
+    description: 类型码
+    values: 1=评价图; 2=追评图; 3=视频封面

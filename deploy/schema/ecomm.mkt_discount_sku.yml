@@ -1,0 +1,40 @@
+namespace: ecomm
+entity: mkt_discount_sku
+description: 折扣活动适用 SKU
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: discount_id
+    type: LONG
+    index: numeric
+    relatedEntity: mkt_discount
+    description: 外键关联 mkt_discount
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: discount_rate
+    type: DOUBLE
+    index: numeric
+    description: 折扣比率
+  - name: discount_price
+    type: DOUBLE
+    index: numeric
+    description: 折扣价格（元）
+  - name: original_price
+    type: DOUBLE
+    index: numeric
+    description: 原价价格（元）
+  - name: sold_quantity
+    type: INT
+    index: numeric
+    description: 已售数量

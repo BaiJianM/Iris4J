@@ -1,0 +1,37 @@
+namespace: ecomm
+entity: ord_order_delivery_item
+description: 发货单商品明细
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: delivery_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order_delivery
+    description: 外键关联 ord_order_delivery
+  - name: order_item_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order_item
+    description: 外键关联 ord_order_item
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: sku_name
+    type: STRING
+    index: text
+    description: SKU 名称
+  - name: quantity
+    type: INT
+    index: numeric
+    description: 数量

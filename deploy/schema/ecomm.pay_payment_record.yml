@@ -1,0 +1,53 @@
+namespace: ecomm
+entity: pay_payment_record
+description: 支付流水记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: payment_id
+    type: LONG
+    index: numeric
+    relatedEntity: pay_payment
+    description: 外键关联 pay_payment
+  - name: request_no
+    type: STRING
+    index: tag
+    description: 请求单号
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: payment_no
+    type: STRING
+    index: tag
+    description: 支付单号
+  - name: action
+    type: INT
+    index: numeric
+    description: 操作
+    values: 1=发起支付; 2=同步回调; 3=异步回调; 4=主动查询; 5=关闭
+  - name: result_code
+    type: STRING
+    index: tag
+    description: 结果编码
+  - name: result_msg
+    type: STRING
+    index: tag
+    description: 结果消息
+  - name: amount
+    type: DOUBLE
+    index: numeric
+    description: 金额（元）
+  - name: success
+    type: INT
+    index: numeric
+    description: 成功
+    values: 0=否; 1=是
+  - name: payload
+    type: STRING
+    index: tag
+    description: 载荷

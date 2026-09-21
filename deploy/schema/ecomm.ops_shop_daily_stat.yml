@@ -1,0 +1,55 @@
+namespace: ecomm
+entity: ops_shop_daily_stat
+description: 店铺每日经营统计；演示数据与交易单据不同源，营收/销量等对账口径以明细单据为准，此表仅作运营报表展示参考
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: stat_date
+    type: LONG
+    index: numeric
+    description: 统计日期（YYYYMMDD）
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: visit_count
+    type: INT
+    index: numeric
+    description: 访问次数
+  - name: order_count
+    type: INT
+    index: numeric
+    description: 订单次数
+  - name: pay_order_count
+    type: INT
+    index: numeric
+    description: 支付订单次数
+  - name: pay_amount
+    type: DOUBLE
+    index: numeric
+    description: 支付金额（元）
+  - name: refund_amount
+    type: DOUBLE
+    index: numeric
+    description: 退款金额（元）
+  - name: commission_amount
+    type: DOUBLE
+    index: numeric
+    description: 佣金金额（元）
+  - name: new_customer_count
+    type: INT
+    index: numeric
+    description: 新增客户次数
+  - name: convert_rate
+    type: DOUBLE
+    index: numeric
+    description: 转化率

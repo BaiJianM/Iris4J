@@ -1,0 +1,59 @@
+namespace: ecomm
+entity: rvw_consult
+description: 商品咨询问答
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待回复; 1=已回复; 2=已关闭
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: question
+    type: STRING
+    index: tag
+    description: 问题
+  - name: answer
+    type: STRING
+    index: tag
+    description: 回复
+  - name: answer_by
+    type: LONG
+    index: numeric
+    description: 回复
+  - name: answer_at
+    type: LONG
+    index: numeric
+    description: 回复时间（毫秒时间戳）
+  - name: is_public
+    type: INT
+    index: numeric
+    description: 是否公开
+    values: 0=否; 1=是
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

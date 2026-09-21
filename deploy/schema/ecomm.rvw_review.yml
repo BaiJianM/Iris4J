@@ -1,0 +1,104 @@
+namespace: ecomm
+entity: rvw_review
+description: 商品评价主表
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: order_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order
+    description: 外键关联 ord_order
+  - name: order_item_id
+    type: LONG
+    index: numeric
+    relatedEntity: ord_order_item
+    description: 外键关联 ord_order_item
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: product_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_product
+    description: 外键关联 prd_product
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待审核; 1=已发布; 2=已屏蔽; 3=已删除
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: score
+    type: INT
+    index: numeric
+    description: 评分
+  - name: score_desc
+    type: INT
+    index: numeric
+    description: 描述评分
+  - name: score_service
+    type: INT
+    index: numeric
+    description: 服务评分
+  - name: score_logistics
+    type: INT
+    index: numeric
+    description: 物流评分
+  - name: content
+    type: STRING
+    index: text
+    description: 内容
+  - name: is_anonymous
+    type: INT
+    index: numeric
+    description: 是否匿名
+    values: 0=否; 1=是
+  - name: is_image
+    type: INT
+    index: numeric
+    description: 是否图片
+    values: 0=否; 1=是
+  - name: has_append
+    type: INT
+    index: numeric
+    description: 是否有追加（0/1）
+    values: 0=否; 1=是
+  - name: append_content
+    type: STRING
+    index: text
+    description: 追加内容
+  - name: append_at
+    type: LONG
+    index: numeric
+    description: 追加时间（毫秒时间戳）
+  - name: like_count
+    type: INT
+    index: numeric
+    description: 点赞次数
+  - name: reply_count
+    type: INT
+    index: numeric
+    description: 答复次数
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

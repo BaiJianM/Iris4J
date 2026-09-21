@@ -1,0 +1,69 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### OS / Editor junk ###
+.DS_Store
+hs_err_pid*.log
+replay_pid*.log
+
+### Local workspace state (AI assistant sessions, debug artifacts) ###
+.workbuddy/
+.playwright-cli/
+
+### Local secrets & env (never commit) ###
+.env
+.env.*
+application-local.yml
+
+### Large binaries: local ONNX models, download separately (see deploy/models/README.md) ###
+deploy/models/*/model.onnx
+deploy/models/*/tokenizer.json
+deploy/models/*/quantized.onnx
+deploy/models/*/*.onnx
+deploy/models/*/*.txt
+deploy/models/*/*.json
+
+### Local data backups (db dumps, redis snapshots) ###
+deploy/backups/
+*.tar.gz
+*.sql.gz
+
+### Node ###
+node_modules/
+**/dist/
+**/.vite/
+*.tsbuildinfo
+
+### Demo dataset (1.1 GB real business data, never distribute) ###
+deploy/mysql/init/test_data/

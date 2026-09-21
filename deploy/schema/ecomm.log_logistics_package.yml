@@ -1,0 +1,48 @@
+namespace: ecomm
+entity: log_logistics_package
+description: 物流包裹表，一个物流单可拆多包裹
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: logistics_id
+    type: LONG
+    index: numeric
+    relatedEntity: log_logistics
+    description: 外键关联 log_logistics
+  - name: package_no
+    type: STRING
+    index: tag
+    description: 包裹单号
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: quantity
+    type: INT
+    index: numeric
+    description: 数量
+  - name: weight
+    type: DOUBLE
+    index: numeric
+    description: 重量（kg）
+  - name: length
+    type: DOUBLE
+    index: numeric
+    description: 长度
+  - name: width
+    type: DOUBLE
+    index: numeric
+    description: 宽度（cm）
+  - name: height
+    type: DOUBLE
+    index: numeric
+    description: 高度（cm）

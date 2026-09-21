@@ -1,0 +1,69 @@
+namespace: ecomm
+entity: base_region
+description: 行政区划地区表（省市区）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: parent_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: region_code
+    type: STRING
+    index: tag
+    description: 地区编码
+  - name: region_level
+    type: INT
+    index: numeric
+    description: 地区等级
+    values: 1=省; 2=市; 3=区/县; 4=街道/镇
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: region_name
+    type: STRING
+    index: text
+    description: 地区名称
+  - name: short_name
+    type: STRING
+    index: text
+    description: 简称
+  - name: path
+    type: STRING
+    index: tag
+    description: 路径
+  - name: zip_code
+    type: STRING
+    index: tag
+    description: 邮政编码
+  - name: area_code
+    type: STRING
+    index: tag
+    description: 区域编码
+  - name: lng
+    type: DOUBLE
+    index: numeric
+    description: 经度
+  - name: lat
+    type: DOUBLE
+    index: numeric
+    description: 纬度
+  - name: sort
+    type: INT
+    index: numeric
+    description: 排序值（小在前）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=停用; 1=启用
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

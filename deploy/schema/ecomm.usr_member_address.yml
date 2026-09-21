@@ -1,0 +1,87 @@
+namespace: ecomm
+entity: usr_member_address
+description: 会员收货地址
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: member_id
+    type: LONG
+    index: numeric
+    relatedEntity: usr_member
+    description: 外键关联 usr_member
+  - name: province_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: city_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: district_id
+    type: LONG
+    index: numeric
+    relatedEntity: base_region
+    description: 外键关联 base_region
+  - name: is_default
+    type: INT
+    index: numeric
+    description: 默认标记（0/1）
+    values: 0=否; 1=是
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: receiver
+    type: STRING
+    index: tag
+    description: 收货人
+  - name: mobile
+    type: STRING
+    index: tag
+    description: 手机号
+  - name: phone
+    type: STRING
+    index: tag
+    description: 电话
+  - name: street_id
+    type: LONG
+    index: numeric
+    description: 街道ID
+  - name: address
+    type: STRING
+    index: text
+    description: 详细地址
+  - name: full_address
+    type: STRING
+    index: text
+    description: 满额地址
+  - name: tag
+    type: STRING
+    index: tag
+    description: 标签
+  - name: zip_code
+    type: STRING
+    index: tag
+    description: 邮政编码
+  - name: longitude
+    type: DOUBLE
+    index: numeric
+    description: 经度
+  - name: latitude
+    type: DOUBLE
+    index: numeric
+    description: 纬度
+  - name: use_count
+    type: INT
+    index: numeric
+    description: 使用次数
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

@@ -1,0 +1,81 @@
+namespace: ecomm
+entity: mkt_promotion
+description: 促销活动主表（满减等）
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: shop_id
+    type: LONG
+    index: numeric
+    relatedEntity: mch_shop
+    description: 外键关联 mch_shop
+  - name: start_time
+    type: LONG
+    index: numeric
+    description: 开始时间（毫秒时间戳）
+  - name: end_time
+    type: LONG
+    index: numeric
+    description: 结束时间（毫秒时间戳）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=未开始; 1=进行中; 2=已结束; 3=已下线
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: promotion_name
+    type: STRING
+    index: text
+    description: 促销名称
+  - name: promotion_type
+    type: INT
+    index: numeric
+    description: 促销类型
+    values: 1=满减; 2=折扣; 3=秒杀; 4=拼团; 5=赠品; 6=N件N折
+  - name: rule_desc
+    type: STRING
+    index: text
+    description: 规则描述
+  - name: min_amount
+    type: DOUBLE
+    index: numeric
+    description: 最低金额（元）
+  - name: reduce_amount
+    type: DOUBLE
+    index: numeric
+    description: 满减金额（元）
+  - name: discount_rate
+    type: DOUBLE
+    index: numeric
+    description: 折扣比率
+  - name: gift_sku_id
+    type: LONG
+    index: numeric
+    description: 赠品SKUID
+  - name: limit_per_user
+    type: INT
+    index: numeric
+    description: 每人限领数量
+  - name: participant_count
+    type: INT
+    index: numeric
+    description: 参与人次数
+  - name: order_count
+    type: INT
+    index: numeric
+    description: 订单次数
+  - name: total_discount
+    type: DOUBLE
+    index: numeric
+    description: 合计折扣
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

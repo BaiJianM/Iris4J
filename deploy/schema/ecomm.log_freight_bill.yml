@@ -1,0 +1,64 @@
+namespace: ecomm
+entity: log_freight_bill
+description: 运费账单，记录物流费用结算
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: bill_no
+    type: STRING
+    index: tag
+    description: 账单单号
+  - name: company_id
+    type: LONG
+    index: numeric
+    relatedEntity: log_company
+    description: 外键关联 log_company
+  - name: period_start
+    type: LONG
+    index: numeric
+    description: 账期开始日
+  - name: period_end
+    type: LONG
+    index: numeric
+    description: 账期结束日
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: order_count
+    type: INT
+    index: numeric
+    description: 订单次数
+  - name: total_weight
+    type: DOUBLE
+    index: numeric
+    description: 总重量（kg）
+  - name: freight_amount
+    type: DOUBLE
+    index: numeric
+    description: 运费金额（元）
+  - name: surcharge
+    type: DOUBLE
+    index: numeric
+    description: 附加费
+  - name: payable_amount
+    type: DOUBLE
+    index: numeric
+    description: 应付金额（元）
+  - name: status
+    type: INT
+    index: numeric
+    description: 状态码
+    values: 0=待核对; 1=已核对; 2=已付款; 3=有异议
+  - name: pay_at
+    type: LONG
+    index: numeric
+    description: 支付时间（毫秒时间戳）
+  - name: updated_at
+    type: LONG
+    index: numeric
+    description: 更新时间（毫秒时间戳）

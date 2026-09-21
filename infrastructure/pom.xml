@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.iris</groupId>
+        <artifactId>iris-lite</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>iris-lite-infrastructure</artifactId>
+    <name>iris-lite-infrastructure</name>
+    <description>Redis、配置、鉴权、指标等适配器（客户端细节不泄漏到业务层）</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.iris</groupId>
+            <artifactId>iris-lite-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.iris</groupId>
+            <artifactId>iris-lite-memory</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.iris</groupId>
+            <artifactId>iris-lite-cache</artifactId>
+        </dependency>
+        <!-- 运维适配器（如 DefaultRedisOpsService）实现 application 端口，对齐 cdc 模块先例 -->
+        <dependency>
+            <groupId>com.iris</groupId>
+            <artifactId>iris-lite-application</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+        </dependency>
+        <!-- @ConditionalOnProperty（Embedder 条件装配）在 autoconfigure 包里 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <!-- @PreDestroy（bean 资源释放） -->
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- 源库一致性校验：MySQL JDBC 驱动（版本由 spring-boot-starter-parent BOM 托管）。
+             JdbcSourceTableReader 条件装配（iris.consistency.jdbc-url），未配置时不使用 -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,46 @@
+namespace: ecomm
+entity: stk_stock_warning
+description: 库存预警配置与触发记录
+primaryKeys:
+  - id
+fields:
+  - name: id
+    type: LONG
+    indexed: true
+    description: 主键
+  - name: sku_id
+    type: LONG
+    index: numeric
+    relatedEntity: prd_sku
+    description: 外键关联 prd_sku
+  - name: warehouse_id
+    type: LONG
+    index: numeric
+    relatedEntity: stk_warehouse
+    description: 外键关联 stk_warehouse
+  - name: warning_type
+    type: INT
+    index: numeric
+    description: 预警类型
+    values: 1=低于安全库存; 2=断货; 3=积压滞销; 4=临期
+  - name: handle_status
+    type: INT
+    index: numeric
+    description: 处理状态码
+    values: 0=未处理; 1=已补货; 2=已忽略
+  - name: created_at
+    type: LONG
+    index: numeric
+    description: 毫秒时间戳
+  - name: current_qty
+    type: INT
+    index: numeric
+    description: 当前数量
+  - name: threshold
+    type: INT
+    index: numeric
+    description: 阈值
+  - name: handle_at
+    type: LONG
+    index: numeric
+    description: 处理时间（毫秒时间戳）
