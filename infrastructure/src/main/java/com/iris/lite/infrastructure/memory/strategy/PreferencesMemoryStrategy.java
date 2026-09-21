@@ -16,7 +16,7 @@ import java.util.List;
  *
  * <p><b>克制原则</b>：只抽清晰、可执行的偏好；排除临时状态与一次性决定，
  * 聚焦模式化、重复出现的偏好；没有明确偏好就输出空——
- * 宁可少记不错记，把临时性发言沉淀成"用户偏好"是垃圾记忆的主要来源。
+ * 宁可少记不错记，把临时性发言积累成"用户偏好"是垃圾记忆的主要来源。
  */
 @Component
 @ConditionalOnProperty(name = "iris.memory.extractor.enabled", havingValue = "true")

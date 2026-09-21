@@ -40,7 +40,7 @@ import java.util.Set;
  * <p><b>失败粒度</b>：连接级故障抛 {@link RedisException}（整批留在 PEL）；
  * 单条命令失败只把对应消息标记为未投影（与逐条路径同粒度）；
  * bump / 缓存失效失败按「该实体全部消息失败」处理——与逐条路径
- * 「handle() 内任何一步抛异常 = 事件失败」的口径一致。
+ * 「handle() 内任何一步抛异常 = 事件失败」的标准一致。
  */
 @Component("delegateProjectionBatchApplier")
 public class LettuceProjectionBatchApplier implements ProjectionBatchApplier {
@@ -185,14 +185,14 @@ public class LettuceProjectionBatchApplier implements ProjectionBatchApplier {
                     if (members == null || members.isEmpty()) {
                         continue;
                     }
-                    // 成员 key 一次 DEL 收敛（逐成员 DEL 是 N 次往返，把批 pipeline 的收益吃掉）
+                    // 成员 key 一次 DEL 合并（逐成员 DEL 是 N 次往返，把批 pipeline 的收益吃掉）
                     String[] memberKeys = members.stream()
                             .map(relativeKey -> keys.cacheKey(t[0], relativeKey))
                             .toArray(String[]::new);
                     redis.del(memberKeys);
                     redis.del(keys.cacheIndexKey(t[0], t[1]));
                 } catch (Exception e) {
-                    // 与逐条路径同口径：失效失败 = 该实体本批全部消息失败（留 PEL 重试）
+                    // 与逐条路径同标准：失效失败 = 该实体本批全部消息失败（留 PEL 重试）
                     markEntityFailed(entityTag, handled, touched, e);
                 }
             }
@@ -216,7 +216,7 @@ public class LettuceProjectionBatchApplier implements ProjectionBatchApplier {
         }
     }
 
-    /** 实体级失败：bump / 缓存失效失败 = 该实体本批全部消息失败（与逐条路径口径一致）。 */
+    /** 实体级失败：bump / 缓存失效失败 = 该实体本批全部消息失败（与逐条路径标准一致）。 */
     private void markEntityFailed(String entityTag, Boolean[] handled,
                                   Map<String, Set<Integer>> touched, Exception e) {
         Set<Integer> opIndexes = touched.get(entityTag);

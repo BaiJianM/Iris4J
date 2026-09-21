@@ -1,6 +1,6 @@
 namespace: ecomm
 entity: cart_cart_stat
-description: 购物车每日统计（运营侧报表）；演示数据与交易单据不同源，营收/销量等对账口径以明细单据为准，此表仅作运营报表展示参考
+description: 购物车每日统计（运营侧报表）；演示数据与交易单据不同源，营收/销量等对账标准以明细单据为准，此表仅作运营报表展示参考
 primaryKeys:
   - id
 fields:

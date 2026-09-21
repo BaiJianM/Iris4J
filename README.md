@@ -6,7 +6,7 @@
 |---|---|
 | **Data Integration** | MySQL/PostgreSQL → Debezium Server → Redis Stream → 实时投影（hash/JSON）+ FT 二级索引 + 缓存失效 + 数据版本 bump |
 | **Context Retriever** | YAML 声明式 Schema（热载）→ 治理链（字段裁剪/租户隔离/access tags/索引校验）→ Query Engine 索引查询 |
-| **LangCache** | 实体查询两层缓存（精确 + 语义 0.85）+ LLM 响应语义缓存（两级命中 + 槽位校验 + 交叉编码器精判 + 数据版本围栏） |
+| **LangCache** | 实体查询两层缓存（精确 + 语义 0.85）+ LLM 响应语义缓存（两级命中 + 槽位校验 + 交叉编码器重排 + 数据版本守卫） |
 | **Agent Memory** | 工作记忆（TTL + Lua 原子 append）→ 渐进摘要晋升长期记忆（KNN 语义索引、两级去重、ownerId 隔离） |
 
 Agent 侧通过 **REST**（`/api/v1`）或 **MCP Streamable-HTTP**（`/mcp`，on-demand 动态工具发现）访问数据；附带一个 14 页真数据管理控制台（React 19）与 SSE 流式 Agent 演示页。
@@ -23,7 +23,7 @@ Agent <--MCP(/mcp, 动态工具) / REST(/api/v1)-- 查询链路（三层装饰�
 
 - **查询红线**：一律走 Redis Query Engine 二级索引，禁止 SCAN + 逐条 GET；索引默认 TAG/NUMERIC，TEXT 按字段显式开启。
 - **安全模型**：授权集合与字段约束取交集（防 TAG OR 越权）、无授权 fail-closed、tags 由鉴权层注入不可伪造、语义缓存中集合值绝不参与模糊匹配（防跨 Agent 越权）、动态 agent key 存 SHA-256 指纹不落明文。
-- **数据版本围栏**：CDC 投影成功即 bump 实体版本；LLM 语义缓存命中后校验依赖实体版本，数据变更即 stale/fresh bypass，杜绝返回旧答案。
+- **数据版本守卫**：CDC 投影成功即 bump 实体版本；LLM 语义缓存命中后校验依赖实体版本，数据变更即 stale/fresh bypass，杜绝返回旧答案。
 
 ## 模块结构
 
@@ -52,7 +52,7 @@ deploy/         docker compose、Debezium 配置、Schema YAML
 | Redis | 8.x（AOF，Query Engine 二级索引） |
 | CDC | Debezium Server 3.6.2 → Redis Stream |
 | 源库 | MySQL 8.4 / PostgreSQL（docker compose 共 5 容器） |
-| 远程模型 | Qwen3-Embedding-0.6B（embedder，1024 维）· Qwen3-Reranker-0.6B（缓存精判），llama-server 项目外部署（默认指向 Mac mini :8081/:8082） |
+| 远程模型 | Qwen3-Embedding-0.6B（embedder，1024 维）· Qwen3-Reranker-0.6B（缓存重排），llama-server 项目外部署（默认指向 Mac mini :8081/:8082） |
 
 ## 快速开始
 
@@ -89,7 +89,7 @@ curl http://127.0.0.1:8080/actuator/health
 | `IRIS_CONSISTENCY_JDBC_USER` | 一致性校验 JDBC 用户（默认 `root`） |
 | `IRIS_CONSISTENCY_JDBC_PASS` | 一致性校验 JDBC 密码（仓库不落明文；演示 compose 的 MySQL 默认密码为 `iris-root`，本地按此设置） |
 | `iris.embedder.type` | `remote`（默认，远程 embedding 服务）/ `bm25`（本地 BM25 词法降级，冒烟用） |
-| `iris.llm-cache.rerank.enabled` | LLM 缓存精判门开关（false 回落纯余弦） |
+| `iris.llm-cache.rerank.enabled` | LLM 缓存重排门槛开关（false 回落纯余弦） |
 | `iris.rag.*` | 混合检索（记忆 HYBRID 检索 + LLM 缓存查找）：`lexical.enabled` BM25 词法通道、`rrf-k`/`candidates` RRF 融合参数、`multi-query.mode` LLM 改写触发（`off` 缺省 / `on-miss` / `always`） |
 | `iris.cache.freshness-bypass.*` | 时效词旁路：问题含「最新/现在/今天」类指示词时 LLM 缓存强制 miss、数据查询穿透两层缓存强制现算（`enabled` 缺省 true、`keywords` 可覆盖默认词表） |
 | `iris.cdc.cache-invalidation-enabled` | CDC 逐条缓存失效开关（全量导入期间建议关闭，见下方提示） |

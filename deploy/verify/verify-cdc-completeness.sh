@@ -7,7 +7,7 @@
 # 会被推到尾部，于是 XINFO GROUPS 显示 lag=0，「看起来全部消费完毕」。
 # 注意：CDC 静默丢失的典型形态是「源库远多于 Redis 且 lag=0」（XTRIM 裁掉未投递
 # 事件后 group 的 last-delivered-id 已推到尾部，XINFO GROUPS 显示已消费完毕）。
-# 唯一能发现它的口径就是「源库行数 vs 索引文档数」——本脚本即该断言。
+# 唯一能发现它的标准就是「源库行数 vs 索引文档数」——本脚本即该断言。
 #
 # 用法： ./deploy/verify/verify-cdc-completeness.sh [namespace]
 # 前置：iris-lite 已运行（索引已建）；iris-redis / iris-mysql 容器可用。

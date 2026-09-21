@@ -6,7 +6,7 @@ package com.iris.lite.shared.key;
  * <p><b>为什么所有 key 都必须走这里</b>：Redis 里的数据是"按 key 约定"组织的——
  * CDC 往 {@code iris:demo:entity:customer:1001} 写，查询侧必须按同一个规则读。
  * 一旦某个模块自己拼字符串，改命名规范时就会出现"写侧改了、读侧没改"的静默丢数据。
- * 因此规范收敛在 {@link RedisKeyPatterns}，生成逻辑收敛在这里，业务模块只依赖
+ * 因此规范集中在 {@link RedisKeyPatterns}，生成逻辑集中在这里，业务模块只依赖
  * {@link KeyStrategy} 接口。
  *
  * <p><b>实现细节</b>：用 {@code String.formatted}（Java 15+ 实例方法）而非
@@ -122,7 +122,7 @@ public class DefaultKeyStrategy implements KeyStrategy {
         return RedisKeyPatterns.LLM_CACHE.formatted(namespace, modelTag, promptHash);
     }
 
-    /** 实体数据版本计数器 key：{@code iris:{ns}:ver:{entity}}（数据版本围栏）。 */
+    /** 实体数据版本计数器 key：{@code iris:{ns}:ver:{entity}}（数据版本守卫）。 */
     @Override
     public String entityVersionKey(String namespace, String entity) {
         return RedisKeyPatterns.ENTITY_VERSION.formatted(namespace, entity);

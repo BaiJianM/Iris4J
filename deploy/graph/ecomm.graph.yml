@@ -62,7 +62,7 @@ recipes:
       - "aggregate_entity(entity=事实实体, group_by=[\"外键字段->维表实体.维度字段\"], metrics=[{op:count}], sort_by=count, sort_desc=true, limit=10)"
       - "示例：各支付方式笔数 → aggregate_entity(entity=pay_payment, group_by=[\"channel_id->pay_channel.channel_code\"], metrics=[{op:count}], sort_by=count, sort_desc=true, limit=10)——返回行含 inputGroups（归并前实例数）与 totalGroups（归并后类别数）"
     tools: aggregate_entity
-    hint: 维度路径写法=外键字段->维表实体.维度字段（必须与 Schema 声明的 relatedEntity 一致）；返回按归并后组数排序，先结论后口径（inputGroups 是归并前实例数，声明口径用）
+    hint: 维度路径写法=外键字段->维表实体.维度字段（必须与 Schema 声明的 relatedEntity 一致）；返回按归并后组数排序，先结论后标准（inputGroups 是归并前实例数，声明标准用）
   - intent: 时间范围统计（典型问法：今天/昨天/本周/某日 有多少笔 X、X 近期总量）
     match: [今天, 昨天, 本周, 当日, 今日, 近期, 这几天]
     anchor: 直接 aggregate_entity + range_filters，一步出数；不确定时间字段名时先 get_schema 确认（通常为 created_at）
@@ -70,4 +70,4 @@ recipes:
       - "aggregate_entity(entity=X, metrics=[{op:count}], range_filters={created_at:{min:<起始日界毫秒>, max:<截止日界毫秒>}})"
       - "日界毫秒一律取 system prompt 末尾 nowAnchor 注入的近 32 天逐日 UTC 日界表：今天=[当日 00:00:00.000, 当日 23:59:59.999]；昨天/本周=相应起止日界"
     tools: aggregate_entity, get_schema
-    hint: 禁止自算 epoch 毫秒（极易差一天）；数据毫秒基准恒为 UTC 字面不可配置，声明统计口径时说明按 UTC 日界
+    hint: 禁止自算 epoch 毫秒（极易差一天）；数据毫秒基准恒为 UTC 字面不可配置，声明统计标准时说明按 UTC 日界

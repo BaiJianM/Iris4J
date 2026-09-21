@@ -1,6 +1,6 @@
 namespace: ecomm
 entity: ops_shop_daily_stat
-description: 店铺每日经营统计；演示数据与交易单据不同源，营收/销量等对账口径以明细单据为准，此表仅作运营报表展示参考
+description: 店铺每日经营统计；演示数据与交易单据不同源，营收/销量等对账标准以明细单据为准，此表仅作运营报表展示参考
 primaryKeys:
   - id
 fields:

@@ -26,12 +26,12 @@ import java.util.Map;
  *
  * <p><b>共用应用服务的意义</b>（与 {@link EntityQueryMcpTool} 同源）：
  * REST / Agent 直连 / MCP 三入口走完全相同的聚合路径
- * （{@link EntityQueryService} 装饰链：安全 → 缓存围栏 → 校验 → 引擎），
+ * （{@link EntityQueryService} 装饰链：安全 → 缓存守卫 → 校验 → 引擎），
  * 含跨实体维度归并（group_by 支持 {@code fk->维表.维度字段}），
  * 不会出现入口行为不一致。
  *
- * <p><b>聚合不缓存</b>：与 Agent 直连同口径（FT.AGGREGATE 结果依赖维表新鲜度，
- * 版本围栏声明成本高而收益低），每次实时执行。
+ * <p><b>聚合不缓存</b>：与 Agent 直连同标准（FT.AGGREGATE 结果依赖维表新鲜度，
+ * 版本守卫声明成本高而收益低），每次实时执行。
  */
 @Component
 public class AggregateMcpTool {
@@ -113,7 +113,7 @@ public class AggregateMcpTool {
         out.put("entity", entity);
         out.put("totalGroups", result.totalGroups());
         if (result.inputGroups() != result.totalGroups()) {
-            // 维度归并时声明口径：如 2957 个配置实例归并成 8 类，调用方需要这两个数
+            // 维度归并时声明标准：如 2957 个配置实例归并成 8 类，调用方需要这两个数
             out.put("inputGroups", result.inputGroups());
         }
         out.put("rows", result.rows());

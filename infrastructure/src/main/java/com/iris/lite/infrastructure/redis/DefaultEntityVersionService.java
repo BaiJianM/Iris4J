@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 实体数据版本服务的 Redis 实现（数据版本围栏）。
+ * 实体数据版本服务的 Redis 实现（数据版本守卫）。
  *
  * <p>版本计数器用 Redis 原生 INCR（{@code iris:{ns}:ver:{entity}}）：原子自增、
  * 无并发竞争；key 不存在从 0 起增（从未变更 = 版本 0）。
@@ -41,7 +41,7 @@ public class DefaultEntityVersionService implements EntityVersionService {
         if (entities.isEmpty()) {
             return Map.of();
         }
-        // 一次 MGET 取回全部版本（围栏校验挂在查询/回答链路上，逐实体 GET 放大往返）
+        // 一次 MGET 取回全部版本（守卫校验挂在查询/回答链路上，逐实体 GET 放大往返）
         String[] versionKeys = new String[entities.size()];
         for (int i = 0; i < entities.size(); i++) {
             versionKeys[i] = keys.entityVersionKey(namespace, entities.get(i));

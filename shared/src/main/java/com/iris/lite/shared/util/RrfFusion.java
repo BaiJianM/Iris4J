@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * RRF（Reciprocal Rank Fusion）多路召回融合（RAG 检索核心）。
  *
- * <p><b>为什么用 RRF 而非分数加权</b>：多路召回的分数口径天然不可比——
+ * <p><b>为什么用 RRF 而非分数加权</b>：多路召回的分数标准天然不可比——
  * 稠密通道是余弦（0-1）、词法通道是 BM25（无界）、改写通道是另一套余弦，
  * 任何线性加权都要为「谁乘几」发明一套拍脑袋系数。RRF 只用<b>排名</b>：
  * {@code score(d) = Σ 1/(k + rank_i(d))}，对分数分布完全免疫；
@@ -32,7 +32,7 @@ public final class RrfFusion {
      * 融合多路召回的排名列表。
      *
      * @param rrfK     RRF 常数（业界缺省 60）
-     * @param topM     融合后候选池上限（进入精判的量）
+     * @param topM     融合后候选池上限（进入重排的量）
      * @param channels 每通道按相关度降序的候选 id 列表；null 元素/列表允许（视为空通道）
      */
     public static List<Fused> fuse(int rrfK, int topM, List<List<String>> channels) {
@@ -42,7 +42,7 @@ public final class RrfFusion {
                 continue;
             }
             for (int i = 0; i < channel.size(); i++) {
-                // rank 从 1 计（论文口径）：第 1 名贡献 1/(k+1)
+                // rank 从 1 计（论文标准）：第 1 名贡献 1/(k+1)
                 scores.merge(channel.get(i), 1.0 / (rrfK + i + 1), Double::sum);
             }
         }

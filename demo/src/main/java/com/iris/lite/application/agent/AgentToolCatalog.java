@@ -65,13 +65,13 @@ public final class AgentToolCatalog {
      */
     public static AgentChatClient.ToolSpec askClarification() {
         Map<String, Object> props = new LinkedHashMap<>();
-        props.put("question", str("澄清问题本身，一句话说清要确认什么口径/范围"));
+        props.put("question", str("澄清问题本身，一句话说清要确认什么标准/范围"));
         props.put("options", Map.of(
                 "type", FIELD_ARRAY, "items", Map.of("type", "string"),
-                FIELD_DESCRIPTION, "2-4 个互斥的可选口径，必须来自真实存在的字段/时间窗/分组维度，禁止开放式空问"));
+                FIELD_DESCRIPTION, "2-4 个互斥的可选标准，必须来自真实存在的字段/时间窗/分组维度，禁止开放式空问"));
         return new AgentChatClient.ToolSpec("ask_clarification",
                 "向用户发起澄清提问（呈现为可点选的选项卡片，另含自由填写项）。"
-                        + "仅当问题存在歧义或关键口径缺失（时间范围、统计口径、分组维度、实体指代等）时调用；"
+                        + "仅当问题存在歧义或关键标准缺失（时间范围、统计标准、分组维度、实体指代等）时调用；"
                         + "调用后本轮结束等待答复，用户答复会自动带回继续。不要用它闲聊或确认已明确的内容。",
                 objectSchema(props, List.of("question", "options")));
     }
@@ -229,7 +229,7 @@ public final class AgentToolCatalog {
 
     private static AgentChatClient.ToolSpec llmCacheStats() {
         return new AgentChatClient.ToolSpec("llm_cache_stats",
-                "LLM 语义缓存统计：条目数/命中分布/围栏拦截数（fenceMiss）等。",
+                "LLM 语义缓存统计：条目数/命中分布/守卫拦截数（fenceMiss）等。",
                 objectSchema(Map.of(), List.of()));
     }
 

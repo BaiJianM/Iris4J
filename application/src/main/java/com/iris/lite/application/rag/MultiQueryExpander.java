@@ -88,7 +88,7 @@ public class MultiQueryExpander {
      *
      * @param onMissCondition 「miss 升级条件」是否已成立——语义由调用方定义：
      *                        记忆检索 = 常规通道融合池为空；LLM 缓存 = 主链路
-     *                        未命中（KNN 有候选不等于命中，被精判拒绝同样是 miss）。
+     *                        未命中（KNN 有候选不等于命中，被重排拒绝同样是 miss）。
      *                        ALWAYS 模式恒 true（调用方在常规阶段就应主动触发）。
      */
     public boolean shouldExpand(boolean onMissCondition) {
@@ -137,7 +137,7 @@ public class MultiQueryExpander {
         }
     }
 
-    /** 宽容解析：剥离代码块围栏/前后缀后取首个 JSON 数组。解析失败由调用方 fail-open。 */
+    /** 宽容解析：剥离代码块守卫/前后缀后取首个 JSON 数组。解析失败由调用方 fail-open。 */
     private List<String> parseArray(String out) throws Exception {
         int left = out.indexOf('[');
         int right = out.lastIndexOf(']');

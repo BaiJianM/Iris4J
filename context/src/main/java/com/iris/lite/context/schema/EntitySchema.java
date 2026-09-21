@@ -227,7 +227,7 @@ public record EntitySchema(
      * Agent 的 fields 列表常来自工具描述里的完整字段清单，让它逐字段预判权限
      * 违背"平台裁剪、调用方无感"的设计；报错反而泄露"该字段存在"这一信息。
      *
-     * @param requested 请求返回的字段列表；null 或空表示返回全部字段，直接放行
+     * @param requested 请求返回的字段列表；null 或空表示返回全部字段，直接通过
      * @throws IrisException 含未声明字段时抛 FIELD_NOT_FOUND
      */
     public void validateFields(List<String> requested) {

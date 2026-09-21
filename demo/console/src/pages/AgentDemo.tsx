@@ -52,7 +52,7 @@ type ChatMessage = {
   cache?: CacheInfo
 }
 
-/** 预设演示场景：覆盖四服务能力（查询导航/Schema/记忆/缓存/围栏/运维）。 */
+/** 预设演示场景：覆盖四服务能力（查询导航/Schema/记忆/缓存/守卫/运维）。 */
 const SCENARIOS: { label: string; prompt: string; hint: string }[] = [
   { label: "关联查询", prompt: "查最近 3 笔支付记录，并告诉我每笔支付对应的订单和支付渠道", hint: "query_entity + 关系导航" },
   { label: "Schema 感知", prompt: "现在能查询哪些实体和字段？哪些字段之间有外键关系？", hint: "get_schema" },
@@ -71,7 +71,7 @@ const CACHE_LABEL: Record<string, { tone: "hit" | "miss" | "warn" | "neutral"; t
   "no-embedder": { tone: "neutral", text: "缓存不可用（无 Embedder）" },
   disabled: { tone: "neutral", text: "缓存未启用" },
   bypass: { tone: "neutral", text: "实时模式（跳过缓存）" },
-  stale: { tone: "warn", text: "围栏拦截 fence-miss" },
+  stale: { tone: "warn", text: "守卫拦截 fence-miss" },
 }
 
 /** 将指定类型的所有未完成段标记为结束（新段开始/整体结束时收尾）。 */
@@ -718,7 +718,7 @@ export default function AgentDemo({ ns }: PageProps) {
           {clarify && !running && (
             <div className="shrink-0 border-t border-border bg-accent/5 px-4 py-2.5">
               <p className="mb-2 text-[13px] text-fg-muted">
-                请选择一个口径继续（Agent 将按你的选择直接查询，不再重复确认）：
+                请选择一个标准继续（Agent 将按你的选择直接查询，不再重复确认）：
               </p>
               <div className="mb-2 flex flex-wrap gap-1.5">
                 {clarify.options.map((o) => (

@@ -37,7 +37,7 @@ import java.util.Map;
  *
  * <p>关系映射编辑 {@code PUT /{ns}/{entity}/fields/{field}/related-entity}——
  * 控制台下拉选择 Related Entity 后回写 YAML 并热载。属管理类操作，
- * 与 agent key 管理同款 operator 校验（legacy key / 鉴权关闭放行）。
+ * 与 agent key 管理同款 operator 校验（legacy key / 鉴权关闭通过）。
  */
 @RestController
 @RequestMapping("/api/v1/schema")
@@ -137,7 +137,7 @@ public class SchemaController {
 
     /**
      * operator 校验：与 agent key 管理同款——Schema 编辑是管理类操作，
-     * per-agent 动态 key 不允许改模型；无身份（鉴权关闭，本地开发）放行。
+     * per-agent 动态 key 不允许改模型；无身份（鉴权关闭，本地开发）通过。
      */
     private void requireOperator(String action) {
         var attrs = RequestContextHolder.getRequestAttributes();

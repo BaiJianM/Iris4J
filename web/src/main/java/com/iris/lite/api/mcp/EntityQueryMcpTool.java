@@ -100,7 +100,7 @@ public class EntityQueryMcpTool {
                 namespace, entity, filters, ranges, textFilters,
                 agent == null ? "-" : agent.agentId());
         Page<Map<String, Object>> resultPage = queryService.query(request);
-        // 结果硬裁剪：与 DynamicToolExecutor/AgentToolDispatcher 同一口径（50 行/32KB），
+        // 结果硬裁剪：与 DynamicToolExecutor/AgentToolDispatcher 同一标准（50 行/32KB），
         // 否则静态 query_entity 的 200 行宽行 payload 无上界直接灌进 LLM 上下文
         ResultTrimmer.Trimmed trimmed = ResultTrimmer.trim(
                 resultPage.items(), resultPage.total(), objectMapper);

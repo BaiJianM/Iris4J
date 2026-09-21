@@ -4,7 +4,7 @@
 # 排除名单 = cdc-excluded-tables.txt（与 debezium exclude.list、application.yml sources 三处一致）。
 #
 # 为什么必须清：排除后这些表不再更新，Redis 里留的是全量导入期的冻结快照，
-# Agent 查询会返回「看似真实、永不更新」的旧数据，误导业务口径。
+# Agent 查询会返回「看似真实、永不更新」的旧数据，误导业务标准。
 #
 # 【前置条件（不满足会被守卫拦下）】
 #   1. iris-debezium 容器已停止（否则新事件会把 stream/投影键重新写回来）；

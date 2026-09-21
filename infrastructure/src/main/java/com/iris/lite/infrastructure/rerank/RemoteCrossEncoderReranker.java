@@ -28,28 +28,28 @@ import java.util.List;
  * llama-server 上。项目外部署，Java 侧零模型推理。
  *
  * <p><b>⚠️ 模板前提</b>：Qwen3-Reranker 是 instruction 敏感模型——
- * 上游 GGUF 烘焙的 rerank 模板把 {@code <Instruct>} 焊死为 web search 默认任务，
+ * 上游 GGUF 烘焙的 rerank 模板把 {@code <Instruct>} 固定写死为 web search 默认任务，
  * 对「是否同一个问题」类判定无区分度（同域句对一律 0.97+，判话题不判同题）。
  * 所用 GGUF 的模板 instruction 必须是任务定制中文指令
  * （「日期/数值/指标/方向完全一致才算相关」），此时正负完全可分
- * （正对 min 0.9950 / 进精判门的负对 max 0.6812）。**换 GGUF 必须确认模板含
+ * （正对 min 0.9950 / 进重排门槛的负对 max 0.6812）。**换 GGUF 必须确认模板含
  * 任务 instruction**。
  *
  * <p><b>启用方式</b>：{@code iris.llm-cache.rerank.enabled=true}。
- * 精判器必须项目外部署（llama-server /v1/rerank），Java 侧零模型推理。
+ * 重排器必须项目外部署（llama-server /v1/rerank），Java 侧零模型推理。
  *
- * <p><b>分数口径（与接口契约对齐）</b>：llama.cpp 的 {@code relevance_score}
+ * <p><b>分数标准（与接口契约对齐）</b>：llama.cpp 的 {@code relevance_score}
  * 对 Qwen3-Reranker 输出已是 sigmoid 后的 0-1 相关概率（相关 0.998 /
  * 无关 4e-5，分离干净），直接可用作跨模型阈值比较，无需二次映射。
- * 换 reranker 实现时若分数口径不同，必须先重标 {@code iris.llm-cache.rerank.threshold}。
+ * 换 reranker 实现时若分数标准不同，必须先重标 {@code iris.llm-cache.rerank.threshold}。
  *
  * <p><b>失败语义（接口契约）</b>：score() 失败抛 {@link IllegalStateException}——
- * 调用方（LlmCacheService）按「精判不可用」保守处理（MISS → 回真实 LLM 调用）。
- * 静默放行等于放任微改写误命中，失败绝不能静默放行。
+ * 调用方（LlmCacheService）按「重排不可用」保守处理（MISS → 回真实 LLM 调用）。
+ * 静默通过等于放任微改写误命中，失败绝不能静默通过。
  *
  * <p><b>性能注</b>：接口支持逐句对 {@code score()} 与批量 {@code scoreBatch()}
  * （正向前向 1 次批量 + 反向逐对，2N 次往返压到 N+1 次）。调用方有召回线预筛
- * 与融合候选池上限（iris.rag.candidates），精判调用量可控。
+ * 与融合候选池上限（iris.rag.candidates），重排调用量可控。
  *
  * <p><b>线程安全</b>：HttpClient 与 ObjectMapper 均线程安全。
  */
@@ -101,7 +101,7 @@ public class RemoteCrossEncoderReranker implements CrossEncoderReranker {
      * （「订单量→销售额」0.9005 vs 反向 0.6812——query 视角下相关指标都算
      * 半相关）。生产中 (新 prompt, 存量 prompt) 两个方向都会出现（取决于哪条先
      * 入库），单方向阈值在 0.90 处贴边；双向取 min 后该负对最高分 0.6812，
-     * 与正对 min 0.9929 完全可分，阈值鲁棒。代价：精判候选 ×2 次调用
+     * 与正对 min 0.9929 完全可分，阈值鲁棒。代价：重排候选 ×2 次调用
      * （~300ms/对），候选已被召回线预筛，量小可接受。
      *
      * @throws IllegalStateException 服务不可达/超时/响应异常（调用方保守 MISS）
@@ -125,7 +125,7 @@ public class RemoteCrossEncoderReranker implements CrossEncoderReranker {
     }
 
     /**
-     * 批量精判（RAG 融合候选池）：正向前向 1 次批量调用，反向逐对补 N 次后取 min。
+     * 批量重排（RAG 融合候选池）：正向前向 1 次批量调用，反向逐对补 N 次后取 min。
      *
      * <p>反向无法批量——每个句对的「query 角色互换」后 query 各不相同，
      * /v1/rerank 单请求只接受一个 query。批量把 2N 次往返压到 N+1 次
@@ -207,7 +207,7 @@ public class RemoteCrossEncoderReranker implements CrossEncoderReranker {
             }
             return out;
         } catch (IOException | InterruptedException e) {
-            throw new IllegalStateException("远程 rerank 调用失败（调用方应按精判不可用保守处理）: "
+            throw new IllegalStateException("远程 rerank 调用失败（调用方应按重排不可用保守处理）: "
                     + e.getMessage(), e);
         }
     }

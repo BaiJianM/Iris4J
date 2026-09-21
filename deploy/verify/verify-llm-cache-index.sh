@@ -12,7 +12,7 @@
 #   向量清理在索引内按后两段后缀匹配（不再 SCAN）。
 #
 # ---------------------------------------------------------------------------
-# 【口径：commandstats 是全局计数，哪些可信必须分清】
+# 【标准：commandstats 是全局计数，哪些可信必须分清】
 #   scan             ：可信，且是本脚本核心断言。CDC 失效路径不 SCAN；本脚本
 #                      自己会触发 SCAN 的地方只有 clear()（DELETE 接口），故快照 A
 #                      刻意取在 DELETE 之后 → 之后任何 scan 增量都只能是请求路径产生的。
@@ -177,7 +177,7 @@ done <<<"$(redis ZRANGE "$IDX" 0 -1 2>/dev/null | tr -d '\r')"
 [ "$dangle" -eq 0 ] && ok "文档索引内 ${idxCard} 个成员全部指向存在的 key" \
   || bad "文档索引内有 $dangle 个悬空成员（指向已删除/已过期 key）"
 
-# 与真实 keyspace 交叉核对（此处的 SCAN 发生在增量断言之后，不影响上面的口径）
+# 与真实 keyspace 交叉核对（此处的 SCAN 发生在增量断言之后，不影响上面的标准）
 # 注意 glob 是跨段匹配：iris:{ns}:llmcache:* 会把两个索引键与向量键一并捞出，
 # 必须显式剔除 :llmcache:vec: 以及恰好以 :llmcache:idx / :llmcache:vecidx 结尾的键。
 actual=$(redis --scan --pattern "iris:${NS}:llmcache:*" 2>/dev/null | tr -d '\r' \

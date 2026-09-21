@@ -17,7 +17,7 @@ fields:
     type: INT
     index: numeric
     carriedFrom: order_id->ord_order.pay_status
-    description: 支付状态（投影期从主表 ord_order 携带，销量/金额类统计按此过滤成交口径）
+    description: 支付状态（投影期从主表 ord_order 携带，销量/金额类统计按此过滤成交标准）
     values: 0=未付; 1=已付; 2=已退款; 3=部分退款
   - name: shop_id
     type: LONG

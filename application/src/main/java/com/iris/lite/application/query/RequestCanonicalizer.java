@@ -15,8 +15,8 @@ import java.util.TreeMap;
  * <p><b>解决什么问题</b>：精确缓存（{@link CachedEntityQueryService}）与语义缓存
  * （{@link SemanticCachedEntityQueryService}）共用同一份「哪些请求成分
  * 参与 key、如何消除顺序差异」清单。未来给 QueryRequest 增加新的过滤形态时
- * 若两处口径不一致，就会出现「查询 A 条件命中 B 条件缓存」的数据串号——这类漂移
- * 编译期完全不可见。本类把清单收敛到唯一一处，两种模式共用同一组件顺序与
+ * 若两处标准不一致，就会出现「查询 A 条件命中 B 条件缓存」的数据串号——这类漂移
+ * 编译期完全不可见。本类把清单集中到唯一一处，两种模式共用同一组件顺序与
  * 同一条 STRING 分类规则，只差 STRING 值的处理方式。
  *
  * <p><b>两种模式</b>：

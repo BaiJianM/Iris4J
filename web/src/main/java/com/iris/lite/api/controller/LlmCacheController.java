@@ -51,7 +51,7 @@ public class LlmCacheController {
         resp.put("hit", r.hit());
         resp.put("exact", r.exact());
         resp.put("similarity", r.similarity());
-        // 精判门：语义命中时透出 rerank 分数（精判未启用/精确命中为 null）
+        // 重排门槛：语义命中时透出 rerank 分数（重排未启用/精确命中为 null）
         resp.put("rerankScore", r.rerankScore());
         if (r.hit()) {
             resp.put("entry", Map.of(
@@ -61,7 +61,7 @@ public class LlmCacheController {
                     "createdAt", r.entry().createdAt()));
         } else {
             resp.put("reason", r.reason());
-            // 候选进过召回线但被精判拒绝时，透出最高被拒 rerank 分（校准/排障）
+            // 候选进过召回线但被重排拒绝时，透出最高被拒 rerank 分（校准/排障）
             if (r.bestRejectedRerankScore() != null) {
                 resp.put("bestRejectedSimilarity", r.bestRejectedSimilarity());
                 resp.put("bestRejectedRerankScore", r.bestRejectedRerankScore());

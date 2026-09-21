@@ -1,6 +1,6 @@
 namespace: ecomm
 entity: ops_daily_sales_stat
-description: 平台每日销售统计（运营报表）；演示数据与交易单据不同源，营收/销量等对账口径以明细单据为准，此表仅作运营报表展示参考
+description: 平台每日销售统计（运营报表）；演示数据与交易单据不同源，营收/销量等对账标准以明细单据为准，此表仅作运营报表展示参考
 primaryKeys:
   - id
 fields:

@@ -199,7 +199,7 @@ public class LettuceCacheRepository implements CacheRepository {
             log.debug("实体缓存无需失效（无索引条目）ns={} entity={}", namespace, entity);
             return;
         }
-        // 成员 key 一次 DEL 收敛（CDC 失效热路径：逐成员 DEL 是 N 次往返）
+        // 成员 key 一次 DEL 合并（CDC 失效热路径：逐成员 DEL 是 N 次往返）
         String[] memberKeys = members.stream()
                 .map(relativeKey -> keys.cacheKey(namespace, relativeKey))
                 .toArray(String[]::new);
@@ -357,7 +357,7 @@ public class LettuceCacheRepository implements CacheRepository {
         }
         scored.sort((a, b) -> Long.compare(a[0], b[0]));
 
-        // 淘汰列表一次 DEL + 一次 SREM 收敛（原先逐 key 两两往返 3N 次）
+        // 淘汰列表一次 DEL + 一次 SREM 合并（原先逐 key 两两往返 3N 次）
         List<String> victims = new ArrayList<>(toEvict);
         for (int i = 0; i < toEvict; i++) {
             victims.add(relativeKeys.get((int) scored.get(i)[1]));

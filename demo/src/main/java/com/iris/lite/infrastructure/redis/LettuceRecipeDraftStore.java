@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 配方草稿池的 Redis list 实现（自进化闭环）。
+ * 配方草稿池的 Redis list 实现（自进化循环）。
  *
  * <p>key = {@code keys.recipeDraftKey(ns)}（{@code iris:{ns}:recipe-drafts}）；
  * LPUSH 插队头 + LTRIM 封顶（「最近 N 条」审核队列）；条目为 RecipeDraft 的 JSON。

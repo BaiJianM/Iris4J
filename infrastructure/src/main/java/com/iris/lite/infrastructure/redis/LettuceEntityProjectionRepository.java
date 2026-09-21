@@ -382,7 +382,7 @@ public class LettuceEntityProjectionRepository implements EntityProjectionReposi
      * <p><b>无 SCAN 降级</b>（与 find() 的三条路径刻意不同）：聚合的对象是
      * 「全量数据的统计特征」，SCAN 聚合 = 请求路径上扫全 keyspace，是本项目红线。
      * 索引未就绪/条件不可下推时抛 {@link IrisException}，上层转可读错误让
-     * 调用方（Agent）改用别的口径，而不是等 5~7 秒的全库扫描。
+     * 调用方（Agent）改用别的标准，而不是等 5~7 秒的全库扫描。
      *
      * <p><b>字段校验（fail-closed）</b>：groupBy/sortBy 字段必须已索引（任意形态），
      * sum/avg/min/max 的 field 必须是 numeric 索引——COUNT 之外对非索引字段聚合
@@ -480,7 +480,7 @@ public class LettuceEntityProjectionRepository implements EntityProjectionReposi
      * 归并后重算 Σsum/Σcount（标准 partial aggregation 语义）。
      *
      * <p><b>正确性不靠缓存 TTL</b>：维表映射每次实时读投影（pipeline 几十 ms），
-     * 无本地缓存——数据版本围栏在 dispatcher 层把维表声明为依赖，缓存装饰链负责失效。
+     * 无本地缓存——数据版本守卫在 dispatcher 层把维表声明为依赖，缓存装饰链负责失效。
      */
     private AggregateResult aggregateWithDimension(AggregateRequest request,
                                                    com.iris.lite.context.model.DimensionPath dp) {

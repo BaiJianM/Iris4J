@@ -114,7 +114,7 @@ public class DefaultChangeEventHandler implements ChangeEventHandler {
                 log.debug("事件已投影 op=d {}/{} pk={}", namespace, entity, pkValue);
             }
             // 未知 op 必须与其他跳过分支一样 return：什么数据都没改却触发
-            // invalidateEntity + 版本自增，会把数据版本围栏下的 LLM 缓存误判
+            // invalidateEntity + 版本自增，会把数据版本守卫下的 LLM 缓存误判
             // 「数据过期」整体失效（envelope 缺 op 字段时 String.valueOf 还会产出 "null"）
             default -> {
                 log.warn("未知 op={}，跳过: {}/{}", event.op(), namespace, entity);
@@ -129,7 +129,7 @@ public class DefaultChangeEventHandler implements ChangeEventHandler {
         if (cacheInvalidationEnabled) {
             cacheService.invalidateEntity(namespace, entity);
         }
-        // 数据版本围栏：版本自增，LLM 缓存条目命中后据此校验数据新鲜度。
+        // 数据版本守卫：版本自增，LLM 缓存条目命中后据此校验数据新鲜度。
         // INCR 是 O(1)，逐条执行无性能压力；且关闭缓存失效时版本也必须保持正确
         versionService.bump(namespace, entity);
     }

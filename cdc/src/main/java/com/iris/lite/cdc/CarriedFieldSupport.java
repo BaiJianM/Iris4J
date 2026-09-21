@@ -30,11 +30,11 @@ import jakarta.annotation.PostConstruct;
 /**
  * 跨表携带字段（Schema {@code carriedFields} 声明）的投影期支撑：回填 + 回刷。
  *
- * <p><b>解决什么问题</b>：单表聚合引擎没有 JOIN，「明细按主表状态过滤」类口径
+ * <p><b>解决什么问题</b>：单表聚合引擎没有 JOIN，「明细按主表状态过滤」类标准
  * （商品销量只算已支付订单）跨不过表去。Schema 里声明
  * {@code carriedFrom: "order_id->ord_order.pay_status"} 后，投影链路把主表字段
  * <b>携带</b>进子表文档——查询侧保持单表一跳，模型无需感知跨表。携带什么由
- * 接入方声明（业务口径不进 core），本类只认声明。
+ * 接入方声明（业务标准不进 core），本类只认声明。
  *
  * <p><b>两条写入路径</b>：
  * <ul>
@@ -45,7 +45,7 @@ import jakarta.annotation.PostConstruct;
  *   <li><b>主表变更回刷</b>（{@link #propagateFromParent}）：主表行的携带来源字段
  *       变化（c/r 新行视为变化；u 仅 before/after 值不同才刷）时，按 FK 反查
  *       子表行（FT.SEARCH 下推，fk 字段由 EntitySchema 加载期强制索引），逐行
- *       更新携带字段。子表缓存失效 + 版本自增随行执行，维持数据版本围栏一致性。</li>
+ *       更新携带字段。子表缓存失效 + 版本自增随行执行，维持数据版本守卫一致性。</li>
  * </ul>
  *
  * <p><b>为什么回刷前查索引就绪</b>：全量快照按表序进行（主表先于子表），主表

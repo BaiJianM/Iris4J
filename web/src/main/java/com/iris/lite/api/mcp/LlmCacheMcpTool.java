@@ -66,7 +66,7 @@ public class LlmCacheMcpTool {
     @McpTool(name = "llm_cache_store",
             description = "把一次 LLM 调用的 prompt 与响应写入语义缓存，供后续相似 prompt 命中"
                     + "（官方 LangCache 的降本模式：命中即免掉输出 token 成本）。"
-                    + "回答依赖业务数据的，务必通过 dependencies 声明依赖实体以启用数据版本围栏。")
+                    + "回答依赖业务数据的，务必通过 dependencies 声明依赖实体以启用数据版本守卫。")
     public String store(
             @McpToolParam(description = "命名空间（可省略时用服务端默认配置）", required = true) String namespace,
             @McpToolParam(description = "用户 prompt", required = true) String prompt,
@@ -74,7 +74,7 @@ public class LlmCacheMcpTool {
             @McpToolParam(description = "模型名（可空）", required = false) String model,
             @McpToolParam(description = "过期秒数（可空，默认 3600）", required = false) Long ttlSeconds,
             @McpToolParam(description = "回答依赖的实体名，逗号分隔（可空）；"
-                    + "声明后数据变更会让该条目自动过期（数据版本围栏）",
+                    + "声明后数据变更会让该条目自动过期（数据版本守卫）",
                     required = false) String dependencies) {
         operatorGuard.require("llm_cache_store");
         List<String> deps = dependencies == null || dependencies.isBlank()

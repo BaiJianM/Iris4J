@@ -78,7 +78,7 @@ public class RedisAdminController {
 
     /**
      * operator 校验：与 AgentKeyAdminController 同策略——
-     * 无身份（鉴权关闭）放行；有身份必须持通配 {@code *}（legacy key）。
+     * 无身份（鉴权关闭）通过；有身份必须持通配 {@code *}（legacy key）。
      */
     private void requireOperator(String action) {
         var attrs = RequestContextHolder.getRequestAttributes();

@@ -42,9 +42,9 @@ import java.util.stream.Collectors;
  * 无 tool_calls 即终答。max-iterations 护栏防失控。
  *
  * <p><b>LLM 语义缓存集成</b>：运行前 lookup（modelTag 隔离，
- * 命中已内置版本围栏校验）；命中时把缓存答案分片回放成流式体验；
+ * 命中已内置版本守卫校验）；命中时把缓存答案分片回放成流式体验；
  * 终答 store 时声明 dependencies = 当前运行工具调用实际触及的实体——
- * 之后 CDC 投影 bump 版本，围栏自动判旧，无需人工失效。
+ * 之后 CDC 投影 bump 版本，守卫自动判旧，无需人工失效。
  *
  * <p><b>会话留痕</b>：问答对写入工作记忆（联动工作记忆抽取触发钩子）；
  * Agent 也可自主调 save_working_memory/save_long_term_memory 工具。
@@ -65,13 +65,13 @@ public class DefaultAgentService implements AgentService {
             6. 数据随时可能变化，回答只能基于本轮工具返回的最新结果。
             7. 回答面向非技术读者，用自然语言呈现：先给结论，再按逻辑归纳分点，可配简短小标题；严禁把查询结果原样贴成数据库表、字段名+值列表或 JSON——那是给你看的原始数据，不是给用户的答案。
             8. 字段名、状态码、缩写必须转成通俗中文并按需一句话解释（如状态码缩写→中文含义、编号类字段说明其业务含义）；关键数字注明来源（哪个数据、共多少条）；用户要求记住的信息调用 save_long_term_memory。
-            9. 时间处理：Schema 摘要里名为 *_at / *_time 的 LONG 字段是 Unix 毫秒时间戳（如 created_at:LONG）。日期对应的毫秒区间必须按本提示末尾「数据时间字段换算基准」给出的口径计算，严禁改用本地时区自行换算；「今天/昨天/本周/本月/最近 N 天」先用末尾「当前系统时间」确定是哪一天，再按该基准换算成毫秒区间，不得凭猜测、也不得按数据自行推断。
+            9. 时间处理：Schema 摘要里名为 *_at / *_time 的 LONG 字段是 Unix 毫秒时间戳（如 created_at:LONG）。日期对应的毫秒区间必须按本提示末尾「数据时间字段换算基准」给出的标准计算，严禁改用本地时区自行换算；「今天/昨天/本周/本月/最近 N 天」先用末尾「当前系统时间」确定是哪一天，再按该基准换算成毫秒区间，不得凭猜测、也不得按数据自行推断。
             10. 目标时间范围内查询无结果时，必须如实回答「该时段无数据」，并可说明数据的最新时间；严禁改用其他时间窗、把多个日期的数量相加、或编造「增长/下降」等对比结论。
-            11. 数据事实强制锚定：所有回答必须完全依据本轮工具返回的数据事实生成，检索、分析、推理、总结、引用等任何环节均严禁编造、推测或虚构任何数据；当数据缺失或不足以支撑回答时，不得强行作答或猜测性补充，必须直接回答「信息不足，无法回答」，并简要说明缺少什么数据、现有数据可支持哪些查询口径；严禁拿相似字段、近似口径或部分数据冒充答案。
-            12. 需求预判与澄清：回答前先判断需要哪些工具与查询口径；当问题存在歧义或关键信息缺失（时间范围未指明、统计口径两可、分组维度不明、实体指代含糊等）时，调用 ask_clarification 发起澄清（options 给 2-4 个互斥选项，必须来自真实存在的字段/口径）；收到「澄清答复：」开头的消息时，结合会话历史理解它对应你上一条澄清问题的哪个选项，直接按该口径继续执行，严禁重复提问或再次确认已明确的内容。仅关键口径缺失才澄清（同一问题最多一次）；口径可以合理默认时按默认执行并在答案中说明所选口径。
-            13. 能力边界与聚合优先：分组统计/求和/平均/最值/排名/分布类问题必须优先用 aggregate_entity 一次调用完成（服务端聚合，严禁逐页拉取全量数据自行累计——单次问题分页拉取不得超过 3 页）；若所需字段不支持聚合（工具会明确报错），直接说明当前工具无法完成该统计，并给出你能回答的替代口径（如总量、按单值过滤查询），严禁编造统计结果。
-            14. 派生口径重算：主实体某字段是累计总量（如「累计销量/累计评论数」这类全周期累计值）而问题要求分段口径（某时间段/某店铺/某类目）时，严禁以「字段口径不符」为由回答不支持——应回该业务的明细流水表重算：对明细实体用 aggregate_entity 的 rangeFilters 传时间毫秒区间 + groupBy 分组（明细表的时间戳与外键字段通常均为 numeric 索引，可直接聚合）；group_by 还支持「外键字段->维表实体.维度字段」语法直接按维表字段（如名称、类目）归并分组。
-            15. 答案聚焦与口径唯一：用户问"是多少/排前几名"时，最终答案必须给出唯一数值/唯一榜单——严禁并列多套口径或多个数据源的结果让用户挑选；统计口径用一句话说明即可。统计口径默认值的取舍依据：字段/表 Schema 描述与值域声明中已写明的统计口径（如某状态字段注明"金额类统计按此过滤"），按声明执行；未写明的，两可口径按规则 12 澄清或按常识默认并在答案中说明，严禁把多套口径并列当答案。派生汇总数据与明细单据冲突时，以与问题语义直接对应的明细为准，汇总值只能作为参考提及。
+            11. 数据事实强制锚定：所有回答必须完全依据本轮工具返回的数据事实生成，检索、分析、推理、总结、引用等任何环节均严禁编造、推测或虚构任何数据；当数据缺失或不足以支撑回答时，不得强行作答或猜测性补充，必须直接回答「信息不足，无法回答」，并简要说明缺少什么数据、现有数据可支持哪些查询标准；严禁拿相似字段、近似标准或部分数据冒充答案。
+            12. 需求预判与澄清：回答前先判断需要哪些工具与查询标准；当问题存在歧义或关键信息缺失（时间范围未指明、统计标准两可、分组维度不明、实体指代含糊等）时，调用 ask_clarification 发起澄清（options 给 2-4 个互斥选项，必须来自真实存在的字段/标准）；收到「澄清答复：」开头的消息时，结合会话历史理解它对应你上一条澄清问题的哪个选项，直接按该标准继续执行，严禁重复提问或再次确认已明确的内容。仅关键标准缺失才澄清（同一问题最多一次）；标准可以合理默认时按默认执行并在答案中说明所选标准。
+            13. 能力边界与聚合优先：分组统计/求和/平均/最值/排名/分布类问题必须优先用 aggregate_entity 一次调用完成（服务端聚合，严禁逐页拉取全量数据自行累计——单次问题分页拉取不得超过 3 页）；若所需字段不支持聚合（工具会明确报错），直接说明当前工具无法完成该统计，并给出你能回答的替代标准（如总量、按单值过滤查询），严禁编造统计结果。
+            14. 派生标准重算：主实体某字段是累计总量（如「累计销量/累计评论数」这类全周期累计值）而问题要求分段标准（某时间段/某店铺/某类目）时，严禁以「字段标准不符」为由回答不支持——应回该业务的明细流水表重算：对明细实体用 aggregate_entity 的 rangeFilters 传时间毫秒区间 + groupBy 分组（明细表的时间戳与外键字段通常均为 numeric 索引，可直接聚合）；group_by 还支持「外键字段->维表实体.维度字段」语法直接按维表字段（如名称、类目）归并分组。
+            15. 答案聚焦与标准唯一：用户问"是多少/排前几名"时，最终答案必须给出唯一数值/唯一榜单——严禁并列多套标准或多个数据源的结果让用户挑选；统计标准用一句话说明即可。统计标准默认值的取舍依据：字段/表 Schema 描述与值域声明中已写明的统计标准（如某状态字段注明"金额类统计按此过滤"），按声明执行；未写明的，两可标准按规则 12 澄清或按常识默认并在答案中说明，严禁把多套标准并列当答案。派生汇总数据与明细单据冲突时，以与问题语义直接对应的明细为准，汇总值只能作为参考提及。
             16. 分组排名必须使用唯一键：按某类业务对象分组/排名时，分组键必须是其唯一标识字段（主键或编码类），严禁使用可一对多的名称/描述类字段——同一对象的名称变体会把结果拆散成多行，榜单即失真。
             """;
 
@@ -104,7 +104,7 @@ public class DefaultAgentService implements AgentService {
 
     private static final String SUMMARY_SYSTEM_PROMPT = """
             你是会话留痕摘要器。把助手答案压缩为不超过 200 字的摘要：\
-            保留结论、关键数字与统计口径，剔除过程性表述、重复与寒暄。\
+            保留结论、关键数字与统计标准，剔除过程性表述、重复与寒暄。\
             只能引用原文中的数字与事实，严禁新增、改写或推算任何数字。直接输出摘要正文。""";
 
     /**
@@ -144,7 +144,7 @@ public class DefaultAgentService implements AgentService {
     /** 配方自进化草稿池；未装配/未启用时采集关闭。 */
     private final ObjectProvider<RecipeDraftStore> recipeDraftStoreProvider;
     private final boolean recipeDraftsEnabled;
-    /** 「顺畅会话」判定阈值：轮数 ≤ 该值的成功会话才值得沉淀为配方候选。 */
+    /** 「顺畅会话」判定阈值：轮数 ≤ 该值的成功会话才值得整理为配方候选。 */
     private final int recipeDraftSmoothMaxRounds;
 
     public DefaultAgentService(ObjectProvider<AgentChatClient> chatClientProvider,
@@ -197,7 +197,7 @@ public class DefaultAgentService implements AgentService {
         //    同句不同语境绝不能共用缓存条目（防跨轮次串缓存）。
         History history = loadHistory(request);
 
-        // 1. 语义缓存查找（两级命中 + 版本围栏在 lookup 内已校验）
+        // 1. 语义缓存查找（两级命中 + 版本守卫在 lookup 内已校验）
         LlmCacheService.LookupResult cached =
                 llmCacheService.lookup(request.namespace(), cachePrompt(request.message(), history), model,
                         null, request.bypassCache());
@@ -315,7 +315,7 @@ public class DefaultAgentService implements AgentService {
             return;
         }
 
-        // 3. 终答回存语义缓存：声明当前运行触及实体为依赖（围栏数据联动）
+        // 3. 终答回存语义缓存：声明当前运行触及实体为依赖（守卫数据联动）
         try {
             llmCacheService.store(request.namespace(), cachePrompt(request.message(), history), finalAnswer,
                     model, null, List.copyOf(dependencies));
@@ -323,7 +323,7 @@ public class DefaultAgentService implements AgentService {
             log.warn("Agent 终答写入 LLM 缓存失败（不影响回答）ns={} err={}",
                     request.namespace(), e.getMessage());
         }
-        // 3.5 澄清闭环规范化回写：澄清流终答只入
+        // 3.5 澄清回路规范化回写：澄清流终答只入
         // 「澄清答复：…」的缓存 key，用户换问法重问永远不命中——额外回写一条
         // 「被澄清的原始问题为 key、无历史指纹」的规范化条目，让同类问题跨问法/
         // 跨会话可命中。答案过不了自包含门（含指代承接词）则放弃：错放的半截
@@ -338,13 +338,13 @@ public class DefaultAgentService implements AgentService {
         usage.put("cacheResult", "miss");
         usage.put("dependencies", List.copyOf(dependencies));
         sink.emit("done", Map.of("usage", usage));
-        // 顺畅样本沉淀：轮数少、有真实工具调用的成功会话是配方候选
+        // 顺畅样本积累：轮数少、有真实工具调用的成功会话是配方候选
         maybeCollectRecipeDraft(request, toolTrace, rounds, toolCalls, false);
     }
 
     /**
      * 会话历史：注入 prompt 的文本块（可为空）+ 缓存隔离指纹（空历史 = 空串）
-     * + 逐条留痕原文（slim 后），供澄清闭环提取被澄清的原始问题。
+     * + 逐条留痕原文（slim 后），供澄清回路提取被澄清的原始问题。
      */
     private record History(String promptBlock, String fingerprint, List<String> rawEntries) {
         boolean isEmpty() { return fingerprint.isEmpty(); }
@@ -404,7 +404,7 @@ public class DefaultAgentService implements AgentService {
     }
 
     /**
-     * 澄清闭环规范化回写。
+     * 澄清回路规范化回写。
      *
      * <p><b>为什么需要</b>：澄清流存在三层缓存断层——原问题触发澄清不入缓存、
      * 终答 key 是「澄清答复：…」句（新问法 promptHash 不同）、cachePrompt 带历史指纹
@@ -414,10 +414,10 @@ public class DefaultAgentService implements AgentService {
      *
      * <p><b>自包含门</b>：答案含承接/指代词（因此、按你选择…）说明它依赖澄清语境，
      * 单独回放是半截答案——直接放弃回写（宁可少存，不可错放）。
-     * 规则 12 的口径默认答案会在正文说明所选口径，过门条目的答案因此可独立阅读。
+     * 规则 12 的标准默认答案会在正文说明所选标准，过门条目的答案因此可独立阅读。
      *
      * <p><b>依赖声明</b>：沿用澄清答复轮的 touched 实体（答案正是基于当前轮次工具结果），
-     * 版本围栏语义不变。全程 best-effort，失败只记日志不影响回答。
+     * 版本守卫语义不变。全程 best-effort，失败只记日志不影响回答。
      */
     private void maybeStoreCanonicalEntry(AgentRunRequest request, History history,
                                           String finalAnswer, Set<String> dependencies) {
@@ -429,13 +429,13 @@ public class DefaultAgentService implements AgentService {
             return;
         }
         if (!isSelfContained(finalAnswer)) {
-            log.debug("澄清闭环终答含指代表述，放弃规范化回写 ns={}", request.namespace());
+            log.debug("澄清回路终答含指代表述，放弃规范化回写 ns={}", request.namespace());
             return;
         }
         try {
             llmCacheService.store(request.namespace(), original, finalAnswer,
                     model, null, List.copyOf(dependencies));
-            log.debug("澄清闭环规范化条目已回写 ns={} key={}", request.namespace(), original);
+            log.debug("澄清回路规范化条目已回写 ns={} key={}", request.namespace(), original);
         } catch (Exception e) {
             log.warn("规范化条目回写失败（不影响回答）ns={} err={}",
                     request.namespace(), e.getMessage());
@@ -480,7 +480,7 @@ public class DefaultAgentService implements AgentService {
     }
 
     /**
-     * 配方草稿落池（自进化闭环）。
+     * 配方草稿落池（自进化循环）。
      *
      * <p>采集两类原始素材：①<b>顺畅成功会话</b>（轮数 ≤ 阈值）的工具序列——
      * 审核后可直接固化为 recipe；②<b>失败会话</b>（烧满轮数）——暴露原语/配方缺口。
@@ -525,7 +525,7 @@ public class DefaultAgentService implements AgentService {
      * 历史条目瘦身：
      * <ul>
      *   <li><b>已摘要条目</b>（含 {@link #FULL_ANSWER_MARKER}）：直接取标记前的
-     *       「用户 + 助手摘要」段——摘要由 LLM 按结论/数字/口径约束生成，
+     *       「用户 + 助手摘要」段——摘要由 LLM 按结论/数字/标准约束生成，
      *       不再机械砍前 200 字符（追问「把表格列全」这类指代由
      *       {@code get_working_memory} 工具按条目回捞全文兜底）；</li>
      *   <li><b>未摘要条目</b>（旧格式/短答案/摘要失败的全文条目）：沿用旧规则，
@@ -639,7 +639,7 @@ public class DefaultAgentService implements AgentService {
                 touched = Set.of();
             } else if (mcpSession != null && !LOCAL_DISPATCH_TOOLS.contains(call.name())) {
                 // MCP 模式：协议路径执行（与外部 Agent 一致）；调用失败归一为 error JSON 供模型自修正。
-                // 依赖收集：工具面协议不含实体元数据，此处不声明（该模式下版本围栏按无依赖处理）。
+                // 依赖收集：工具面协议不含实体元数据，此处不声明（该模式下版本守卫按无依赖处理）。
                 try {
                     resultJson = mcpSession.callTool(call.name(), call.argumentsJson());
                 } catch (Exception e) {
@@ -887,14 +887,14 @@ public class DefaultAgentService implements AgentService {
      * 就会系统性地答错。典型坑有二：
      * <ul>
      *   <li>锚点写 Asia/Shanghai 而数据是 UTC 字面基准时，模型在「锚点说 CST」「数据像
-     *       UTC」之间摇摆，同一模型会混用两套口径：问「今天有人下单吗」按 UTC 日界恰好
+     *       UTC」之间摇摆，同一模型会混用两套标准：问「今天有人下单吗」按 UTC 日界恰好
      *       对齐数据（对），问「2026年8月30日多少笔订单」按 CST 日界算，窗口落在字面
      *       8/29 16:00~8/30 15:59，只查到 790 笔，而正确值 1217 笔，误差 -35%。</li>
      *   <li>若把锚点日界改成 +08:00，会与数据基准整体错位 8 小时——数据基准由
      *       Debezium 对 DATETIME 的写死 UTC 换算决定，锚点日界必须与数据基准严格一致。</li>
      * </ul>
-     * 所以口径必须显式写死、并把「今天/昨天」的边界毫秒直接给出，让模型从「推理换算」
-     * 退化为「照抄数值」。<b>锚点口径与数据基准是强耦合的一对</b>，任何一侧单独改动
+     * 所以标准必须显式写死、并把「今天/昨天」的边界毫秒直接给出，让模型从「推理换算」
+     * 退化为「照抄数值」。<b>锚点标准与数据基准是强耦合的一对</b>，任何一侧单独改动
      * 都会造成 8 小时整体偏移；而数据基准由 Debezium 单方面锁死在 UTC，因此锚点也只能是 UTC。
      */
     private String nowAnchor() {
@@ -916,7 +916,7 @@ public class DefaultAgentService implements AgentService {
                 + "解释（Debezium 对 DATETIME 的换算写死为 UTC，无配置项可改）。"
                 + "因此某日 D 的时间窗 = [D 00:00:00.000 的毫秒, D 23:59:59.999 的毫秒]，"
                 + "按 UTC 边界取；严禁改用 +08:00 或其它时区换算日界"
-                + "（错用时区会使日界偏移 8 小时，整日统计口径完全错位）。"
+                + "（错用时区会使日界偏移 8 小时，整日统计标准完全错位）。"
                 + "\n日期→毫秒边界表（应用已按 UTC 预计算，日期在表内时必须直接引用，"
                 + "严禁自行换算——自行换算极易偏移一天：窗口错了但查询语法是对的，"
                 + "返回一个小数字极具迷惑性）："

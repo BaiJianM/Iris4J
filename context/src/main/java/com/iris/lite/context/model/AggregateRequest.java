@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * <p><b>能力边界</b>：GROUPBY 分组 + COUNT/SUM/AVG/MIN/MAX 归约 + 组内排序 TopN。
  * 聚合在 Redis Query Engine（FT.AGGREGATE）服务端完成，不把明细拉进模型上下文——
- * 这是「每渠道多少笔」类统计问题从 ≥6 轮穷举失败收敛到 1 轮出结果的治本解。
+ * 这是「每渠道多少笔」类统计问题从 ≥6 轮穷举失败压缩到 1 轮出结果的治本解。
  *
  * <p><b>约束（fail-closed）</b>：groupBy / sortBy / 数值 metric 的字段必须是<b>已索引</b>字段
  * （groupBy/sortBy 任意索引形态，sum/avg/min/max 必须 numeric）——未索引字段直接拒绝，

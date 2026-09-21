@@ -186,7 +186,7 @@ public class SemanticCachedEntityQueryService implements EntityQueryService {
 
     /**
      * 聚合不走语义缓存：FT.AGGREGATE 本身微秒~毫秒级且统计值
-     * 对 CDC 新鲜度最敏感（围栏拦截率会很高，缓存纯负收益），直接透传下一层。
+     * 对 CDC 新鲜度最敏感（守卫拦截率会很高，缓存纯负收益），直接透传下一层。
      */
     @Override
     public com.iris.lite.context.model.AggregateResult aggregate(
@@ -199,7 +199,7 @@ public class SemanticCachedEntityQueryService implements EntityQueryService {
      *
      * <p><b>硬约束文本</b>：由 {@link RequestCanonicalizer#canonical} 统一产出——
      * 哪些成分参与 key（ns/entity/tenant/fields/分页/排序/非 STRING 过滤值/范围/文本）
-     * 与精确缓存层共用同一份清单，杜绝两处口径漂移。STRING 标量值被剔除出 key
+     * 与精确缓存层共用同一份清单，杜绝两处标准漂移。STRING 标量值被剔除出 key
      * （只保留键存在性，键集合精确一致候选才同构），它们进 semanticText 参与向量相似。
      *
      * <p><b>语义文本</b>：仅 Schema 声明为 STRING 的过滤值，按字段名排序后拼接——

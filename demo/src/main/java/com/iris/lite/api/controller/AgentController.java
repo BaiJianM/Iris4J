@@ -183,7 +183,7 @@ public class AgentController {
     }
 
     /**
-     * 配方草稿审核视图（自进化闭环）。
+     * 配方草稿审核视图（自进化循环）。
      *
      * <p>返回最近的草稿样本（顺畅会话的工具序列 = 可固化的配方候选；
      * 失败会话 = 原语/配方缺口的证据）。人工审核后把顺畅样本整理成 recipe 条目
@@ -240,7 +240,7 @@ public class AgentController {
                         sseSink(emitter));
                 emitter.complete();
             } catch (Exception e) {
-                // 客户端断开（send 失败）与真实异常都收敛到这里
+                // 客户端断开（send 失败）与真实异常都集中到这里
                 log.info("Agent 运行结束（异常或客户端断开）: {}", e.getMessage(), e);
                 try {
                     // 与 sseSink/心跳同一锁纪律：所有 send 在 emitter 上同步串行

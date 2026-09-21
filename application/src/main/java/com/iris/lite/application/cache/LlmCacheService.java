@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 /**
  * LLM 响应语义缓存服务。
  *
- * <p><b>降本口径</b>：缓存 "prompt → LLM response" 对，
+ * <p><b>降本标准</b>：缓存 "prompt → LLM response" 对，
  * 相似 prompt 毫秒级返回已缓存响应，命中即免掉一次真实的 LLM 调用
  * （月省 = 月输出 token 成本 × 命中率）。与查询语义缓存
  * （{@code SemanticCachedEntityQueryService}，缓存的是 Query Engine 查询结果）
@@ -42,10 +42,10 @@ import java.util.regex.Pattern;
  * <ol>
  *   <li><b>精确</b>：promptHash 相同 → similarity=1.0 直取（不走向量）；</li>
  *   <li><b>语义</b>（三段式）：prompt 向量 KNN top-5 召回（余弦 ≥
- *       recallThreshold 0.85，宁滥勿缺）→ <b>槽位一致性校验</b>（数字序列不同
- *       即拒绝——双塔与交叉编码器对槽位差异共同失明，数字差异改写对的 rerank
- *       分可高达 0.9998，无门限可分）→
- *       <b>交叉编码器精判</b>（rerank ≥ 门限才放行；失效时保守 MISS）。
+ *       recallThreshold 0.85，宁可多召回、不可漏召回）→ <b>槽位一致性校验</b>（数字序列不同
+ *       即拒绝——双塔与交叉编码器对槽位差异均不敏感，数字差异改写对的 rerank
+ *       分可高达 0.9998，无阈值可分）→
+ *       <b>交叉编码器重排</b>（rerank ≥ 阈值才通过；失效时保守 MISS）。
  *       与记忆去重同构：阈值判定放在应用层而非索引层。</li>
  * </ol>
  *
@@ -95,9 +95,9 @@ public class LlmCacheService {
             @Value("${iris.llm-cache.max-entries:1000}") int maxEntries,
             // KNN 候选数：多取几个再按余弦筛，防 HNSW 近似排序把真命中挤掉
             @Value("${iris.llm-cache.knn-candidates:5}") int knnCandidates,
-            // 召回阈值放宽（宁滥勿缺），精度交给 rerank 精判门
+            // 召回阈值放宽（宁可多召回、不可漏召回），精度交给 重排门槛
             @Value("${iris.llm-cache.recall-threshold:0.85}") double recallThreshold,
-            // rerank 分数（sigmoid 0-1）≥ 此值才放行命中，默认值需以评测集校准
+            // rerank 分数（sigmoid 0-1）≥ 此值才判定命中，默认值需以评测集校准
             @Value("${iris.llm-cache.rerank.threshold:0.50}") double rerankThreshold,
             @Value("${iris.rag.rrf-k:60}") int rrfK,
             @Value("${iris.rag.candidates:12}") int ragCandidates) {
@@ -119,8 +119,8 @@ public class LlmCacheService {
     }
 
     /**
-     * 查找结果：hit + 相似度 + 条目 + rerank 分数（仅语义命中且有精判时非空）；未命中带 reason。
-     * miss 时若曾有候选进召回线但被精判拒绝，bestRejected* 携带其中最高 rerank 分（校准与排障用）。
+     * 查找结果：hit + 相似度 + 条目 + rerank 分数（仅语义命中且有重排时非空）；未命中带 reason。
+     * miss 时若曾有候选进召回线但被重排拒绝，bestRejected* 携带其中最高 rerank 分（校准与排障用）。
      */
     public record LookupResult(boolean hit, boolean exact, double similarity,
                                Double rerankScore, LlmCacheEntry entry, String reason,
@@ -163,7 +163,7 @@ public class LlmCacheService {
         // 问题语义锚定在说话时刻，任何缓存条目（历史快照）都可能已过期——
         // 无论调用方是否显式传 fresh，一律强制 miss。命中路径零成本检测
         // （确定性关键词），误伤方向（多一次真实 LLM 调用）比漏放（回放过期
-        // 答案）安全。REST /lookup、MCP 工具、Agent 三条入口共用本咽喉点。
+        // 答案）安全。REST /lookup、MCP 工具、Agent 三条入口共用本必经点。
         if (freshnessDetector.isFreshSensitive(prompt)) {
             IrisMetrics.increment("iris.llmcache.requests", "result", "bypass");
             log.debug("时效词旁路 LLM 缓存 ns={} prompt 命中时效词表", namespace);
@@ -175,7 +175,7 @@ public class LlmCacheService {
         String modelTag = modelTag(model);
         String promptHash = Digests.sha256Hex(prompt);
 
-        // 1. 精确命中：同 prompt 同 model 直取；版本围栏不过则继续走语义通道
+        // 1. 精确命中：同 prompt 同 model 直取；版本守卫不过则继续走语义通道
         Optional<LlmCacheEntry> exact = repository.get(namespace, modelTag, promptHash);
         if (exact.isPresent()) {
             if (isFresh(namespace, exact.get())) {
@@ -183,15 +183,15 @@ public class LlmCacheService {
                 IrisMetrics.increment("iris.llmcache.requests", "result", "hit-exact");
                 return LookupResult.of(exact.get(), true, 1.0);
             }
-            log.info("LLM 缓存精确命中但数据已过期（版本围栏拦截）ns={} hash={}", namespace, promptHash);
+            log.info("LLM 缓存精确命中但数据已过期（版本守卫拦截）ns={} hash={}", namespace, promptHash);
             IrisMetrics.increment("iris.llmcache.requests", "result", "fence-miss");
         }
 
         // 2. 语义命中（RAG 多路召回版）：稠密 KNN + 词法 BM25 → RRF 融合候选池
-        //    → 版本围栏 → 槽位一致性 → 交叉编码器精判（批量）。
+        //    → 版本守卫 → 槽位一致性 → 交叉编码器重排（批量）。
         // 背景：双塔余弦对微改写句对区分度不足（「9月6号有人下单吗」vs「那2025年的…」
         // cos 0.916 误命中），精度问题交给交叉编码器逐对判别；词法通道负责把
-        // 稠密排名挤不进 top-K 的同义改写捞回候选池（RRF 融合，宁滥勿缺）。
+        // 稠密排名挤不进 top-K 的同义改写捞回候选池（RRF 融合，宁可多召回、不可漏召回）。
         Embedder embedder = embedderProvider.getIfAvailable();
         if (embedder == null) {
             IrisMetrics.increment("iris.llmcache.requests", "result", "miss");
@@ -203,8 +203,8 @@ public class LlmCacheService {
             IrisMetrics.increment("iris.llmcache.requests", "result", "miss");
             return LookupResult.miss("empty-vector");
         }
-        // 精判门生效时：召回线固定放宽（宁滥勿缺），thresholdOverride 覆盖放行门；
-        // 未启用精判时：thresholdOverride 覆盖余弦阈值
+        // 重排门槛生效时：召回线固定放宽（宁可多召回、不可漏召回），thresholdOverride 覆盖命中门槛；
+        // 未启用重排时：thresholdOverride 覆盖余弦阈值
         double effectiveThreshold = reranker != null
                 ? (thresholdOverride != null ? thresholdOverride : rerankThreshold)
                 : (thresholdOverride != null ? thresholdOverride : threshold);
@@ -229,7 +229,7 @@ public class LlmCacheService {
 
         // 3. LLM 多查询升级通道（on-miss/always）：主链路未命中时改写变体再稠密
         //    召回一轮——命中路径零 LLM 延迟，miss 路径多 ~1s 换一次免真实调用。
-        //    只在 no-match 时升级：stale（围栏拦截）与 rerank-error（精判失效）
+        //    只在 no-match 时升级：stale（守卫拦截）与 rerank-error（重排失效）
         //    语义上不是"没找到"，升级没有意义
         if (!result.hit() && "no-match".equals(result.reason())
                 && multiQueryExpander.shouldExpand(true)) {
@@ -284,7 +284,7 @@ public class LlmCacheService {
         return rank;
     }
 
-    /** RRF 融合：通道排名 → 融合候选池（原融合序，精判/纯余弦按此序先到先得）。 */
+    /** RRF 融合：通道排名 → 融合候选池（原融合序，重排/纯余弦按此序先到先得）。 */
     private List<Candidate> fusePool(int rrfK, int topM, List<List<String>> channels,
                                      Map<String, Candidate> candidateMap) {
         return RrfFusion.fuse(rrfK, topM, channels).stream()
@@ -294,8 +294,8 @@ public class LlmCacheService {
     }
 
     /**
-     * 候选池精判：
-     * 余弦召回线 → 版本围栏 → 槽位一致性 → rerank（批量一次调用）→ 过门限放行。
+     * 候选池重排：
+     * 余弦召回线 → 版本守卫 → 槽位一致性 → rerank（批量一次调用）→ 过阈值通过。
      */
     private LookupResult evaluate(String namespace, String model, String prompt, float[] queryVec,
                                   Embedder embedder, CrossEncoderReranker reranker,
@@ -315,15 +315,15 @@ public class LlmCacheService {
                 continue;
             }
             if (!isFresh(namespace, candidate.entry())) {
-                // 版本围栏拦截：这条候选的数据版本已过期；继续看下一条候选
+                // 版本守卫拦截：这条候选的数据版本已过期；继续看下一条候选
                 // （其余候选可能声明了不同依赖、仍然新鲜）
                 fenceBlocked = true;
                 continue;
             }
-            // 槽位一致性校验（先于 rerank 的确定性精判）：
+            // 槽位一致性校验（先于 rerank 的确定性重排）：
             // 双塔余弦与交叉编码器对数字/日期槽位差异均不敏感——
             // 「…2025年的9月6号…」类改写对 rerank 可高达 0.9998（同义对
-            // 0.999-1.0 完全重叠，无门限可分）。数字序列不同则不可能是同一问题，
+            // 0.999-1.0 完全重叠，无阈值可分）。数字序列不同则不可能是同一问题，
             // 直接拒绝；
             // 误拒方向是安全的（miss → 重算 → 答案仍正确，只损失一次省算）。
             if (!slotConsistent(prompt, candidate.entry().prompt())) {
@@ -336,7 +336,7 @@ public class LlmCacheService {
         }
         if (survivors.isEmpty()) {
             if (fenceBlocked) {
-                // 有候选过阈值但全部被围栏拦下：语义上"本可命中"，数据不新鲜导致 miss
+                // 有候选过阈值但全部被守卫拦下：语义上"本可命中"，数据不新鲜导致 miss
                 IrisMetrics.increment("iris.llmcache.requests", "result", "fence-miss");
                 return LookupResult.miss("stale");
             }
@@ -344,20 +344,20 @@ public class LlmCacheService {
             return LookupResult.miss("no-match");
         }
         if (reranker == null) {
-            // 精判门未启用：纯余弦判定（thresholdOverride 可覆盖），融合序先到先得
+            // 重排门槛未启用：纯余弦判定（thresholdOverride 可覆盖），融合序先到先得
             Candidate hit = survivors.get(0);
             double similarity = candidateSimilarity(hit, queryVec, embedder);
-            log.debug("LLM 缓存语义命中（无精判）ns={} model={} sim={}", namespace, model, similarity);
+            log.debug("LLM 缓存语义命中（无重排）ns={} model={} sim={}", namespace, model, similarity);
             IrisMetrics.increment("iris.llmcache.requests", "result", "hit-semantic");
             return LookupResult.of(hit.entry(), false, similarity);
         }
-        // 精判门：交叉编码器批量判别（正向前向 1 次往返），融合序第一个过门限者胜出
+        // 重排门槛：交叉编码器批量判别（正向前向 1 次往返），融合序第一个过阈值者胜出
         double[] scores;
         try {
             scores = reranker.scoreBatch(prompt,
                     survivors.stream().map(c -> c.entry().prompt()).toList());
         } catch (Exception e) {
-            // 精判失效时放行会重新引入误命中风险 → 保守 MISS 并明示
+            // 重排失效时通过会重新引入误命中风险 → 保守 MISS 并明示
             log.warn("rerank 推理失败，保守降级为 MISS ns={} err={}", namespace, e.getMessage(), e);
             IrisMetrics.increment("iris.llmcache.requests", "result", "miss");
             IrisMetrics.increment("iris.llmcache.rerank", "decision", "error");
@@ -395,8 +395,8 @@ public class LlmCacheService {
     }
 
     /**
-     * 版本围栏校验：条目声明的依赖实体，其当前数据版本必须与写入时一致。
-     * 未声明依赖的条目（旧数据/调用方未传）恒视为新鲜——围栏只约束显式声明者。
+     * 版本守卫校验：条目声明的依赖实体，其当前数据版本必须与写入时一致。
+     * 未声明依赖的条目（旧数据/调用方未传）恒视为新鲜——守卫只约束显式声明者。
      */
     private boolean isFresh(String namespace, LlmCacheEntry entry) {
         if (entry.dependencies() == null || entry.dependencies().isEmpty()) {
@@ -405,7 +405,7 @@ public class LlmCacheService {
         for (Map.Entry<String, Long> dep : entry.dependencies().entrySet()) {
             long now = versionService.current(namespace, dep.getKey());
             if (now != dep.getValue()) {
-                log.debug("版本围栏拦截 ns={} entity={} 写入时={} 当前={}",
+                log.debug("版本守卫拦截 ns={} entity={} 写入时={} 当前={}",
                         namespace, dep.getKey(), dep.getValue(), now);
                 return false;
             }
@@ -419,7 +419,7 @@ public class LlmCacheService {
      * @param ttlSeconds 覆盖 TTL（秒）；null 用全局配置
      * @param dependencyEntities 本条回答依赖的实体名（同 namespace，可空）。
      *                           声明后写入时记录各实体当前版本，命中即校验——
-     *                           数据变更过的条目自动视为过期（数据版本围栏）
+     *                           数据变更过的条目自动视为过期（数据版本守卫）
      * @return 条目标识（modelTag:promptHash）
      */
     public String store(String namespace, String prompt, String response,
@@ -443,7 +443,7 @@ public class LlmCacheService {
         if (vector != null && normSq(vector) == 0) {
             vector = null; // 空向量不进索引：退化为仅精确命中
         }
-        // 依赖实体的当前版本快照（版本围栏的"存储侧半边"）
+        // 依赖实体的当前版本快照（版本守卫的"存储侧半边"）
         Map<String, Long> dependencies = dependencyEntities == null || dependencyEntities.isEmpty()
                 ? null
                 : versionService.currentAll(namespace, dependencyEntities.stream()
@@ -494,11 +494,11 @@ public class LlmCacheService {
         out.put("miss", miss);
         // 命中率：分母 0（从未查询）时返回 null 而非 0——区分"无数据"与"全未命中"
         out.put("hitRate", lookups == 0 ? null : (double) (exact + semantic) / lookups);
-        // 围栏/旁路计数：被版本围栏拦截的命中数、调用方主动 bypass 次数
+        // 守卫/旁路计数：被版本守卫拦截的命中数、调用方主动 bypass 次数
         out.put("fenceMiss", fenceMiss);
         out.put("bypass", bypass);
         out.put("evictions", evictions);
-        // 精判门：放行/拒绝/失败计数与配置（rerankEnabled 反映 bean 是否装配）
+        // 重排门槛：通过/拒绝/失败计数与配置（rerankEnabled 反映 bean 是否装配）
         boolean rerankOn = rerankerProvider.getIfAvailable() != null;
         out.put("rerankEnabled", rerankOn);
         if (rerankOn) {

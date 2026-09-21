@@ -4,7 +4,7 @@
 通用管线：从源库 information_schema 读枚举/状态类列（tinyint/smallint）的
 column_comment，解析「前缀：0待审 1通过 2驳回」形态的值域声明，
 写入 deploy/schema 下对应 yml 字段的 values 注记——get_schema/MCP 语义化
-工具即向 LLM 输出该值域（聚合口径类问题的正答前提）。
+工具即向 LLM 输出该值域（聚合标准类问题的正答前提）。
 
 只补缺失的 values，已有绝不动；values 不参与索引定义比对，不触发索引重建。
 注释无值域（如「包裹数量」）自动跳过；形态可疑（前导数字解析歧义）保守放弃

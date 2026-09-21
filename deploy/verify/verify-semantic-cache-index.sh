@@ -17,7 +17,7 @@
 # 的探针实体 t28probe：走的仍是同一条代码路径（{entity}:sem:* →
 # getAllMatchingWithKeys），但不会被任何 CDC 事件失效，校验结果与排空进度解耦。
 #
-# 【判定口径为什么用 commandstats 计数而非耗时】
+# 【判定标准为什么用 commandstats 计数而非耗时】
 # 耗时受负载波动影响不可复现，而「有没有 SCAN」是二值事实。
 #
 # 【哪些计数可信、哪些会被 CDC 污染——务必分清】
@@ -138,7 +138,7 @@ else
   fi
 fi
 
-echo "== 2. 触发 semantic/reindex，观察命令口径 =="
+echo "== 2. 触发 semantic/reindex，观察命令标准 =="
 S0=$(stat_calls scan); M0=$(stat_calls smembers); G0=$(stat_calls mget)
 T0=$(date +%s)
 RESP=$(curl -s --noproxy '*' -m 60 -X POST \
@@ -170,12 +170,12 @@ else
   bad "未观察到 mget（增量=${DG}）：候选读取仍在逐条 GET，或候选集为空"
 fi
 
-# smembers 只在 CDC 空闲时可归因于该次 reindex；排空期 CDC 会把它抬高到几百，判不准
+# smembers 只在 CDC 空闲时可定位于该次 reindex；排空期 CDC 会把它抬高到几百，判不准
 if [ "$DM" -ge 1 ]; then
   if [ "$IDLE" = "yes" ]; then
-    ok "走索引集合（smembers 增量=${DM}，CDC 空闲故可归因）"
+    ok "走索引集合（smembers 增量=${DM}，CDC 空闲故可定位）"
   else
-    note "smembers 增量=${DM}，但 CDC 未空闲（每事件一次 SMEMBERS），无法归因本次 reindex——以 mget 增量为准"
+    note "smembers 增量=${DM}，但 CDC 未空闲（每事件一次 SMEMBERS），无法定位本次 reindex——以 mget 增量为准"
   fi
 else
   bad "未观察到 smembers（增量=${DM}）"

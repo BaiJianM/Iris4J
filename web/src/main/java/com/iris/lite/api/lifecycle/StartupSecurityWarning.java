@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * 启动安全姿态自检：API-Key 鉴权未启用时打醒目 WARN。
  *
  * <p><b>为什么在启动时而不是文档里说</b>：鉴权关闭（legacy api-key 空 +
- * 无 agents[] 静态 key + 无动态 key = 全放行 + 匿名即 operator）是刻意的
+ * 无 agents[] 静态 key + 无动态 key = 全部允许访问 + 匿名即 operator）是刻意的
  * 本地开发默认值——降低上手门槛；但它同时意味着 Schema 编辑、agent key
  * 管理、DLQ 重放等管理面端点全部裸奔。默认姿态可以宽松，但绝不允许
  * "静默地宽松"：任何人把本地配置原样带上生产，必须在启动日志里第一眼

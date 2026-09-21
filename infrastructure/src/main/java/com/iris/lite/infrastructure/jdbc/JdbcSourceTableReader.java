@@ -27,7 +27,7 @@ import java.util.Map;
  * 慢几百毫秒完全可接受。
  *
  * <p><b>SQL 注入防护</b>：表名不允许参数化（标识符不能走 PreparedStatement 占位符），
- * 所以用白名单正则校验——只放行 {@code [A-Za-z0-9_]+}，
+ * 所以用白名单正则校验——只允许 {@code [A-Za-z0-9_]+}，
  * 拒绝一切含引号/分号/空格/注释符的输入。
  *
  * <p><b>条件装配</b>：{@code iris.consistency.jdbc-url} 未配置时不创建 bean。

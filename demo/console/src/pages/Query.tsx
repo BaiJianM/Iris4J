@@ -156,7 +156,7 @@ export default function Query({ ns }: PageProps) {
       if (!entityName) return
       const tf = detail.data?.tenantField
       // tenant 输入留空时，若条件里显式带了 tenant_id = x，自动取该值作 tenant 参数
-      // （后端语义：filters 显式租户与 tenant 参数一致时放行）
+      // （后端语义：filters 显式租户与 tenant 参数一致时通过）
       const condTenant = tf
         ? conds.find((c) => c.field === tf && c.op === "=" && c.value.trim() !== "")?.value.trim()
         : undefined

@@ -160,7 +160,7 @@ public class EntityToolFactory {
                 sb.append("结果含 total（匹配总数）与分页信息；结果超过 50 行会被截断，")
                         .append("请尽量用 filters 收窄条件、fields 只取需要的列。");
                 // MCP 面未提供聚合工具：明确「不可解」出口，防止模型穷举分页自行累计
-                sb.append("本工具无聚合能力——统计/求和/排名类问题无法完成，请直接说明并给出替代口径，")
+                sb.append("本工具无聚合能力——统计/求和/排名类问题无法完成，请直接说明并给出替代标准，")
                         .append("严禁逐页拉取全量数据自行累计。");
                 // 把外键关系写进工具描述——Agent 不必调 get_schema 就知道实体怎么连，
                 // 指纹含描述，此处变化即触发对账 remove+add + tools/list_changed

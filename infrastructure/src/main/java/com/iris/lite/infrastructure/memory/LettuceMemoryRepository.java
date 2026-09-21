@@ -106,7 +106,7 @@ public class LettuceMemoryRepository implements MemoryRepository {
     /** 工作记忆语义索引开关（无 Embedder 时同样旁路）。 */
     private final boolean wmIndexEnabled;
 
-    // ---------- RAG 多路召回：稠密 KNN + BM25 词法 + LLM 多查询 → RRF → 精判 ----------
+    // ---------- RAG 多路召回：稠密 KNN + BM25 词法 + LLM 多查询 → RRF → 重排 ----------
 
     private final LexicalIndexManager lexicalIndex;
     private final ObjectProvider<CrossEncoderReranker> rerankerProvider;
@@ -343,7 +343,7 @@ public class LettuceMemoryRepository implements MemoryRepository {
      * <p><b>SEMANTIC</b>：纯 KNN 单通道（契约不变，改写/同义命中）；
      * <b>KEYWORD</b>：词法 BM25 检索（引擎排序下推），词法不可用/单字查询落回
      * 旧的包含匹配路径；<b>HYBRID</b>（缺省）= RAG 多路召回：稠密 KNN + BM25 词法
-     * （+ LLM 多查询改写触发时逐变体稠密）→ RRF 融合 → rerank 精判（可用时）。
+     * （+ LLM 多查询改写触发时逐变体稠密）→ RRF 融合 → rerank（可用时）。
      *
      * <p>query 为空一律走关键词路径的"最近记忆"语义；全通道失败自动降级
      * 关键词兜底——检索增强挂了不能变成检索不可用。
@@ -401,9 +401,9 @@ public class LettuceMemoryRepository implements MemoryRepository {
      *
      * <p>三通道：稠密 KNN（原查询）→ 词法 BM25（lex TEXT 索引）→ LLM 多查询改写
      * （{@code shouldExpand} 决定是否触发，逐变体稠密召回）。各通道产出按相关度
-     * 降序的 memoryId 排名列表，RRF 融合出候选池；有精判器时 batch rerank 把
+     * 降序的 memoryId 排名列表，RRF 融合出候选池；有重排器时 batch rerank 把
      * 排名升级为交叉编码器判别序（失败保持 RRF 序——记忆检索是增强路径，
-     * 精判挂了不能不可用），最后截断 limit。
+     * 重排挂了不能不可用），最后截断 limit。
      */
     private List<LongTermMemory> searchHybrid(
             String namespace, String owner, String query, int limit, Embedder embedder) {
@@ -457,7 +457,7 @@ public class LettuceMemoryRepository implements MemoryRepository {
                 }
                 docs = ranked;
             } catch (Exception e) {
-                log.warn("记忆精判失败，保持 RRF 序: ns={} - {}", namespace, e.getMessage());
+                log.warn("记忆重排失败，保持 RRF 序: ns={} - {}", namespace, e.getMessage());
             }
         }
         return docs.size() > limit ? new ArrayList<>(docs.subList(0, limit)) : docs;
@@ -530,7 +530,7 @@ public class LettuceMemoryRepository implements MemoryRepository {
     /**
      * 按记忆 id 批量回捞本体（融合候选 ≤ ragCandidates，一次 pipeline），保持传入
      * （融合排名）顺序；owner 等值过滤与悬空 id 跳过。批量失败回落逐条（单 key
-     * 异常不拖垮整批，与关键词路径同口径）。
+     * 异常不拖垮整批，与关键词路径同标准）。
      */
     private List<LongTermMemory> fetchMemories(String namespace, List<String> ids, String owner) {
         List<String> docKeys = new ArrayList<>(ids.size());
@@ -753,7 +753,7 @@ public class LettuceMemoryRepository implements MemoryRepository {
             try {
                 jsons = redis.jsonGetPathBatch(docKeys, "$");
             } catch (Exception e) {
-                // 批量失败回落逐条（单 key 异常不该拖垮整批），与投影降级同口径
+                // 批量失败回落逐条（单 key 异常不该拖垮整批），与投影降级同标准
                 log.debug("记忆索引批量回捞失败，回落逐条: {}", e.getMessage(), e);
                 jsons = new ArrayList<>(batch.size());
                 for (String docKey : docKeys) {

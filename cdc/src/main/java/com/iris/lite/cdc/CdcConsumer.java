@@ -59,7 +59,7 @@ public class CdcConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(CdcConsumer.class);
 
-    /** 消费循环异常后的重连退避毫秒（日志文案与实际退避由此常量统一口径）。 */
+    /** 消费循环异常后的重连退避毫秒（日志文案与实际退避由此常量统一标准）。 */
     private static final long RECONNECT_DELAY_MS = 2000;
 
     /** CDC 事件计数指标名（result tag：ok/fail）。 */
@@ -159,7 +159,7 @@ public class CdcConsumer {
      * @PostConstruct 阶段 context 尚未 refresh 完成，其他 bean 的初始化
      * （schema 加载、模型加载等重活）可能还没跑完；而消费线程一起动就开始消化
      * Debezium 积压，"依赖未就绪"窗口内的连续失败在 max-deliveries=3 下
-     * 约一分钟就会把正常消息误送 DLQ（可回放但污染排查口径）。
+     * 约一分钟就会把正常消息误送 DLQ（可回放但污染排查标准）。
      * 改在应用完全就绪后启动，消费起点后移到所有 bean 初始化完毕之后。
      *
      * <p><b>daemon 线程</b>：不阻止 JVM 退出——CDC 消费是后台任务，
@@ -221,8 +221,8 @@ public class CdcConsumer {
      * iris.cdc.stream.backlog = stream 当前保留条数（XLEN，O(1)）；
      * iris.cdc.pel = 已投递未确认条数（XPENDING 摘要，PEL 小时成本可忽略）。
      *
-     * <p><b>口径注意</b>：XLEN 是"保留在 stream 里的条数"（受 stream-maxlen
-     * 裁剪约束），不是消费积压——积压看 XINFO GROUPS 的 lag（控制台 Cdc 页口径）。
+     * <p><b>标准注意</b>：XLEN 是"保留在 stream 里的条数"（受 stream-maxlen
+     * 裁剪约束），不是消费积压——积压看 XINFO GROUPS 的 lag（控制台 Cdc 页标准）。
      *
      * <p>指标抓取时才取值，取值失败（如 group 刚被重建）按 0 处理——
      * Gauge 异常不能打断 Prometheus 抓取请求。
@@ -304,7 +304,7 @@ public class CdcConsumer {
                         if (!groupReady) {
                             session.xgroupCreate(source.stream(), source.group());
                             groupReady = true;
-                            // 启动即裁剪一次：上次运行留下的历史事件立即收敛到 maxlen 内
+                            // 启动即裁剪一次：上次运行留下的历史事件立即压回到 maxlen 内
                             trimStream(source);
                             // 启动即清理一次陈旧消费端：实例标识使每次重启都会新增条目
                             pruneStaleConsumers(source);
@@ -420,7 +420,7 @@ public class CdcConsumer {
      *
      * <p><b>为什么需要</b>：消费端 id 带上实例标识后，每次重启都会留下一个新条目，
      * 而 Redis 从不自动回收（XINFO CONSUMERS 只增不减）。135 条流各自累积，
-     * 会让「消费端数量」这个观测口径彻底失去意义。
+     * 会让「消费端数量」这个观测标准彻底失去意义。
      *
      * <p><b>只删 pending == 0 的，这是硬约束</b>：XGROUP DELCONSUMER 会连带丢弃
      * 该消费端的 PEL 条目，那些消息将不再被重投也不进 DLQ——等于静默丢消息。
@@ -504,7 +504,7 @@ public class CdcConsumer {
         }
     }
 
-    /** 记录一条消息的处理失败（供转 DLQ 带原因 + 指标归因）。 */
+    /** 记录一条消息的处理失败（供转 DLQ 带原因 + 指标定位）。 */
     private void recordFailure(StreamMessage<String, String> message,
                                CdcProperties.Source source, String reason) {
         lastErrors.put(message.getId(), reason);
@@ -725,7 +725,7 @@ public class CdcConsumer {
      * <p>现在只有「本实例确实处理失败过」才可能进 DLQ，{@code error} 字段必然
      * 携带真实失败原因，不再出现 unknown。
      *
-     * <p>尝试次数口径：{@code p.getRedeliveryCount()} 是重领前的投递次数，
+     * <p>尝试次数标准：{@code p.getRedeliveryCount()} 是重领前的投递次数，
      * XCLAIM 使其 +1，故当前这次是第 {@code count+1} 次尝试；失败且已达上限才转 DLQ。
      */
     private void retryOrDlq(CdcProperties.Source source, PendingMessage p) {

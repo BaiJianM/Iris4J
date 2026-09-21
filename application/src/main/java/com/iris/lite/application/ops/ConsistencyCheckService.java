@@ -262,9 +262,9 @@ public class ConsistencyCheckService {
     /**
      * 标量规范化：datetime 转毫秒 epoch 与 CDC envelope 形态对齐。
      *
-     * <p><b>时区口径</b>：Debezium MySQL connector 对无时区的
-     * DATETIME 按数据库会话时区解释，投影值为 UTC 口径
-     * （如某 DATETIME 值按 UTC 解释得 1788220800000，而非东八区口径 1788192000000）。
+     * <p><b>时区标准</b>：Debezium MySQL connector 对无时区的
+     * DATETIME 按数据库会话时区解释，投影值为 UTC 标准
+     * （如某 DATETIME 值按 UTC 解释得 1788220800000，而非东八区标准 1788192000000）。
      * 这里必须用 UTC 转换，
      * 否则时间列永远差 8 小时、full 校验全表误报 mismatched。
      */

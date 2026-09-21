@@ -122,7 +122,7 @@ iris:
     # 常驻上下文从 ≈14k 字符降到 ≈4k；小库（个位数实体）一步到位更省一跳。
     schema-digest-full-max: 12
     # 配方自进化草稿池：顺畅成功会话（轮数≤smooth-max-rounds）
-    # 与失败会话的「问题+工具序列」沉淀到 iris:{ns}:recipe-drafts 审核队列，
+    # 与失败会话的「问题+工具序列」积累到 iris:{ns}:recipe-drafts 审核队列，
     # 人工审核后合入 graph 配方热载（不做 LLM 自动生成配方——会编造工具名）。
     # 审核视图：GET /api/v1/agent/recipe-drafts?namespace=&limit=
     recipe-drafts-enabled: true
@@ -259,13 +259,13 @@ iris:
     max-entries: 1000
     # KNN 候选数：多取几个再按余弦阈值筛，防 HNSW 近似排序漏掉真命中
     knn-candidates: 5
-    # 精判门：双塔余弦对微改写句对区分度不足——日期槽位在 512 维里被稀释，
+    # 重排门槛：双塔余弦对微改写句对区分度不足——日期槽位在 512 维里被稀释，
     # 「9月6号有人下单吗」vs「那2025年的9月6号有人下单吗」cos 0.916 即可误命中。
-    # 链路：KNN 召回放宽（宁滥勿缺）→ 槽位一致性校验（数字序列不同即拒；
-    # 交叉编码器对槽位差异同样失明，rerank 0.9998）→ rerank 精判 → 过门限才放行。
-    # 精判失效时保守 MISS（放行等于回到误命中状态）。
+    # 链路：KNN 召回放宽（宁可多召回、不可漏召回）→ 槽位一致性校验（数字序列不同即拒；
+    # 交叉编码器对槽位差异同样不敏感，rerank 0.9998）→ rerank → 过阈值才判为命中。
+    # 重排失效时保守 MISS（判为命中等于回到误命中状态）。
     # Qwen3-Embedding 标定：正对 cos min=0.8283，召回线必须低于它；
-    # 0.80 宁滥勿缺（精度由槽位门 + rerank 门兜底），无数字槽位的反义对
+    # 0.80 宁可多召回、不可漏召回（精度由槽位门 + rerank 门兜底），无数字槽位的反义对
     # （女性/男性复购率 cos 0.928）由 rerank 门拦截——Qwen3-Reranker-0.6B
     # 配任务定制指令后正负对完全可分（双向取 min：正 min 0.9929 / 负 max 0.6812，
     # 见 RemoteCrossEncoderReranker 类注释）
@@ -277,7 +277,7 @@ iris:
       # 实际机器地址经 application-local.yml 覆盖（不入库）。
       # 关键前提：GGUF 内烘焙的 rerank 模板已把 <Instruct> 从默认 web search
       # 换成任务定制指令（「日期/数值/指标/方向完全一致才算相关」）——裸 GGUF 的
-      # 焊死模板对同域句对全判 0.97+（判话题不判同题），patched 后正负完全可分，
+      # 固定写死模板对同域句对全判 0.97+（判话题不判同题），patched 后正负完全可分，
       # 详见 scripts/qwen3-reranker-official-test.py
       base-url: ${IRIS_RERANK_BASE_URL:http://127.0.0.1:8082/v1}
       model: qwen3-reranker-0.6b
@@ -285,13 +285,13 @@ iris:
       timeout-ms: 10000
       # 双向取 min（缺省 true）：Qwen3-Reranker 分数有方向性（订单量→销售额 0.9005
       # vs 反向 0.6812），双向 min 后与正对 min 0.9929 完全可分，对入库先后顺序免疫；
-      # 代价是精判候选 ×2 次调用。false = 单方向（省一半延迟，阈值需 ≥0.95 贴边）
+      # 代价是重排候选 ×2 次调用。false = 单方向（省一半延迟，阈值需 ≥0.95 贴边）
       two-sided: true
-      # 放行门限（0-1）。Qwen3-Reranker-0.6B 标定（patched 模板）：
-      # 过槽位门后进精判的句对——正对 min=0.9950，负对 max=0.6812（销售额/订单量），
+      # 命中阈值（0-1）。Qwen3-Reranker-0.6B 标定（patched 模板）：
+      # 过槽位门后进重排的句对——正对 min=0.9950，负对 max=0.6812（销售额/订单量），
       # 0.90 取分界带中点；带数字槽位的负对（2025年改写 0.9985 等）由槽位门在前段拦截
       threshold: 0.90
-  # RAG 混合检索：多路召回 → RRF 融合 → rerank 精判。
+  # RAG 混合检索：多路召回 → RRF 融合 → rerank。
   # 生效面：长期记忆检索（HYBRID 模式）与 LLM 缓存语义查找。
   # 三通道：稠密（embedding KNN）+ 词法（BM25，FT TEXT 索引 + lex 派生字段）
   # + LLM 多查询改写（MultiQueryExpander，按 mode 触发）。
@@ -303,7 +303,7 @@ iris:
     # RRF（Reciprocal Rank Fusion）常数：业界缺省 60，压平头部排名差异，
     # 让「多通道同时命中」稳定胜过「单通道第一」
     rrf-k: 60
-    # 融合候选池上限（进精判的量）：配合 rerank 批量调用（1+N 次往返）控制延迟
+    # 融合候选池上限（进重排的量）：配合 rerank 批量调用（1+N 次往返）控制延迟
     candidates: 12
     multi-query:
       # LLM 改写触发模式（可配置项，默认 off 不开启）：always=每次检索都改写 |

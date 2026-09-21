@@ -4,9 +4,9 @@ Qwen3-Embedding-0.6B / Qwen3-Reranker-0.6B 阈值标定脚本。
 
 背景：RemoteEmbedder/RemoteReranker 由 bge-small-zh-v1.5/bge-reranker-base
 切换到 Qwen3 0.6B 后，旧阈值（0.85/0.50/0.90/0.80）是按旧模型分数分布
-标定的，不可直接沿用——本脚本用构造的金标句对重测两类分数分布，给出各阈值建议。
+标定的，不可直接沿用——本脚本用构造的基准句对重测两类分数分布，给出各阈值建议。
 
-金标设计（正对 = 语义等价；负对 = 语义不同但表面相似）：
+基准设计（正对 = 语义等价；负对 = 语义不同但表面相似）：
   A. 语义缓存值对（semantic-cache.threshold）：
      城市/品牌/类目/订单状态等同字段值域内的等价改写 vs 不同值。
   B. LLM 缓存 prompt 对（llm-cache.recall-threshold + rerank.threshold）：
@@ -24,8 +24,8 @@ IRIS_RERANK_BASE_URL 环境变量覆盖，或命令行参数显式传入）。
     正负有重叠（正 min 0.813 / 负 max 0.826），取 0.85 偏防丢事实。
   - Rerank：Qwen3-Reranker-0.6B（llama.cpp）双峰分布——域外 ~0，同域一律 0.97+，
     指标级差异（销售额/订单量、女性/男性）全判 0.99+，instruction 前缀亦无效；
-    判话题相关不判「同一个问题」，不能担任精判门（详见
-    RemoteCrossEncoderReranker 类注释）。精判保留本地 bge-reranker-base。
+    判话题相关不判「同一个问题」，不能担任重排门槛（详见
+    RemoteCrossEncoderReranker 类注释）。重排保留本地 bge-reranker-base。
 """
 import json
 import os
@@ -163,7 +163,7 @@ def main():
     neg = [cosine(vecs[off + 2 * j], vecs[off + 2 * j + 1]) for j in range(m)]
     mid_a = stats("A. semantic-cache.threshold（值对余弦）", pos, neg)
 
-    # B. LLM 缓存：双塔余弦（recall 线）+ rerank（放行门）
+    # B. LLM 缓存：双塔余弦（recall 线）+ rerank（命中门槛）
     prompts = [t for p in PROMPT_POS for t in p] + [t for p in PROMPT_NEG for t in p]
     pvecs = embed_batch(prompts)
     np_ = len(PROMPT_POS)
@@ -201,7 +201,7 @@ def main():
 
     print("\n== 阈值建议汇总 ==")
     print(f"  semantic-cache.threshold     = {mid_a:.2f}" if mid_a else "  semantic-cache.threshold     = 人工定")
-    print(f"  llm-cache.recall-threshold   = 略低于 B1 正对 min（宁滥勿缺，精判门兜精度）")
+    print(f"  llm-cache.recall-threshold   = 略低于 B1 正对 min（宁可多召回、不可漏召回，重排门槛兜精度）")
     if mid_r:
         print(f"  llm-cache.rerank.threshold   = {mid_r:.2f}")
     else:

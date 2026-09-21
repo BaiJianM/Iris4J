@@ -45,7 +45,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Redis 命令适配器：把业务需要的 Redis 操作收敛到 infrastructure 层。
+ * Redis 命令适配器：把业务需要的 Redis 操作集中到 infrastructure 层。
  *
  * <p><b>为什么需要这一层</b>：项目用原生 Lettuce（而非 spring-data-redis），
  * 因为要用到 RedisJSON 的 {@code JSON.SET/JSON.GET} 和 Stream 的
@@ -481,7 +481,7 @@ public class RedisAdapter {
      *
      * <p><b>为什么不用 XLEN 当积压</b>：Debezium 消费后不删除事件，XLEN 反映的是
      * 当前保留在 stream 里的条数（未开启裁剪时等于历史累计、只增不减），
-     * 与"落后多少没消费"是两个口径——控制台口径必须用 lag
+     * 与"落后多少没消费"是两个标准——控制台标准必须用 lag
      * （lag 才反映真实积压；XLEN 仅作保留窗口内的事件量参考）。
      *
      * <p>应答形态随 RESP 协议不同：RESP3 每个 group 是 map，RESP2 是扁平数组
@@ -967,7 +967,7 @@ public class RedisAdapter {
         // 显式防御性判空（不用 assert——生产环境默认 -da 不生效，等于没判）：
         // 循环体正常至少执行一次，理论上 result 已赋值；此分支只兜「未预期路径」
         if (result == null) {
-            throw new IrisException(ErrorCode.INVALID_QUERY, "聚合结果缺失（未预期路径），请重试或换查询口径");
+            throw new IrisException(ErrorCode.INVALID_QUERY, "聚合结果缺失（未预期路径），请重试或换查询标准");
         }
         // 3 次耗尽仍空但有组数 = 引擎超时截断的假结果（total 还在跳变，不可信）：
         // 抛业务异常让上层（Agent）读到「这是超时、可重试」，而不是把
@@ -975,7 +975,7 @@ public class RedisAdapter {
         if (result.rows().isEmpty() && result.totalGroups() > 0 && limit > 1) {
             // 文案明确「别原样重试」：RepeatGuard 同参第 2 次即拦，教模型重试只会浪费一轮
             // （模型层重复同参重试会被护栏拦截，徒增困惑）。
-            // 瞬时抖动已由本方法内 3 次重试+退避覆盖，模型层应直接换口径。
+            // 瞬时抖动已由本方法内 3 次重试+退避覆盖，模型层应直接换标准。
             throw new IrisException(ErrorCode.INVALID_QUERY,
                     "聚合引擎超时：分组基数过大或撞上资源抖动，服务端已自动重试仍未完成；"
                             + "请勿原样重试（会被重复护栏拦截），直接换更低基数的分组字段，"
@@ -1088,7 +1088,7 @@ public class RedisAdapter {
     }
 
     /**
-     * INCR：原子自增并返回新值（数据版本围栏）。
+     * INCR：原子自增并返回新值（数据版本守卫）。
      *
      * <p><b>输出必须用 IntegerOutput</b>：INCR 回复是整数（:N），与 HSET 同理
      * 不能用 StatusOutput 接（参见 hsetBinary 的教训）。
@@ -1316,7 +1316,7 @@ public class RedisAdapter {
     /**
      * FT.SEARCH 词法排名查询（RAG 词法通道专用）：不带 SORTBY，按引擎默认序返回——
      * RediSearch 对文本查询的默认排序就是 BM25 相关度降序，RRF 只需要排名不需要分数，
-     * 免去 WITHSCORES 的 RESP2/RESP3 双格式分数解析（分数口径也不进业务语义）。
+     * 免去 WITHSCORES 的 RESP2/RESP3 双格式分数解析（分数标准也不进业务语义）。
      *
      * <p>查询串由调用方拼装（{@code @lex:(a|b|c)}，TAG 过滤段可叠加），
      * 词项经 {@code LexTerms.orQuery} 生成——纯字母/数字词项，无转义负担。

@@ -12,16 +12,16 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 /**
- * DATETIME 字面量 ⇄ epoch 毫秒换算的<b>唯一出处</b>（时间口径的代码层收口）。
+ * DATETIME 字面量 ⇄ epoch 毫秒换算的<b>唯一出处</b>（时间标准的代码层收口）。
  *
- * <p><b>口径铁律</b>：源库 DATETIME 经 Debezium 投影后的毫秒值恒为
+ * <p><b>标准铁律</b>：源库 DATETIME 经 Debezium 投影后的毫秒值恒为
  * 「字面量按 UTC 解释」，且无法通过任何配置改变。因此这里的一切换算<b>缺省按
  * UTC 字面</b>——不取系统默认时区（取了就会在 +08:00 宿主机上整体偏移 8 小时）。
  *
  * <p><b>为什么这个类必须存在</b>：AI 调用方（Agent / MCP 客户端）传 range 过滤时
  * 让模型自己心算 epoch 毫秒是错的——epoch 心算是确定性计算，确定性计算必须由
  * 代码完成，LLM 只负责表达意图（ISO 日期字符串）。本类把「表达」与「换算」
- * 分离：任何入口（REST / MCP / Agent 工具）收到日期字符串都走这里，口径一处收口。
+ * 分离：任何入口（REST / MCP / Agent 工具）收到日期字符串都走这里，标准一处收口。
  *
  * <p><b>接受格式</b>：
  * <ul>

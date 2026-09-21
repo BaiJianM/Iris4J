@@ -17,11 +17,11 @@ import java.util.List;
  * LLM 策略执行器：四个记忆策略共用的"LLM 调用 + JSON 容错解析"底座。
  *
  * <p><b>职责切分</b>：策略实现只负责"给什么 prompt、对结果做什么校验"；
- * LLM 阻塞调用、输出格式容错、候选字段映射全部收敛在这里，一处维护。
+ * LLM 阻塞调用、输出格式容错、候选字段映射全部集中在这里，一处维护。
  *
  * <p><b>容错约定</b>：LLM 输出可能是干净 JSON、
- * {@code ```json} 围栏、前后带解释文字、或 {@code {"memories":[...]}} 对象包裹。
- * 解析策略：剥围栏 → 截首个 '[' 到末个 ']' → 兜底取对象形态；
+ * {@code ```json} 守卫、前后带解释文字、或 {@code {"memories":[...]}} 对象包裹。
+ * 解析策略：剥守卫 → 截首个 '[' 到末个 ']' → 兜底取对象形态；
  * 全部失败按空结果处理（抽取是尽力而为，绝不因解析失败炸掉调用方）。
  *
  * <p><b>条件装配</b>：{@code iris.memory.extractor.enabled=true} 才创建——
@@ -35,7 +35,7 @@ public class LlmStrategyExecutor {
 
     /** 统一的输出格式约束（system 层）：只输出 JSON，杜绝解释性前后缀。 */
     private static final String FORMAT_RULE =
-            "只输出一个 JSON 对象：{\"memories\":[...]}，不要输出任何解释、前后缀或代码围栏。";
+            "只输出一个 JSON 对象：{\"memories\":[...]}，不要输出任何解释、前后缀或代码守卫。";
 
     private final LlmClient llmClient;
     private final ObjectMapper objectMapper;
@@ -130,11 +130,11 @@ public class LlmStrategyExecutor {
 
     /**
      * 从原始输出中定位 JSON 片段：
-     * 先剥 ```json 围栏，再截首个 '[' 到末个 ']'；截不到再试 {"...":[...]} 对象形态。
+     * 先剥 ```json 守卫，再截首个 '[' 到末个 ']'；截不到再试 {"...":[...]} 对象形态。
      */
     private String extractJsonArray(String raw) {
         String text = raw.trim();
-        // 剥代码围栏：```json ... ``` 或 ``` ... ```
+        // 剥代码守卫：```json ... ``` 或 ``` ... ```
         if (text.startsWith("```")) {
             int firstNewline = text.indexOf('\n');
             int lastFence = text.lastIndexOf("```");

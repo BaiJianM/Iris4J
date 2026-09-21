@@ -170,7 +170,7 @@ public class LettuceLlmCacheRepository implements LlmCacheRepository {
             return List.of();
         }
         try {
-            // OR 语义 + BM25 排序：词法通道负责召回面，精度由 RRF 排名与精判门兜底
+            // OR 语义 + BM25 排序：词法通道负责召回面，精度由 RRF 排名与重排门槛兜底
             String terms = LexTerms.orQuery(query);
             if (terms == null) {
                 return List.of();
@@ -281,8 +281,8 @@ public class LettuceLlmCacheRepository implements LlmCacheRepository {
         // 清空后仍可能命中陈旧答案。
         List<String> docs = docKeys(namespace);
         List<String> vecs = redis.scanKeys(keys.llmCacheVectorScanPattern(namespace));
-        // 一次 multi-key DEL：逐条 DEL 是 N 次往返（与 removeVectorsBySuffixes 同口径；
-        // 上限 ≈ max-entries，从 ≤1000 次往返收敛为 2 次）
+        // 一次 multi-key DEL：逐条 DEL 是 N 次往返（与 removeVectorsBySuffixes 同标准；
+        // 上限 ≈ max-entries，从 ≤1000 次往返合并为 2 次）
         if (!docs.isEmpty()) {
             redis.del(docs.toArray(String[]::new));
         }
@@ -325,7 +325,7 @@ public class LettuceLlmCacheRepository implements LlmCacheRepository {
             doc.put("response", entry.response());
             doc.put("model", entry.model() == null ? "" : entry.model());
             doc.put("createdAt", entry.createdAt());
-            // 数据版本围栏：依赖实体 → 写入时版本；null 不写（兼容旧条目）
+            // 数据版本守卫：依赖实体 → 写入时版本；null 不写（兼容旧条目）
             if (entry.dependencies() != null) {
                 doc.put("dependencies", entry.dependencies());
             }

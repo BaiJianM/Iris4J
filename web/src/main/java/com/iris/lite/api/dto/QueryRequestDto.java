@@ -48,7 +48,7 @@ public record QueryRequestDto(
     /**
      * 范围条件 DTO：min/max 均可缺省（null = 开放端点）。
      * 端点用 Object：数字毫秒或日期字面量字符串均可
-     * （{@link RangeFilter#parse} 统一按 UTC 字面换算口径）。
+     * （{@link RangeFilter#parse} 统一按 UTC 字面换算标准）。
      * 用独立 record 而不是裸 Map 是为了类型安全 + RangeFilter 里的 min<=max 校验可复用。
      */
     public record RangeDto(Object min, Object max) {

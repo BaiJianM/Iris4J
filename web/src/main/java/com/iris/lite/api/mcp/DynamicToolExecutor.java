@@ -81,7 +81,7 @@ public class DynamicToolExecutor {
             Page<Map<String, Object>> page = queryService.query(
                     toQueryRequest(def, rawArgs, agent));
             // 结果硬裁剪：50 行/32KB 双闸门，
-            // MCP 与 Agent 直连路径同一口径（AgentToolDispatcher 同款）
+            // MCP 与 Agent 直连路径同一标准（AgentToolDispatcher 同款）
             ResultTrimmer.Trimmed trimmed = ResultTrimmer.trim(
                     page.items(), page.total(), objectMapper);
             // 索引回填期提示：回填中查询已降级 SCAN 保正确性，结果可能不完整。

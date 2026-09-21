@@ -162,10 +162,10 @@ public final class RedisKeyPatterns {
     public static final String LLM_CACHE = PREFIX + ":%s:llmcache:%s:%s";
 
     /**
-     * 实体数据版本计数器（数据版本围栏）：{@code iris:{ns}:ver:{entity}}。
+     * 实体数据版本计数器（数据版本守卫）：{@code iris:{ns}:ver:{entity}}。
      *
      * <p>CDC 消费点每次成功投影该实体的变更即 INCR；LLM 缓存条目写入时记录
-     * 依赖实体当时的版本，查找命中后校验版本一致才放行——数据变了旧答案自动失效。
+     * 依赖实体当时的版本，查找命中后校验版本一致才通过——数据变了旧答案自动失效。
      */
     public static final String ENTITY_VERSION = PREFIX + ":%s:ver:%s";
 

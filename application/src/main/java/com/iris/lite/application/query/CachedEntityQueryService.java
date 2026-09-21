@@ -95,9 +95,9 @@ public class CachedEntityQueryService implements EntityQueryService {
     /**
      * 缓存 key = 实体前缀 + 规范化请求哈希前 16 字节。
      *
-     * <p>规范化（哪些请求成分参与 key、如何消除顺序差异）收敛在
+     * <p>规范化（哪些请求成分参与 key、如何消除顺序差异）集中在
      * {@link RequestCanonicalizer}——exact 与 semantic 两级缓存共用同一份清单，
-     * 未来增加请求字段不会出现「两处口径漂移」导致的串号。本层传 null schema
+     * 未来增加请求字段不会出现「两处标准漂移」导致的串号。本层传 null schema
      * = exact 模式：全部过滤值进 key，不同条件的结果绝不互串。
      *
      * <p>key 带 entity 前缀，便于按实体整体失效（CDC 主动失效），

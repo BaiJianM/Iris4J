@@ -39,7 +39,7 @@ public class CustomMemoryStrategy implements MemoryStrategy {
 
     /**
      * 可疑短语黑名单：自定义 prompt 与抽取输出命中即拦截——
-     * 防止把"系统提示词注入/凭据窃取"类内容沉淀为长期记忆并反复注入后续对话。
+     * 防止把"系统提示词注入/凭据窃取"类内容整理为长期记忆并反复注入后续对话。
      */
     private static final List<String> BLACKLIST = List.of(
             "system", "instruction", "ignore", "override", "execute", "eval", "import",

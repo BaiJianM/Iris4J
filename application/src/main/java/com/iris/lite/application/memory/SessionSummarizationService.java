@@ -43,7 +43,7 @@ public class SessionSummarizationService {
     private static final Logger log = LoggerFactory.getLogger(SessionSummarizationService.class);
 
     private static final String SYSTEM_PROMPT =
-            "你是会话摘要器。只输出摘要正文，不要任何解释、前后缀或代码围栏。";
+            "你是会话摘要器。只输出摘要正文，不要任何解释、前后缀或代码守卫。";
 
     /** 渐进摘要 prompt。 */
     private static final String USER_PROMPT_TEMPLATE = """

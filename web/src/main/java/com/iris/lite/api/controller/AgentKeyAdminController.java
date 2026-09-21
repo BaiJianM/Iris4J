@@ -29,7 +29,7 @@ import java.util.Map;
  * <p>挂 {@code /api/v1/admin} 前缀（便于网关按路径收紧来源）；
  * 鉴权仍走统一的 API-Key 过滤器，<b>本控制器额外要求 operator 身份</b>：
  * 请求身份须持通配 tag {@code *}（即 legacy key）——"有 operator 权限的人才能发 key"。
- * 鉴权整体关闭（本地开发）时放行，与全局姿态一致。
+ * 鉴权整体关闭（本地开发）时通过，与全局姿态一致。
  *
  * <p>端点：
  * <ul>
@@ -121,7 +121,7 @@ public class AgentKeyAdminController {
     }
 
     /**
-     * operator 校验：无身份（鉴权关闭）放行；有身份必须持通配 {@code *}（legacy）。
+     * operator 校验：无身份（鉴权关闭）通过；有身份必须持通配 {@code *}（legacy）。
      */
     private void requireOperator(String action) {
         var attrs = RequestContextHolder.getRequestAttributes();

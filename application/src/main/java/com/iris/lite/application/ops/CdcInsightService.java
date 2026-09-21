@@ -14,7 +14,7 @@ public interface CdcInsightService {
     /**
      * 单个 source 的管道视图；计数取不到（stream/group 未创建）为 null——UI 显示"未知"而非 0。
      *
-     * <p>lag 与 streamLen 的口径区别：lag 是主消费组尚未投递的事件数
+     * <p>lag 与 streamLen 的标准区别：lag 是主消费组尚未投递的事件数
      * （真实积压，消费跟上就归零）；streamLen 是 XLEN（stream 保留的事件总量，
      * Debezium 消费后不删除，只增不减，本质是历史累计）。
      */

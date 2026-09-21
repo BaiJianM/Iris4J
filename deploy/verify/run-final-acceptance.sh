@@ -57,7 +57,7 @@ stage "阶段 5/5：Agent 时间问答实测（8/30 应答 1217）"
 CLEARED=$(curl -s --noproxy '*' -m 30 -X DELETE "$BASE/api/v1/llm-cache?namespace=${NS}")
 echo "  llm-cache 已清：$CLEARED"
 
-Q="2026年8月30日一共有多少笔订单？请只回答准确数字并简述口径。"
+Q="2026年8月30日一共有多少笔订单？请只回答准确数字并简述标准。"
 SID="t26-timecheck-$(date +%s)"
 echo "  问题：$Q"
 curl -sN --noproxy '*' -m 240 -X POST "$BASE/api/v1/agent/chat" \
@@ -96,7 +96,7 @@ else
   echo "  [FAIL] 回答未包含 1217"
 fi
 if printf '%s' "$ANSWER" | grep -q '2484'; then
-  echo "  [FAIL] 回答出现 2484（累加式错答，说明时区口径仍错）"
+  echo "  [FAIL] 回答出现 2484（累加式错答，说明时区标准仍错）"
   TIME_PASS=0
 fi
 if [ -z "$ANSWER" ]; then

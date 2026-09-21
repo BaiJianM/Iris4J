@@ -156,14 +156,14 @@ public class AccessControlledEntityQueryService implements EntityQueryService {
 
     /**
      * 行级 access tags 条件注入——query 与 aggregate 共用的安全原语
-     * （交集语义这类安全规则收敛在一份实现里，避免两份拷贝漂移出越权漏洞）。
+     * （交集语义这类安全规则集中在一份实现里，避免两份拷贝漂移出越权漏洞）。
      *
      * <p><b>安全条件覆盖同名字段</b>——调用方传入的 accessTagField 值不构成提权通道。
      *
      * <p><b>与该字段显式约束的交集语义（重要）</b>：当 accessTagField 上另有
      * 单值约束（典型：accessTagField = tenantField，tenant 参数就是约束）时，
      * 行必须"在授权集合内 **且** 满足显式约束"。若直接注入整个授权集合，
-     * TAG 多值的 OR 语义会让"授权含 t1、请求 t2"的查询放行 t1 行（越权）。
+     * TAG 多值的 OR 语义会让"授权含 t1、请求 t2"的查询通过 t1 行（越权）。
      * 因此：显式约束 ∈ 授权集合 -> 收窄为单值 {constraint}；不在 -> fail-closed。
      *
      * @param path   日志路径标签（query / aggregate），fail-closed 时区分入口

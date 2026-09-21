@@ -11,7 +11,7 @@ import java.util.List;
  * @param model      模型名，可空
  * @param ttlSeconds 过期秒数，null 用服务端配置（默认 3600）
  * @param dependencies 依赖实体名列表（同 namespace，可空）。声明后写入时记录各实体
- *                     当前数据版本，命中即校验——数据变更过的条目自动过期（数据版本围栏）
+ *                     当前数据版本，命中即校验——数据变更过的条目自动过期（数据版本守卫）
  */
 public record LlmCacheStoreRequest(
         String namespace,

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  *
  * <p><b>策略（与 REST 侧逐字一致）</b>：
  * <ul>
- *   <li>鉴权关闭（本地开发默认）：放行——「匿名即 operator」是已文档化的
+ *   <li>鉴权关闭（本地开发默认）：通过——「匿名即 operator」是已文档化的
  *       本地语义（见 {@code StartupSecurityWarning} 的启动警告），否则 console
  *       演示开箱即碎；</li>
  *   <li>鉴权开启：身份必须持通配 tag {@code *}（legacy key）——per-agent key

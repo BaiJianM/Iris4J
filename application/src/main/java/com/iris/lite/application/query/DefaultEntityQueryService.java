@@ -176,7 +176,7 @@ public class DefaultEntityQueryService implements EntityQueryService {
      *   <li>Schema 未声明 tenantField -> 非多租户实体，tenant 参数忽略；</li>
      *   <li>声明了 tenantField 但请求未带 tenant -> IRIS-1004 拒绝；</li>
      *   <li>filters 里显式带 tenantField 且与 tenant 不一致 -> IRIS-1005 拒绝（防伪造）；</li>
-     *   <li>filters 里带的值与 tenant 一致 -> 原样放行（幂等，不重复注入）。</li>
+     *   <li>filters 里带的值与 tenant 一致 -> 原样通过（幂等，不重复注入）。</li>
      * </ul>
      */
     private QueryRequest applyTenantScope(EntitySchema schema, QueryRequest request) {

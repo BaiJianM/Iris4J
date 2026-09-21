@@ -124,7 +124,7 @@ public interface KeyStrategy {
     /** LLM 响应缓存文档 key：{@code iris:{ns}:llmcache:{modelTag}:{promptHash}}。 */
     String llmCacheKey(String namespace, String modelTag, String promptHash);
 
-    /** 实体数据版本计数器 key：{@code iris:{ns}:ver:{entity}}（数据版本围栏）。 */
+    /** 实体数据版本计数器 key：{@code iris:{ns}:ver:{entity}}（数据版本守卫）。 */
     String entityVersionKey(String namespace, String entity);
 
     /**

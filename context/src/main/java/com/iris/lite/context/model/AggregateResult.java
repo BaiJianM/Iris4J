@@ -9,7 +9,7 @@ import java.util.Map;
  *
  * <p><b>维度归并</b>：{@code inputGroups} 为归并前组数——
  * 维度归并时 {@code totalGroups} 是归并后的组数（如 8 大类），{@code inputGroups}
- * 是归并前的原始组数（如 2957 个配置实例），调用方（Agent）需要两个数才能声明口径。
+ * 是归并前的原始组数（如 2957 个配置实例），调用方（Agent）需要两个数才能声明标准。
  * 普通聚合两者恒等。
  *
  * <p>行值统一为 JSON 友好类型：数值归约结果转 Double、分组键转 String/Number——

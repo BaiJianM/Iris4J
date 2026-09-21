@@ -42,7 +42,7 @@ import java.util.Set;
  *
  * <p><b>一致性红线</b>：query_entity / get_related_entities 走装配好的
  * {@link EntityQueryService} 链头（access-controlled → semantic → exact → default），
- * 与 MCP 动态工具的执行路径逐字节一致——租户隔离、访问 tags 裁剪、版本围栏、
+ * 与 MCP 动态工具的执行路径逐字节一致——租户隔离、访问 tags 裁剪、版本守卫、
  * 缓存装饰全部自动生效。Agent 不是绕过治理的第二条通路。
  *
  * <p><b>错误约定</b>：业务异常（IRIS-1xxx，如实体不存在/租户缺失）转成
@@ -50,7 +50,7 @@ import java.util.Set;
  * 只有基础设施级异常才向上抛（由编排层转 SSE error 事件）。
  *
  * <p><b>依赖收集</b>：数据查询类工具返回 entitiesTouched（本调用触及的实体名），
- * 编排层聚合后作为 LLM 语义缓存条目的 dependencies（版本围栏）。
+ * 编排层聚合后作为 LLM 语义缓存条目的 dependencies（版本守卫）。
  */
 @Component
 public class AgentToolDispatcher {
@@ -104,7 +104,7 @@ public class AgentToolDispatcher {
         }
     }
 
-    /** 执行结果：resultJson 喂回模型；entitiesTouched 供版本围栏声明依赖。 */
+    /** 执行结果：resultJson 喂回模型；entitiesTouched 供版本守卫声明依赖。 */
     public record DispatchResult(String resultJson, Set<String> entitiesTouched) {
     }
 
@@ -205,7 +205,7 @@ public class AgentToolDispatcher {
             out.put("notice", hint);
         }
         // 空结果也声明依赖：数据从无到有是典型的 stale 场景（旧答案"查无数据"在
-        // 数据灌入后即错误，围栏必须拦截）
+        // 数据灌入后即错误，守卫必须拦截）
         return new DispatchResult(objectMapper.writeValueAsString(out), Set.of(entity));
     }
 
@@ -277,7 +277,7 @@ public class AgentToolDispatcher {
         out.put("entity", entity);
         out.put("totalGroups", result.totalGroups());
         if (result.inputGroups() != result.totalGroups()) {
-            // 维度归并时声明口径：2957 个配置实例归并成 8 类，模型需要这两个数
+            // 维度归并时声明标准：2957 个配置实例归并成 8 类，模型需要这两个数
             out.put("inputGroups", result.inputGroups());
         }
         out.put("rows", result.rows());
@@ -285,7 +285,7 @@ public class AgentToolDispatcher {
         if (hint != null) {
             out.put("notice", hint);
         }
-        // 空组也声明依赖：数据从无到有是典型 stale 场景（围栏口径，与 query 一致）。
+        // 空组也声明依赖：数据从无到有是典型 stale 场景（守卫标准，与 query 一致）。
         // 维度归并：维表实体（via）一并声明——维表变更必须令归并结果失效
         Set<String> touched = new HashSet<>(Set.of(entity));
         for (String g : groupBy) {
@@ -310,7 +310,7 @@ public class AgentToolDispatcher {
         int pageSize = args.path("page_size").asInt(20);
         Map<String, Object> result = relatedEntityService.related(
                 ctx.namespace(), entity, id, field, tenant, ctx.agentTags(), page, pageSize);
-        // 触及实体 = 源实体 + 全部关系的目标实体（供版本围栏声明依赖）
+        // 触及实体 = 源实体 + 全部关系的目标实体（供版本守卫声明依赖）
         Set<String> touched = new HashSet<>();
         touched.add(entity);
         Object relations = result.get("relations");
@@ -360,7 +360,7 @@ public class AgentToolDispatcher {
                 fm.put("description", f.description());
             }
             // 值域语义：枚举/状态类字段各取值的含义（如 0=未支付; 1=已支付）。
-            // 聚合口径类问题（营收只算已支付）的正答前提，模型第二跳即可见
+            // 聚合标准类问题（营收只算已支付）的正答前提，模型第二跳即可见
             if (f.values() != null) {
                 fm.put("values", f.values());
             }

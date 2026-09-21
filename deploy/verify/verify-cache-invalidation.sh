@@ -165,7 +165,7 @@ if [ "${G_PEN:-0}" != "0" ]; then
   echo "         它只能靠 reclaim 慢速消化（约 1 条/5.7 秒），会偶发触发失效；"
   echo "         若第 3 步「索引成员 >=5」失败，先怀疑这个而不是失效逻辑。"
 fi
-ok "目标实体已追平（${ENTITY} lag=0 pending=${G_PEN:-0}，失效断言可归因）"
+ok "目标实体已追平（${ENTITY} lag=0 pending=${G_PEN:-0}，失效断言可定位）"
 
 echo "== 1. 清理基线（按索引成员清单删，不做全库 SCAN） =="
 for member in $(redis SMEMBERS "$INDEX_KEY" 2>/dev/null | tr -d '\r'); do
