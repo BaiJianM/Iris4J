@@ -133,17 +133,6 @@ http://127.0.0.1:8080/mcp   (Streamable-HTTP, 需 X-API-Key 时透传)
 
 `on-demand` 模式下 `tools/list` 恒 25 个（23 静态 + `search_entity_tools` / `call_entity_tool` 两跳发现），Schema 热载后自动广播 `tools/list_changed`——数百实体不会撑爆 Agent 上下文。
 
-## 生产部署 Checklist（单机）
-
-部署到生产前逐项确认（本地开发姿态的默认值在生产都是坑）：
-
-- [ ] **设 `IRIS_API_KEY`**——为空时全部端点匿名可访问且匿名即 operator（Schema 编辑/agent key 管理全开放），启动日志会有醒目 WARN；
-- [ ] **收口 `/actuator/**`**——该前缀豁免 X-API-Key 鉴权（控制台健康探测与指标页依赖），生产必须经网关限制来源（仅内网/管理网段），或改独立 management 端口加防火墙；
-- [ ] **修改 compose 默认密码**（`iris-root`/`iris-pg`/`debezium`）并同步到 Debezium 的 `application.properties` 与一致性校验环境变量；
-- [ ] **确认 Stream 裁剪**——`iris.cdc.stream-maxlen`（默认 100000）对已消费事件做 XTRIM，防止长期运行 stream 无限增长；多副本部署时该值必须远大于未消费积压；
-- [ ] **毒消息监控**——消费失败超 `iris.cdc.max-deliveries`（默认 3）自动转 DLQ（`{stream}:dlq`），经控制台 CDC 页或 `dlq_replay` MCP 工具人工重放；
-- [ ] **模型服务就绪**——远程 embedding/rerank 服务不可达时启动仅 WARN，查询路径一致 MISS 回源（不假命中）；离线环境可用 `iris.embedder.type=bm25` + `iris.llm-cache.rerank.enabled=false` 降级。
-
 ## 文档
 
 - [docs/iris-lite项目总览.md](docs/iris-lite项目总览.md) — 对标范围、架构、安全红线、踩坑清单、端点速查（必读）
