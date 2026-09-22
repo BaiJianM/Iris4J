@@ -176,12 +176,13 @@ iris:
   llm:
     # 总开关：关闭时不创建 LLM 客户端 bean（同时应关闭 memory.extractor）
     enabled: true
-    # 阿里云百炼（当前生效）：OpenAI 兼容端点，注意须带 /compatible-mode/v1 前缀
-    base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    # 阿里云百炼（默认值）：OpenAI 兼容端点，注意须带 /compatible-mode/v1 前缀
+    # 三项均可环境变量覆盖（本机专属值写 application-local.yml 或 export，不落仓库）
+    base-url: ${IRIS_LLM_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
     # 密钥不落仓库：启动前 export IRIS_LLM_API_KEY=sk-xxx
     api-key: ${IRIS_LLM_API_KEY:}
     # 推理模型：reasoning 阶段消耗输出预算，max-tokens 红线同下
-    model: deepseek-v4.1-flash
+    model: ${IRIS_LLM_MODEL:glm-5.3}
     # --- 备选 1：DeepSeek 云端 ---
 #    base-url: https://api.deepseek.com
 

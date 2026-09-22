@@ -149,8 +149,8 @@ export default function App() {
             <Dot tone={healthy === null ? "neutral" : healthy ? "hit" : "error"} />
             {healthy === null ? "检测中" : healthy ? "已连接" : "未连接"}
           </span>
-          <span className="flex items-center gap-1.5 font-mono text-[13px] text-fg-muted">
-            key {keyMask}
+          <span className="flex items-center gap-1.5 font-mono text-[13px] text-fg-muted" title="REST/MCP 鉴权头 X-API-Key（设置页配置）；与 LLM 模型 key 无关，后端未开启鉴权时匿名访问">
+            {keyMask === "未配置" ? "API key 未配置（匿名访问）" : `API key ${keyMask}`}
             {role && <Badge tone={role === "operator" ? "readonly" : "accent"}>{role}</Badge>}
           </span>
           {/* 顶栏切换与设置页同语义：持久化 + 广播（原实现只改 state，刷新即丢） */}
