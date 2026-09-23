@@ -4,7 +4,7 @@
 // 前端一律发相对路径，由 vite dev 代理按前缀分流（见 vite.config.ts）；
 // 鉴权：X-API-Key（设置页配置，存 localStorage）；未配置 = 匿名访问（后端未开启鉴权时可用）
 
-const API_KEY_STORAGE = "iris-lite.apiKey"
+const API_KEY_STORAGE = "redis-iris-java.apiKey"
 
 export function getApiKey(): string {
   try {

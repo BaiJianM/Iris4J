@@ -8,7 +8,7 @@
 #
 # 【前置条件（不满足会被守卫拦下）】
 #   1. iris-debezium 容器已停止（否则新事件会把 stream/投影键重新写回来）；
-#   2. iris-lite 应用建议已停（避免清完后消费者对已删流反复报错；PG/MySQL 无所谓）。
+#   2. redis-iris-java 应用建议已停（避免清完后消费者对已删流反复报错；PG/MySQL 无所谓）。
 #
 # 用法：
 #   ./deploy/verify/decommission-log-tables.sh            # dry-run：只统计，不删任何东西
@@ -84,7 +84,7 @@ done
 echo "----"
 if [ "$CONFIRM" = "yes" ]; then
   echo "完成：共删除投影键 $total_keys 条。"
-  echo "下一步：docker start iris-debezium（新 exclude.list 生效）→ 重建并启动 iris-lite（sources 已缩减 125 块）"
+  echo "下一步：docker start iris-debezium（新 exclude.list 生效）→ 重建并启动 redis-iris-java（sources 已缩减 125 块）"
 else
   echo "dry-run 结束，未删除任何数据。确认无误后执行：IRIS_CONFIRM=yes $0"
 fi

@@ -10,7 +10,7 @@
 # 唯一能发现它的标准就是「源库行数 vs 索引文档数」——本脚本即该断言。
 #
 # 用法： ./deploy/verify/verify-cdc-completeness.sh [namespace]
-# 前置：iris-lite 已运行（索引已建）；iris-redis / iris-mysql 容器可用。
+# 前置：redis-iris-java 已运行（索引已建）；iris-redis / iris-mysql 容器可用。
 set -uo pipefail
 
 NS="${1:-${IRIS_NS:-ecomm}}"

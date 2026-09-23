@@ -1,8 +1,8 @@
-name: iris-lite
+name: redis-iris-java
 
-# iris-lite 部署编排
+# redis-iris-java 部署编排
 # 三件套：redis(standalone) + mysql(单数据源) + debezium-server(独立运行)
-# iris-lite 应用本身用 IDE 或 java -jar 本地启动，不进本编排。
+# redis-iris-java 应用本身用 IDE 或 java -jar 本地启动，不进本编排。
 
 services:
   redis:

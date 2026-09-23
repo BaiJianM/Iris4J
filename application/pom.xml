@@ -6,26 +6,26 @@
 
     <parent>
         <groupId>com.iris</groupId>
-        <artifactId>iris-lite</artifactId>
+        <artifactId>redis-iris-java</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>iris-lite-application</artifactId>
-    <name>iris-lite-application</name>
+    <artifactId>redis-iris-java-application</artifactId>
+    <name>redis-iris-java-application</name>
     <description>用例编排和统一应用服务（不包含 Redis 命令和 MCP 传输细节）</description>
 
     <dependencies>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>iris-lite-context</artifactId>
+            <artifactId>redis-iris-java-context</artifactId>
         </dependency>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>iris-lite-memory</artifactId>
+            <artifactId>redis-iris-java-memory</artifactId>
         </dependency>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>iris-lite-cache</artifactId>
+            <artifactId>redis-iris-java-cache</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

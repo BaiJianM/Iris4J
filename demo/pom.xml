@@ -6,25 +6,25 @@
 
     <parent>
         <groupId>com.iris</groupId>
-        <artifactId>iris-lite</artifactId>
+        <artifactId>redis-iris-java</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>iris-lite-demo</artifactId>
-    <name>iris-lite-demo</name>
+    <artifactId>redis-iris-java-demo</artifactId>
+    <name>redis-iris-java-demo</name>
     <description>Agent 演示模块（boot）：聊天循环 + SSE + 配方自进化 + console 前端，独立于中间件部署体系</description>
 
     <dependencies>
         <!-- 中间件 HTTP 面（含 REST/MCP 端点与安全，console 页面消费）+ 传递业务模块 -->
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>iris-lite-web</artifactId>
+            <artifactId>redis-iris-java-web</artifactId>
         </dependency>
         <!-- 演示链路的端口实现（AgentChatClient/McpToolPort/QueryPathAdvisor/RecipeDraftStore impl）
              直接引用 infrastructure 内部类（如 RedisAdapter），需要编译期可见 -->
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>iris-lite-infrastructure</artifactId>
+            <artifactId>redis-iris-java-infrastructure</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -56,7 +56,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
-                    <mainClass>com.iris.lite.demo.DemoApplication</mainClass>
+                    <mainClass>com.iris.lite.java.demo.DemoApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>

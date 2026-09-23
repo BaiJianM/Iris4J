@@ -1,5 +1,5 @@
 {
-  "name": "iris-lite-console",
+  "name": "redis-iris-java-console",
   "private": true,
   "version": "1.0.0",
   "type": "module",

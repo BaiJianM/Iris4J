@@ -132,7 +132,7 @@ def main() -> None:
             f"      - namespace: {NS}\n"
             f"        stream: iris.{DB}.{t}\n"
             f"        entity: {t}\n"
-            f"        group: iris-lite-ecomm-{t}\n"
+            f"        group: redis-iris-java-ecomm-{t}\n"
             f"        consumer: cdc-ecomm-{t}\n"
             f"        block-ms: 1000")
 

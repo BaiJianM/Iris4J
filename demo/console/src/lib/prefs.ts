@@ -1,7 +1,7 @@
 // namespace 列表管理：后端无 namespace 枚举端点，本地面板维护
 // 缺省 ecomm（全库电商演示数据），用户可在设置页添加（存 localStorage，不伪造后端数据）
 
-const NS_STORAGE = "iris-lite.namespaces"
+const NS_STORAGE = "redis-iris-java.namespaces"
 const BASELINE_NS = "ecomm"
 
 // demo 命名空间无 Schema（全库即演示数据）：旧 localStorage 残留直接清除，

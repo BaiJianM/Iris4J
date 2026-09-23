@@ -49,8 +49,8 @@ stage "阶段 4/5：语义缓存索引路径"
 PHASE4_RC=$?
 
 stage "阶段 5/5：Agent 时间问答实测（8/30 应答 1217）"
-# /api/v1/agent/* 属演示链路，在 demo jar（iris-lite-demo）。
-# BASE 须指向 demo 进程；对中间件 jar（iris-lite-api）该端点不存在（404）。
+# /api/v1/agent/* 属演示链路，在 demo jar（redis-iris-java-demo）。
+# BASE 须指向 demo 进程；对中间件 jar（redis-iris-java-api）该端点不存在（404）。
 # 先清 llm-cache：语义缓存会把上一次的错误答案（2484 那类）直接命中回来，
 # 不清就测不出提示词是否真的生效。走应用端点清（不用 docker exec --scan，
 # 那会制造残留扫描客户端污染后续 scan 断言）。
