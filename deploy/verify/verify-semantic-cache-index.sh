@@ -31,7 +31,7 @@
 #             才作为断言，否则降级为提示。
 #
 # 用法： ./deploy/verify/verify-semantic-cache-index.sh
-# 前置：redis-iris-java 已在 $IRIS_BASE 运行；iris-redis 容器可用；单实例。
+# 前置：iris4j 已在 $IRIS_BASE 运行；iris-redis 容器可用；单实例。
 # 可用 IRIS_ENTITY 覆盖探针实体（覆盖成有 CDC 流的实体时，请等排空完成再跑）。
 set -uo pipefail
 
@@ -86,9 +86,9 @@ cdc_idle() {
 
 echo "== 0. 前置 =="
 if curl -s --noproxy '*' -m 5 "$BASE/actuator/health" | grep -q '"status":"UP"'; then
-  ok "redis-iris-java 健康"
+  ok "iris4j 健康"
 else
-  bad "redis-iris-java 未就绪（$BASE）"
+  bad "iris4j 未就绪（$BASE）"
   exit 1
 fi
 

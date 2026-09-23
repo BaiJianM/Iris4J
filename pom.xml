@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.iris</groupId>
-    <artifactId>redis-iris-java</artifactId>
+    <artifactId>iris4j</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>redis-iris-java</name>
+    <name>iris4j</name>
     <description>Redis Iris-like capability layer for agents (Java)</description>
 
     <modules>
@@ -48,52 +48,52 @@
             <!-- 内部模块 -->
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-shared</artifactId>
+                <artifactId>iris4j-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-context</artifactId>
+                <artifactId>iris4j-context</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-application</artifactId>
+                <artifactId>iris4j-application</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-infrastructure</artifactId>
+                <artifactId>iris4j-infrastructure</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-cdc</artifactId>
+                <artifactId>iris4j-cdc</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-memory</artifactId>
+                <artifactId>iris4j-memory</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-cache</artifactId>
+                <artifactId>iris4j-cache</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-web</artifactId>
+                <artifactId>iris4j-web</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-api</artifactId>
+                <artifactId>iris4j-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.iris</groupId>
-                <artifactId>redis-iris-java-demo</artifactId>
+                <artifactId>iris4j-demo</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

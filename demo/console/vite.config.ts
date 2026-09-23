@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
-// redis-iris-java 管理控制台 — 由 Figma Make 导出 Demo 还原而来（剔除 Figma 专用插件）
+// iris4j 管理控制台 — 由 Figma Make 导出 Demo 还原而来（剔除 Figma 专用插件）
 export default defineConfig({
   base: '/',
   build: {

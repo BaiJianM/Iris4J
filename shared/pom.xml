@@ -6,12 +6,12 @@
 
     <parent>
         <groupId>com.iris</groupId>
-        <artifactId>redis-iris-java</artifactId>
+        <artifactId>iris4j</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>redis-iris-java-shared</artifactId>
-    <name>redis-iris-java-shared</name>
+    <artifactId>iris4j-shared</artifactId>
+    <name>iris4j-shared</name>
     <description>公共模型、异常、分页、namespace 与指标门面</description>
 
     <dependencies>

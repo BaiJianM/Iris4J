@@ -1,8 +1,8 @@
-name: redis-iris-java
+name: iris4j
 
-# redis-iris-java 部署编排
+# Iris4J 部署编排
 # 三件套：redis(standalone) + mysql(单数据源) + debezium-server(独立运行)
-# redis-iris-java 应用本身用 IDE 或 java -jar 本地启动，不进本编排。
+# Iris4J 应用本身用 IDE 或 java -jar 本地启动，不进本编排。
 
 services:
   redis:

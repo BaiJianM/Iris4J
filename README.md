@@ -1,10 +1,10 @@
-# redis-iris-java
+# Iris4J
 
-## Why：Redis-Iris-Java VS 直连数据库方案
+## Why：Iris4J VS 直连数据库方案
 
 Agent 直连生产库（text-to-SQL）看似省掉一层，实际是把最不可控的 LLM 焊在最不可出事的基础设施上。
 
-| 维度 | 直连生产库 | Redis-Iris-Java |
+| 维度 | 直连生产库 | Iris4J |
 |---|---|---|
 | 故障隔离 | 一条 LLM 生成的全表聚合即可拖垮连接池 | 超时硬顶 + 50 行/32KB 结果裁剪，代价封顶在 Redis 侧，碰不到源库 |
 | 行级权限 | DB 只认连接账号，多 agent 共用只读账号时隔离归零 | 按 agent 注入 access tags：行级 fail-closed、字段裁剪、租户防伪造 |
@@ -15,7 +15,7 @@ Agent 直连生产库（text-to-SQL）看似省掉一层，实际是把最不可
 
 基于 **Redis 8** 的 AI Agent 数据访问层（Java 复刻版），对标 [Redis Iris](https://github.com/redis/iris) 官方四大服务，全部能力均有实现承载：
 
-| 官方服务 | redis-iris-java 对应能力 |
+| 官方服务 | iris4j 对应能力 |
 |---|---|
 | **Data Integration** | MySQL/PostgreSQL → Debezium Server → Redis Stream → 实时投影（hash/JSON）+ FT 二级索引 + 缓存失效 + 数据版本 bump |
 | **Context Retriever** | YAML 声明式 Schema（热载）→ 治理链（字段裁剪/租户隔离/access tags/索引校验）→ Query Engine 索引查询 |
@@ -82,7 +82,7 @@ export JAVA_HOME=/path/to/jdk-21
 ./mvnw -DskipTests clean package
 
 # 4. 运行（中间件 fat jar，默认 :8080）
-java -jar web/target/redis-iris-java-web-*-exec.jar
+java -jar web/target/iris4j-web-*-exec.jar
 
 # 5. 验证
 curl http://127.0.0.1:8080/actuator/health
@@ -154,5 +154,3 @@ http://127.0.0.1:8080/mcp   (Streamable-HTTP, 需 X-API-Key 时透传)
 ## License
 
 [Apache-2.0](LICENSE)
-
-> Redis 和 Iris 是 Redis Ltd. 的商标。本项目为独立实现的 Java 版本，与 Redis Ltd. 无关联，亦未经其认可。

@@ -6,27 +6,27 @@
 
     <parent>
         <groupId>com.iris</groupId>
-        <artifactId>redis-iris-java</artifactId>
+        <artifactId>iris4j</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>redis-iris-java-cdc</artifactId>
-    <name>redis-iris-java-cdc</name>
+    <artifactId>iris4j-cdc</artifactId>
+    <name>iris4j-cdc</name>
     <description>Stream 消费、事件转换、幂等投影（不负责对外查询）</description>
 
     <dependencies>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-application</artifactId>
+            <artifactId>iris4j-application</artifactId>
         </dependency>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-infrastructure</artifactId>
+            <artifactId>iris4j-infrastructure</artifactId>
         </dependency>
         <!-- 直接使用 shared 的 IrisMetrics 门面，不靠传递依赖 -->
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-shared</artifactId>
+            <artifactId>iris4j-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

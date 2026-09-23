@@ -6,18 +6,18 @@
 
     <parent>
         <groupId>com.iris</groupId>
-        <artifactId>redis-iris-java</artifactId>
+        <artifactId>iris4j</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>redis-iris-java-cache</artifactId>
-    <name>redis-iris-java-cache</name>
+    <artifactId>iris4j-cache</artifactId>
+    <name>iris4j-cache</name>
     <description>精确缓存与语义缓存：缓存仓储端口（精确缓存首期实现）</description>
 
     <dependencies>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-shared</artifactId>
+            <artifactId>iris4j-shared</artifactId>
         </dependency>
         <!-- @JsonIgnoreProperties（LlmCacheEntry 忽略存储侧派生字段 lex） -->
         <dependency>

@@ -6,36 +6,36 @@
 
     <parent>
         <groupId>com.iris</groupId>
-        <artifactId>redis-iris-java</artifactId>
+        <artifactId>iris4j</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>redis-iris-java-web</artifactId>
-    <name>redis-iris-java-web</name>
+    <artifactId>iris4j-web</artifactId>
+    <name>iris4j-web</name>
     <description>中间件 HTTP 面 + 启动模块：REST 数据/运维端点 + MCP 服务面 + 安全，产物为不含演示的中间件 fat jar</description>
 
     <dependencies>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-application</artifactId>
+            <artifactId>iris4j-application</artifactId>
         </dependency>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-memory</artifactId>
+            <artifactId>iris4j-memory</artifactId>
         </dependency>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-cache</artifactId>
+            <artifactId>iris4j-cache</artifactId>
         </dependency>
         <!-- runtime 传递给 boot 模块（api/demo）打包；本模块代码不直接引用 -->
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-cdc</artifactId>
+            <artifactId>iris4j-cdc</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-infrastructure</artifactId>
+            <artifactId>iris4j-infrastructure</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -71,7 +71,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
-                    <mainClass>com.iris.lite.java.api.RedisIrisJavaApplication</mainClass>
+                    <mainClass>com.iris4j.api.Iris4JApplication</mainClass>
                     <!-- fat jar 挂 -exec 分类器，主产物保持普通 JAR：
                          demo 模块依赖本模块时必须解析到普通 JAR，
                          fat jar 的类藏在 BOOT-INF/classes 里无法作为依赖使用 -->

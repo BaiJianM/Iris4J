@@ -3,7 +3,7 @@
 
 export type MetricSample = { t: number; v: number }
 
-const SERIES_PREFIX = "redis-iris-java.series."
+const SERIES_PREFIX = "iris4j.series."
 const MAX_POINTS = 1440 // 12h @ 30s
 
 type Measurement = { statistic: string; value: number }
@@ -56,7 +56,7 @@ export type QueryLatencyRow = {
  */
 export async function fetchQueryLatency(): Promise<QueryLatencyRow[]> {
   try {
-    const apiKey = localStorage.getItem("redis-iris-java.apiKey") ?? ""
+    const apiKey = localStorage.getItem("iris4j.apiKey") ?? ""
     const res = await fetch("/api/v1/metrics/query-latency", {
       headers: apiKey ? { "X-API-Key": apiKey } : {},
     })

@@ -47,7 +47,7 @@ const NAV: NavGroup[] = [
 export default function App() {
   const [light, setLight] = useState(() => {
     try {
-      return localStorage.getItem("redis-iris-java.theme") === "light"
+      return localStorage.getItem("iris4j.theme") === "light"
     } catch {
       return false // localStorage 被禁用：回落暗色（默认主题）
     }
@@ -98,15 +98,15 @@ export default function App() {
       refreshIdentity()
       toast("设置已保存，顶栏状态已刷新")
     }
-    window.addEventListener("redis-iris-java.settings-saved", handler)
-    return () => window.removeEventListener("redis-iris-java.settings-saved", handler)
+    window.addEventListener("iris4j.settings-saved", handler)
+    return () => window.removeEventListener("iris4j.settings-saved", handler)
   }, [refreshIdentity])
 
   // 设置页切主题
   useEffect(() => {
     const handler = (e: Event) => setLight((e as CustomEvent<boolean>).detail)
-    window.addEventListener("redis-iris-java.theme-change", handler)
-    return () => window.removeEventListener("redis-iris-java.theme-change", handler)
+    window.addEventListener("iris4j.theme-change", handler)
+    return () => window.removeEventListener("iris4j.theme-change", handler)
   }, [])
 
   const Current = PAGES[page].component
@@ -130,7 +130,7 @@ export default function App() {
           </button>
           <div className="flex items-center gap-2">
             <span className="grid size-6 place-items-center rounded bg-accent text-[14px] font-bold text-white">i</span>
-            <span className="text-[16px] font-semibold tracking-tight">redis-iris-java 控制台</span>
+            <span className="text-[16px] font-semibold tracking-tight">iris4j 控制台</span>
           </div>
         </div>
 
@@ -161,11 +161,11 @@ export default function App() {
               const next = !light
               setLight(next)
               try {
-                localStorage.setItem("redis-iris-java.theme", next ? "light" : "dark")
+                localStorage.setItem("iris4j.theme", next ? "light" : "dark")
               } catch {
                 /* ignore */
               }
-              window.dispatchEvent(new CustomEvent("redis-iris-java.theme-change", { detail: next }))
+              window.dispatchEvent(new CustomEvent("iris4j.theme-change", { detail: next }))
             }}
           >
             {light ? "🌙 暗色" : "☀ 亮色"}

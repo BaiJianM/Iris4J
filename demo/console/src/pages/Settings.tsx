@@ -4,7 +4,7 @@ import { api, getApiKey, maskKey, probeRole, setApiKey } from "../lib/api"
 import { addNamespace, getNamespaces, removeNamespace } from "../lib/prefs"
 import type { PageProps } from "."
 
-const THEME_KEY = "redis-iris-java.theme"
+const THEME_KEY = "iris4j.theme"
 
 export default function Settings(_: PageProps) {
   const [test, setTest] = useState<null | { ok: boolean; role: string; msg: string }>(null)
@@ -42,7 +42,7 @@ export default function Settings(_: PageProps) {
     } catch {
       /* ignore */
     }
-    window.dispatchEvent(new CustomEvent("redis-iris-java.theme-change", { detail: t === "light" }))
+    window.dispatchEvent(new CustomEvent("iris4j.theme-change", { detail: t === "light" }))
   }
 
   const testConn = async () => {
@@ -157,7 +157,7 @@ export default function Settings(_: PageProps) {
               <Toggle checked onChange={() => toast("采样/轮询周期固定为 30s，与指标采样一致", "warn")} />
             </div>
           </div>
-          <Button variant="primary" className="w-fit" onClick={() => window.dispatchEvent(new CustomEvent("redis-iris-java.settings-saved"))}>
+          <Button variant="primary" className="w-fit" onClick={() => window.dispatchEvent(new CustomEvent("iris4j.settings-saved"))}>
             保存设置
           </Button>
         </div>

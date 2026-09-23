@@ -6,18 +6,18 @@
 
     <parent>
         <groupId>com.iris</groupId>
-        <artifactId>redis-iris-java</artifactId>
+        <artifactId>iris4j</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>redis-iris-java-context</artifactId>
-    <name>redis-iris-java-context</name>
+    <artifactId>iris4j-context</artifactId>
+    <name>iris4j-context</name>
     <description>实体查询、Schema 解释和结果转换</description>
 
     <dependencies>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-shared</artifactId>
+            <artifactId>iris4j-shared</artifactId>
         </dependency>
     </dependencies>
 </project>

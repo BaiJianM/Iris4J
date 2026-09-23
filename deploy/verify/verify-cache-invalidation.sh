@@ -11,7 +11,7 @@
 # 而不是耗时（耗时受数据量与负载波动影响，不可复现）。
 #
 # 用法：./deploy/verify/verify-cache-invalidation.sh
-# 前置：redis-iris-java 已在 $IRIS_BASE 运行；iris-redis / iris-mysql 容器可用。
+# 前置：iris4j 已在 $IRIS_BASE 运行；iris-redis / iris-mysql 容器可用。
 #
 # 【先决条件：目标实体的 CDC 流必须已追平（lag=0）】
 # 第 3 步要造缓存条目 + 索引成员，第 4 步验证「源库变更 → CDC 失效」。若该实体还有
@@ -96,9 +96,9 @@ alive_count() {
 
 echo "== 0. 前置检查 =="
 if curl -s --noproxy '*' -m 5 "$BASE/actuator/health" | grep -q '"status":"UP"'; then
-  ok "redis-iris-java 健康（$BASE）"
+  ok "iris4j 健康（$BASE）"
 else
-  bad "redis-iris-java 未就绪（$BASE/actuator/health）"
+  bad "iris4j 未就绪（$BASE/actuator/health）"
   echo "验收中止：请先启动应用"
   exit 1
 fi
@@ -107,10 +107,10 @@ fi
 # 一旦逼近 2 倍即说明存在第二个实例，此时下面的 scan/smembers 增量统计已不可信 —— 宁可中止也不出错结论。
 XREAD_CONNS=$(redis CLIENT LIST 2>/dev/null | tr -d '\r' | grep -c 'cmd=xreadgroup')
 if [ "${XREAD_CONNS:-0}" -gt 200 ]; then
-  bad "检测到多个 redis-iris-java 实例（XREADGROUP 连接=${XREAD_CONNS}，单实例应 ≈135）"
+  bad "检测到多个 iris4j 实例（XREADGROUP 连接=${XREAD_CONNS}，单实例应 ≈135）"
   echo "原因：每条事件会被两个实例各投影一遍（双写），且任一实例跑着旧字节码时，"
   echo "      会同时污染「数据条数」与「scan 增量」两项结论。"
-  echo "验收中止：请只保留一个实例（jps -l 可列出全部 redis-iris-java 进程）后重试"
+  echo "验收中止：请只保留一个实例（jps -l 可列出全部 iris4j 进程）后重试"
   exit 1
 fi
 ok "单实例确认（XREADGROUP 连接=${XREAD_CONNS}）"

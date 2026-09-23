@@ -1,6 +1,6 @@
 spring:
   application:
-    name: redis-iris-java
+    name: iris4j
   config:
     # 本机覆盖文件（.gitignore 已挡，不入库）：机器相关值——schema/graph 目录、
     # embed/rerank 服务地址等写在这里，仓库内 yml 只留中性默认值
@@ -18,7 +18,7 @@ spring:
       server:
         # Streamable-HTTP 传输，HTTP 端点 /mcp（默认不鉴权，仅本地开发使用）
         protocol: STREAMABLE
-        name: redis-iris-java-mcp
+        name: iris4j-mcp
         version: 0.1.0
 
 server:
@@ -30,12 +30,12 @@ server:
 # ---- 日志 ----
 # 调试期把业务包开到 DEBUG，输出各流程节点（CDC 消费/投影、查询缓存命中、
 # Schema 热加载、MCP 工具注册、Redis 命令）的关键信息。
-# 上生产改回 info：logging.level.com.iris.lite.java=info（或用环境变量覆盖）。
+# 上生产改回 info：logging.level.com.iris4j=info（或用环境变量覆盖）。
 logging:
   level:
     root: info
     # 业务代码全开 debug，便于追踪完整链路
-    com.iris.lite.java: debug
+    com.iris4j: debug
     # Spring Web / MCP 传输层保持 info，避免把 debug 噪音灌进业务日志
     org.springframework.web: info
     org.springframework.ai.mcp: info
@@ -376,751 +376,751 @@ iris:
       - namespace: ecomm
         stream: iris.iris_demo.afc_after_sale
         entity: afc_after_sale
-        group: redis-iris-java-ecomm-afc_after_sale
+        group: iris4j-ecomm-afc_after_sale
         consumer: cdc-ecomm-afc_after_sale
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.afc_after_sale_item
         entity: afc_after_sale_item
-        group: redis-iris-java-ecomm-afc_after_sale_item
+        group: iris4j-ecomm-afc_after_sale_item
         consumer: cdc-ecomm-afc_after_sale_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.afc_dispute
         entity: afc_dispute
-        group: redis-iris-java-ecomm-afc_dispute
+        group: iris4j-ecomm-afc_dispute
         consumer: cdc-ecomm-afc_dispute
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.afc_exchange
         entity: afc_exchange
-        group: redis-iris-java-ecomm-afc_exchange
+        group: iris4j-ecomm-afc_exchange
         consumer: cdc-ecomm-afc_exchange
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.afc_refund
         entity: afc_refund
-        group: redis-iris-java-ecomm-afc_refund
+        group: iris4j-ecomm-afc_refund
         consumer: cdc-ecomm-afc_refund
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.afc_refund_item
         entity: afc_refund_item
-        group: redis-iris-java-ecomm-afc_refund_item
+        group: iris4j-ecomm-afc_refund_item
         consumer: cdc-ecomm-afc_refund_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.afc_return_goods
         entity: afc_return_goods
-        group: redis-iris-java-ecomm-afc_return_goods
+        group: iris4j-ecomm-afc_return_goods
         consumer: cdc-ecomm-afc_return_goods
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.afc_return_goods_track
         entity: afc_return_goods_track
-        group: redis-iris-java-ecomm-afc_return_goods_track
+        group: iris4j-ecomm-afc_return_goods_track
         consumer: cdc-ecomm-afc_return_goods_track
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.base_admin_permission
         entity: base_admin_permission
-        group: redis-iris-java-ecomm-base_admin_permission
+        group: iris4j-ecomm-base_admin_permission
         consumer: cdc-ecomm-base_admin_permission
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.base_admin_role
         entity: base_admin_role
-        group: redis-iris-java-ecomm-base_admin_role
+        group: iris4j-ecomm-base_admin_role
         consumer: cdc-ecomm-base_admin_role
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.base_admin_role_permission
         entity: base_admin_role_permission
-        group: redis-iris-java-ecomm-base_admin_role_permission
+        group: iris4j-ecomm-base_admin_role_permission
         consumer: cdc-ecomm-base_admin_role_permission
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.base_admin_user
         entity: base_admin_user
-        group: redis-iris-java-ecomm-base_admin_user
+        group: iris4j-ecomm-base_admin_user
         consumer: cdc-ecomm-base_admin_user
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.base_admin_user_role
         entity: base_admin_user_role
-        group: redis-iris-java-ecomm-base_admin_user_role
+        group: iris4j-ecomm-base_admin_user_role
         consumer: cdc-ecomm-base_admin_user_role
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.base_dict
         entity: base_dict
-        group: redis-iris-java-ecomm-base_dict
+        group: iris4j-ecomm-base_dict
         consumer: cdc-ecomm-base_dict
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.base_region
         entity: base_region
-        group: redis-iris-java-ecomm-base_region
+        group: iris4j-ecomm-base_region
         consumer: cdc-ecomm-base_region
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.cart_cart
         entity: cart_cart
-        group: redis-iris-java-ecomm-cart_cart
+        group: iris4j-ecomm-cart_cart
         consumer: cdc-ecomm-cart_cart
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.cart_cart_item
         entity: cart_cart_item
-        group: redis-iris-java-ecomm-cart_cart_item
+        group: iris4j-ecomm-cart_cart_item
         consumer: cdc-ecomm-cart_cart_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.cart_cart_stat
         entity: cart_cart_stat
-        group: redis-iris-java-ecomm-cart_cart_stat
+        group: iris4j-ecomm-cart_cart_stat
         consumer: cdc-ecomm-cart_cart_stat
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.cart_checkout_snapshot
         entity: cart_checkout_snapshot
-        group: redis-iris-java-ecomm-cart_checkout_snapshot
+        group: iris4j-ecomm-cart_checkout_snapshot
         consumer: cdc-ecomm-cart_checkout_snapshot
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.log_company
         entity: log_company
-        group: redis-iris-java-ecomm-log_company
+        group: iris4j-ecomm-log_company
         consumer: cdc-ecomm-log_company
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.log_freight_bill
         entity: log_freight_bill
-        group: redis-iris-java-ecomm-log_freight_bill
+        group: iris4j-ecomm-log_freight_bill
         consumer: cdc-ecomm-log_freight_bill
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.log_logistics
         entity: log_logistics
-        group: redis-iris-java-ecomm-log_logistics
+        group: iris4j-ecomm-log_logistics
         consumer: cdc-ecomm-log_logistics
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.log_logistics_exception
         entity: log_logistics_exception
-        group: redis-iris-java-ecomm-log_logistics_exception
+        group: iris4j-ecomm-log_logistics_exception
         consumer: cdc-ecomm-log_logistics_exception
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.log_logistics_package
         entity: log_logistics_package
-        group: redis-iris-java-ecomm-log_logistics_package
+        group: iris4j-ecomm-log_logistics_package
         consumer: cdc-ecomm-log_logistics_package
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.log_logistics_track
         entity: log_logistics_track
-        group: redis-iris-java-ecomm-log_logistics_track
+        group: iris4j-ecomm-log_logistics_track
         consumer: cdc-ecomm-log_logistics_track
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.log_pickup_point
         entity: log_pickup_point
-        group: redis-iris-java-ecomm-log_pickup_point
+        group: iris4j-ecomm-log_pickup_point
         consumer: cdc-ecomm-log_pickup_point
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_contract
         entity: mch_contract
-        group: redis-iris-java-ecomm-mch_contract
+        group: iris4j-ecomm-mch_contract
         consumer: cdc-ecomm-mch_contract
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_merchant
         entity: mch_merchant
-        group: redis-iris-java-ecomm-mch_merchant
+        group: iris4j-ecomm-mch_merchant
         consumer: cdc-ecomm-mch_merchant
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_qualification
         entity: mch_qualification
-        group: redis-iris-java-ecomm-mch_qualification
+        group: iris4j-ecomm-mch_qualification
         consumer: cdc-ecomm-mch_qualification
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_settlement_account
         entity: mch_settlement_account
-        group: redis-iris-java-ecomm-mch_settlement_account
+        group: iris4j-ecomm-mch_settlement_account
         consumer: cdc-ecomm-mch_settlement_account
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_shop
         entity: mch_shop
-        group: redis-iris-java-ecomm-mch_shop
+        group: iris4j-ecomm-mch_shop
         consumer: cdc-ecomm-mch_shop
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_shop_category
         entity: mch_shop_category
-        group: redis-iris-java-ecomm-mch_shop_category
+        group: iris4j-ecomm-mch_shop_category
         consumer: cdc-ecomm-mch_shop_category
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_shop_role
         entity: mch_shop_role
-        group: redis-iris-java-ecomm-mch_shop_role
+        group: iris4j-ecomm-mch_shop_role
         consumer: cdc-ecomm-mch_shop_role
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_shop_score
         entity: mch_shop_score
-        group: redis-iris-java-ecomm-mch_shop_score
+        group: iris4j-ecomm-mch_shop_score
         consumer: cdc-ecomm-mch_shop_score
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_shop_staff
         entity: mch_shop_staff
-        group: redis-iris-java-ecomm-mch_shop_staff
+        group: iris4j-ecomm-mch_shop_staff
         consumer: cdc-ecomm-mch_shop_staff
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mch_shop_staff_role
         entity: mch_shop_staff_role
-        group: redis-iris-java-ecomm-mch_shop_staff_role
+        group: iris4j-ecomm-mch_shop_staff_role
         consumer: cdc-ecomm-mch_shop_staff_role
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_coupon
         entity: mkt_coupon
-        group: redis-iris-java-ecomm-mkt_coupon
+        group: iris4j-ecomm-mkt_coupon
         consumer: cdc-ecomm-mkt_coupon
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_coupon_sku
         entity: mkt_coupon_sku
-        group: redis-iris-java-ecomm-mkt_coupon_sku
+        group: iris4j-ecomm-mkt_coupon_sku
         consumer: cdc-ecomm-mkt_coupon_sku
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_coupon_template
         entity: mkt_coupon_template
-        group: redis-iris-java-ecomm-mkt_coupon_template
+        group: iris4j-ecomm-mkt_coupon_template
         consumer: cdc-ecomm-mkt_coupon_template
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_coupon_use
         entity: mkt_coupon_use
-        group: redis-iris-java-ecomm-mkt_coupon_use
+        group: iris4j-ecomm-mkt_coupon_use
         consumer: cdc-ecomm-mkt_coupon_use
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_discount
         entity: mkt_discount
-        group: redis-iris-java-ecomm-mkt_discount
+        group: iris4j-ecomm-mkt_discount
         consumer: cdc-ecomm-mkt_discount
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_discount_sku
         entity: mkt_discount_sku
-        group: redis-iris-java-ecomm-mkt_discount_sku
+        group: iris4j-ecomm-mkt_discount_sku
         consumer: cdc-ecomm-mkt_discount_sku
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_groupbuy_activity
         entity: mkt_groupbuy_activity
-        group: redis-iris-java-ecomm-mkt_groupbuy_activity
+        group: iris4j-ecomm-mkt_groupbuy_activity
         consumer: cdc-ecomm-mkt_groupbuy_activity
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_groupbuy_member
         entity: mkt_groupbuy_member
-        group: redis-iris-java-ecomm-mkt_groupbuy_member
+        group: iris4j-ecomm-mkt_groupbuy_member
         consumer: cdc-ecomm-mkt_groupbuy_member
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_groupbuy_team
         entity: mkt_groupbuy_team
-        group: redis-iris-java-ecomm-mkt_groupbuy_team
+        group: iris4j-ecomm-mkt_groupbuy_team
         consumer: cdc-ecomm-mkt_groupbuy_team
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_promotion
         entity: mkt_promotion
-        group: redis-iris-java-ecomm-mkt_promotion
+        group: iris4j-ecomm-mkt_promotion
         consumer: cdc-ecomm-mkt_promotion
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_promotion_sku
         entity: mkt_promotion_sku
-        group: redis-iris-java-ecomm-mkt_promotion_sku
+        group: iris4j-ecomm-mkt_promotion_sku
         consumer: cdc-ecomm-mkt_promotion_sku
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_seckill_activity
         entity: mkt_seckill_activity
-        group: redis-iris-java-ecomm-mkt_seckill_activity
+        group: iris4j-ecomm-mkt_seckill_activity
         consumer: cdc-ecomm-mkt_seckill_activity
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_seckill_sku
         entity: mkt_seckill_sku
-        group: redis-iris-java-ecomm-mkt_seckill_sku
+        group: iris4j-ecomm-mkt_seckill_sku
         consumer: cdc-ecomm-mkt_seckill_sku
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_sign_in_record
         entity: mkt_sign_in_record
-        group: redis-iris-java-ecomm-mkt_sign_in_record
+        group: iris4j-ecomm-mkt_sign_in_record
         consumer: cdc-ecomm-mkt_sign_in_record
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.mkt_user_promotion_record
         entity: mkt_user_promotion_record
-        group: redis-iris-java-ecomm-mkt_user_promotion_record
+        group: iris4j-ecomm-mkt_user_promotion_record
         consumer: cdc-ecomm-mkt_user_promotion_record
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ops_daily_sales_stat
         entity: ops_daily_sales_stat
-        group: redis-iris-java-ecomm-ops_daily_sales_stat
+        group: iris4j-ecomm-ops_daily_sales_stat
         consumer: cdc-ecomm-ops_daily_sales_stat
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ops_message
         entity: ops_message
-        group: redis-iris-java-ecomm-ops_message
+        group: iris4j-ecomm-ops_message
         consumer: cdc-ecomm-ops_message
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ops_message_user
         entity: ops_message_user
-        group: redis-iris-java-ecomm-ops_message_user
+        group: iris4j-ecomm-ops_message_user
         consumer: cdc-ecomm-ops_message_user
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ops_notice
         entity: ops_notice
-        group: redis-iris-java-ecomm-ops_notice
+        group: iris4j-ecomm-ops_notice
         consumer: cdc-ecomm-ops_notice
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ops_product_rank
         entity: ops_product_rank
-        group: redis-iris-java-ecomm-ops_product_rank
+        group: iris4j-ecomm-ops_product_rank
         consumer: cdc-ecomm-ops_product_rank
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ops_search_keyword
         entity: ops_search_keyword
-        group: redis-iris-java-ecomm-ops_search_keyword
+        group: iris4j-ecomm-ops_search_keyword
         consumer: cdc-ecomm-ops_search_keyword
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ops_shop_daily_stat
         entity: ops_shop_daily_stat
-        group: redis-iris-java-ecomm-ops_shop_daily_stat
+        group: iris4j-ecomm-ops_shop_daily_stat
         consumer: cdc-ecomm-ops_shop_daily_stat
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order
         entity: ord_order
-        group: redis-iris-java-ecomm-ord_order
+        group: iris4j-ecomm-ord_order
         consumer: cdc-ecomm-ord_order
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_address
         entity: ord_order_address
-        group: redis-iris-java-ecomm-ord_order_address
+        group: iris4j-ecomm-ord_order_address
         consumer: cdc-ecomm-ord_order_address
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_cancel
         entity: ord_order_cancel
-        group: redis-iris-java-ecomm-ord_order_cancel
+        group: iris4j-ecomm-ord_order_cancel
         consumer: cdc-ecomm-ord_order_cancel
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_commission
         entity: ord_order_commission
-        group: redis-iris-java-ecomm-ord_order_commission
+        group: iris4j-ecomm-ord_order_commission
         consumer: cdc-ecomm-ord_order_commission
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_confirm
         entity: ord_order_confirm
-        group: redis-iris-java-ecomm-ord_order_confirm
+        group: iris4j-ecomm-ord_order_confirm
         consumer: cdc-ecomm-ord_order_confirm
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_delivery
         entity: ord_order_delivery
-        group: redis-iris-java-ecomm-ord_order_delivery
+        group: iris4j-ecomm-ord_order_delivery
         consumer: cdc-ecomm-ord_order_delivery
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_delivery_item
         entity: ord_order_delivery_item
-        group: redis-iris-java-ecomm-ord_order_delivery_item
+        group: iris4j-ecomm-ord_order_delivery_item
         consumer: cdc-ecomm-ord_order_delivery_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_discount
         entity: ord_order_discount
-        group: redis-iris-java-ecomm-ord_order_discount
+        group: iris4j-ecomm-ord_order_discount
         consumer: cdc-ecomm-ord_order_discount
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_invoice
         entity: ord_order_invoice
-        group: redis-iris-java-ecomm-ord_order_invoice
+        group: iris4j-ecomm-ord_order_invoice
         consumer: cdc-ecomm-ord_order_invoice
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_item
         entity: ord_order_item
-        group: redis-iris-java-ecomm-ord_order_item
+        group: iris4j-ecomm-ord_order_item
         consumer: cdc-ecomm-ord_order_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_remark
         entity: ord_order_remark
-        group: redis-iris-java-ecomm-ord_order_remark
+        group: iris4j-ecomm-ord_order_remark
         consumer: cdc-ecomm-ord_order_remark
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_risk
         entity: ord_order_risk
-        group: redis-iris-java-ecomm-ord_order_risk
+        group: iris4j-ecomm-ord_order_risk
         consumer: cdc-ecomm-ord_order_risk
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.ord_order_settlement
         entity: ord_order_settlement
-        group: redis-iris-java-ecomm-ord_order_settlement
+        group: iris4j-ecomm-ord_order_settlement
         consumer: cdc-ecomm-ord_order_settlement
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_channel
         entity: pay_channel
-        group: redis-iris-java-ecomm-pay_channel
+        group: iris4j-ecomm-pay_channel
         consumer: cdc-ecomm-pay_channel
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_merchant_balance
         entity: pay_merchant_balance
-        group: redis-iris-java-ecomm-pay_merchant_balance
+        group: iris4j-ecomm-pay_merchant_balance
         consumer: cdc-ecomm-pay_merchant_balance
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_payment
         entity: pay_payment
-        group: redis-iris-java-ecomm-pay_payment
+        group: iris4j-ecomm-pay_payment
         consumer: cdc-ecomm-pay_payment
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_payment_notify
         entity: pay_payment_notify
-        group: redis-iris-java-ecomm-pay_payment_notify
+        group: iris4j-ecomm-pay_payment_notify
         consumer: cdc-ecomm-pay_payment_notify
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_payment_record
         entity: pay_payment_record
-        group: redis-iris-java-ecomm-pay_payment_record
+        group: iris4j-ecomm-pay_payment_record
         consumer: cdc-ecomm-pay_payment_record
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_reconciliation
         entity: pay_reconciliation
-        group: redis-iris-java-ecomm-pay_reconciliation
+        group: iris4j-ecomm-pay_reconciliation
         consumer: cdc-ecomm-pay_reconciliation
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_reconciliation_diff
         entity: pay_reconciliation_diff
-        group: redis-iris-java-ecomm-pay_reconciliation_diff
+        group: iris4j-ecomm-pay_reconciliation_diff
         consumer: cdc-ecomm-pay_reconciliation_diff
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_settlement_batch
         entity: pay_settlement_batch
-        group: redis-iris-java-ecomm-pay_settlement_batch
+        group: iris4j-ecomm-pay_settlement_batch
         consumer: cdc-ecomm-pay_settlement_batch
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_settlement_item
         entity: pay_settlement_item
-        group: redis-iris-java-ecomm-pay_settlement_item
+        group: iris4j-ecomm-pay_settlement_item
         consumer: cdc-ecomm-pay_settlement_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.pay_withdraw
         entity: pay_withdraw
-        group: redis-iris-java-ecomm-pay_withdraw
+        group: iris4j-ecomm-pay_withdraw
         consumer: cdc-ecomm-pay_withdraw
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_attribute
         entity: prd_attribute
-        group: redis-iris-java-ecomm-prd_attribute
+        group: iris4j-ecomm-prd_attribute
         consumer: cdc-ecomm-prd_attribute
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_attribute_value
         entity: prd_attribute_value
-        group: redis-iris-java-ecomm-prd_attribute_value
+        group: iris4j-ecomm-prd_attribute_value
         consumer: cdc-ecomm-prd_attribute_value
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_brand
         entity: prd_brand
-        group: redis-iris-java-ecomm-prd_brand
+        group: iris4j-ecomm-prd_brand
         consumer: cdc-ecomm-prd_brand
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_category
         entity: prd_category
-        group: redis-iris-java-ecomm-prd_category
+        group: iris4j-ecomm-prd_category
         consumer: cdc-ecomm-prd_category
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_freight_rule
         entity: prd_freight_rule
-        group: redis-iris-java-ecomm-prd_freight_rule
+        group: iris4j-ecomm-prd_freight_rule
         consumer: cdc-ecomm-prd_freight_rule
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_freight_template
         entity: prd_freight_template
-        group: redis-iris-java-ecomm-prd_freight_template
+        group: iris4j-ecomm-prd_freight_template
         consumer: cdc-ecomm-prd_freight_template
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_product
         entity: prd_product
-        group: redis-iris-java-ecomm-prd_product
+        group: iris4j-ecomm-prd_product
         consumer: cdc-ecomm-prd_product
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_product_attribute
         entity: prd_product_attribute
-        group: redis-iris-java-ecomm-prd_product_attribute
+        group: iris4j-ecomm-prd_product_attribute
         consumer: cdc-ecomm-prd_product_attribute
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_product_category
         entity: prd_product_category
-        group: redis-iris-java-ecomm-prd_product_category
+        group: iris4j-ecomm-prd_product_category
         consumer: cdc-ecomm-prd_product_category
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_product_detail
         entity: prd_product_detail
-        group: redis-iris-java-ecomm-prd_product_detail
+        group: iris4j-ecomm-prd_product_detail
         consumer: cdc-ecomm-prd_product_detail
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_product_image
         entity: prd_product_image
-        group: redis-iris-java-ecomm-prd_product_image
+        group: iris4j-ecomm-prd_product_image
         consumer: cdc-ecomm-prd_product_image
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_product_stat
         entity: prd_product_stat
-        group: redis-iris-java-ecomm-prd_product_stat
+        group: iris4j-ecomm-prd_product_stat
         consumer: cdc-ecomm-prd_product_stat
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_sku
         entity: prd_sku
-        group: redis-iris-java-ecomm-prd_sku
+        group: iris4j-ecomm-prd_sku
         consumer: cdc-ecomm-prd_sku
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_sku_attribute
         entity: prd_sku_attribute
-        group: redis-iris-java-ecomm-prd_sku_attribute
+        group: iris4j-ecomm-prd_sku_attribute
         consumer: cdc-ecomm-prd_sku_attribute
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_sku_sale_stat
         entity: prd_sku_sale_stat
-        group: redis-iris-java-ecomm-prd_sku_sale_stat
+        group: iris4j-ecomm-prd_sku_sale_stat
         consumer: cdc-ecomm-prd_sku_sale_stat
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.prd_unit
         entity: prd_unit
-        group: redis-iris-java-ecomm-prd_unit
+        group: iris4j-ecomm-prd_unit
         consumer: cdc-ecomm-prd_unit
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.rvw_consult
         entity: rvw_consult
-        group: redis-iris-java-ecomm-rvw_consult
+        group: iris4j-ecomm-rvw_consult
         consumer: cdc-ecomm-rvw_consult
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.rvw_product_review_stat
         entity: rvw_product_review_stat
-        group: redis-iris-java-ecomm-rvw_product_review_stat
+        group: iris4j-ecomm-rvw_product_review_stat
         consumer: cdc-ecomm-rvw_product_review_stat
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.rvw_review
         entity: rvw_review
-        group: redis-iris-java-ecomm-rvw_review
+        group: iris4j-ecomm-rvw_review
         consumer: cdc-ecomm-rvw_review
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.rvw_review_image
         entity: rvw_review_image
-        group: redis-iris-java-ecomm-rvw_review_image
+        group: iris4j-ecomm-rvw_review_image
         consumer: cdc-ecomm-rvw_review_image
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.rvw_review_like
         entity: rvw_review_like
-        group: redis-iris-java-ecomm-rvw_review_like
+        group: iris4j-ecomm-rvw_review_like
         consumer: cdc-ecomm-rvw_review_like
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.rvw_review_reply
         entity: rvw_review_reply
-        group: redis-iris-java-ecomm-rvw_review_reply
+        group: iris4j-ecomm-rvw_review_reply
         consumer: cdc-ecomm-rvw_review_reply
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_purchase_order
         entity: stk_purchase_order
-        group: redis-iris-java-ecomm-stk_purchase_order
+        group: iris4j-ecomm-stk_purchase_order
         consumer: cdc-ecomm-stk_purchase_order
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_purchase_order_item
         entity: stk_purchase_order_item
-        group: redis-iris-java-ecomm-stk_purchase_order_item
+        group: iris4j-ecomm-stk_purchase_order_item
         consumer: cdc-ecomm-stk_purchase_order_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_stock
         entity: stk_stock
-        group: redis-iris-java-ecomm-stk_stock
+        group: iris4j-ecomm-stk_stock
         consumer: cdc-ecomm-stk_stock
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_stock_adjust
         entity: stk_stock_adjust
-        group: redis-iris-java-ecomm-stk_stock_adjust
+        group: iris4j-ecomm-stk_stock_adjust
         consumer: cdc-ecomm-stk_stock_adjust
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_stock_adjust_item
         entity: stk_stock_adjust_item
-        group: redis-iris-java-ecomm-stk_stock_adjust_item
+        group: iris4j-ecomm-stk_stock_adjust_item
         consumer: cdc-ecomm-stk_stock_adjust_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_stock_flow
         entity: stk_stock_flow
-        group: redis-iris-java-ecomm-stk_stock_flow
+        group: iris4j-ecomm-stk_stock_flow
         consumer: cdc-ecomm-stk_stock_flow
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_stock_lock
         entity: stk_stock_lock
-        group: redis-iris-java-ecomm-stk_stock_lock
+        group: iris4j-ecomm-stk_stock_lock
         consumer: cdc-ecomm-stk_stock_lock
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_stock_warning
         entity: stk_stock_warning
-        group: redis-iris-java-ecomm-stk_stock_warning
+        group: iris4j-ecomm-stk_stock_warning
         consumer: cdc-ecomm-stk_stock_warning
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_stocktake
         entity: stk_stocktake
-        group: redis-iris-java-ecomm-stk_stocktake
+        group: iris4j-ecomm-stk_stocktake
         consumer: cdc-ecomm-stk_stocktake
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_stocktake_item
         entity: stk_stocktake_item
-        group: redis-iris-java-ecomm-stk_stocktake_item
+        group: iris4j-ecomm-stk_stocktake_item
         consumer: cdc-ecomm-stk_stocktake_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_transfer_order
         entity: stk_transfer_order
-        group: redis-iris-java-ecomm-stk_transfer_order
+        group: iris4j-ecomm-stk_transfer_order
         consumer: cdc-ecomm-stk_transfer_order
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_transfer_order_item
         entity: stk_transfer_order_item
-        group: redis-iris-java-ecomm-stk_transfer_order_item
+        group: iris4j-ecomm-stk_transfer_order_item
         consumer: cdc-ecomm-stk_transfer_order_item
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.stk_warehouse
         entity: stk_warehouse
-        group: redis-iris-java-ecomm-stk_warehouse
+        group: iris4j-ecomm-stk_warehouse
         consumer: cdc-ecomm-stk_warehouse
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.usr_member
         entity: usr_member
-        group: redis-iris-java-ecomm-usr_member
+        group: iris4j-ecomm-usr_member
         consumer: cdc-ecomm-usr_member
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.usr_member_address
         entity: usr_member_address
-        group: redis-iris-java-ecomm-usr_member_address
+        group: iris4j-ecomm-usr_member_address
         consumer: cdc-ecomm-usr_member_address
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.usr_member_auth
         entity: usr_member_auth
-        group: redis-iris-java-ecomm-usr_member_auth
+        group: iris4j-ecomm-usr_member_auth
         consumer: cdc-ecomm-usr_member_auth
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.usr_member_browse_history
         entity: usr_member_browse_history
-        group: redis-iris-java-ecomm-usr_member_browse_history
+        group: iris4j-ecomm-usr_member_browse_history
         consumer: cdc-ecomm-usr_member_browse_history
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.usr_member_favorite
         entity: usr_member_favorite
-        group: redis-iris-java-ecomm-usr_member_favorite
+        group: iris4j-ecomm-usr_member_favorite
         consumer: cdc-ecomm-usr_member_favorite
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.usr_member_level
         entity: usr_member_level
-        group: redis-iris-java-ecomm-usr_member_level
+        group: iris4j-ecomm-usr_member_level
         consumer: cdc-ecomm-usr_member_level
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.usr_member_profile
         entity: usr_member_profile
-        group: redis-iris-java-ecomm-usr_member_profile
+        group: iris4j-ecomm-usr_member_profile
         consumer: cdc-ecomm-usr_member_profile
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.usr_member_search_history
         entity: usr_member_search_history
-        group: redis-iris-java-ecomm-usr_member_search_history
+        group: iris4j-ecomm-usr_member_search_history
         consumer: cdc-ecomm-usr_member_search_history
         block-ms: 1000
       - namespace: ecomm
         stream: iris.iris_demo.usr_member_shop_favorite
         entity: usr_member_shop_favorite
-        group: redis-iris-java-ecomm-usr_member_shop_favorite
+        group: iris4j-ecomm-usr_member_shop_favorite
         consumer: cdc-ecomm-usr_member_shop_favorite
         block-ms: 1000
       # 多源 CDC 扩展点：需要时在 ecomm 命名空间为其他数据源（如 PG 库）

@@ -33,11 +33,11 @@
 #     max-entries < 20 → 探针条数 N = max-entries + 3（必然触发淘汰）
 #     max-entries ≥ 20 → 探针条数 N = 5，淘汰断言降级为 NOTE
 #   要完整覆盖淘汰（ZRANGE/ZREM/向量清理）请这样起应用：
-#     java -jar api/target/redis-iris-java-api-*.jar --iris.llm-cache.max-entries=3
+#     java -jar api/target/iris4j-api-*.jar --iris.llm-cache.max-entries=3
 #
 # 用法： ./deploy/verify/verify-llm-cache-index.sh
 #       若应用起在 8080： IRIS_BASE=http://localhost:8080 ./deploy/verify/verify-llm-cache-index.sh
-# 前置：redis-iris-java 运行中；iris-redis 容器可用；**单实例**。
+# 前置：iris4j 运行中；iris-redis 容器可用；**单实例**。
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -68,7 +68,7 @@ hdr "0. 环境守卫"
 
 xrg=$(redis CLIENT LIST 2>/dev/null | grep -c 'cmd=xreadgroup')
 if [ "${xrg:-0}" -gt 200 ]; then
-  bad "检测到多个 redis-iris-java 实例（XREADGROUP 连接=${xrg}，单实例≈135）——多实例会互抢 CDC pending，中止"
+  bad "检测到多个 iris4j 实例（XREADGROUP 连接=${xrg}，单实例≈135）——多实例会互抢 CDC pending，中止"
   echo; echo "汇总：PASS=$pass FAIL=$fail NOTE=$warn"; exit 2
 fi
 ok "单实例（XREADGROUP 连接=${xrg}）"
@@ -83,7 +83,7 @@ fi
 
 stats=$(curlq -H "X-API-Key: $API_KEY" "$BASE/api/v1/llm-cache/stats?namespace=$NS")
 if [ -z "${stats:-}" ]; then
-  bad "应用无响应或未暴露 llm-cache 接口：$BASE —— 先起 redis-iris-java 再跑本脚本"
+  bad "应用无响应或未暴露 llm-cache 接口：$BASE —— 先起 iris4j 再跑本脚本"
   echo; echo "汇总：PASS=$pass FAIL=$fail NOTE=$warn"; exit 2
 fi
 ok "应用可达：$BASE"

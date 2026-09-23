@@ -6,18 +6,18 @@
 
     <parent>
         <groupId>com.iris</groupId>
-        <artifactId>redis-iris-java</artifactId>
+        <artifactId>iris4j</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>redis-iris-java-memory</artifactId>
-    <name>redis-iris-java-memory</name>
+    <artifactId>iris4j-memory</artifactId>
+    <name>iris4j-memory</name>
     <description>工作记忆和长期记忆：领域模型与仓储端口</description>
 
     <dependencies>
         <dependency>
             <groupId>com.iris</groupId>
-            <artifactId>redis-iris-java-shared</artifactId>
+            <artifactId>iris4j-shared</artifactId>
         </dependency>
         <!-- @JsonIgnoreProperties（LongTermMemory 忽略存储侧派生字段 lex）。
              仅引 annotations 最小包，不把 databind 拖进领域模块 -->
