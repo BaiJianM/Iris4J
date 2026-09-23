@@ -154,3 +154,5 @@ http://127.0.0.1:8080/mcp   (Streamable-HTTP, 需 X-API-Key 时透传)
 ## License
 
 [Apache-2.0](LICENSE)
+
+> Redis 和 Iris 是 Redis Ltd. 的商标。本项目为独立实现的 Java 版本，与 Redis Ltd. 无关联，亦未经其认可。
